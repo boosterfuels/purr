@@ -1,17 +1,5 @@
 # Custom ETL Pipeline
 
-This code is written in `Python <https://www.python.org>` and the purpose is to replace the existing ETL tool we because of the following issues.
-
-`Learn more <https://github.com/stripe/mosql/issues>`.
-
----
-
-Learn more about
-✨🍰✨
-
-usage: main.py [-h]-c MDB_COLLS [MDB_COLLS ...]] [-a][-t] [-tr][-dr]
-[-s START_DATE_TIME]
-
 An ETL tool for your MongoDB and Postgres.
 
 optional arguments:
@@ -28,6 +16,7 @@ The Start Date - format YY-MM-DDTHH:MM:SS. Example
 21/1/06T16:30:00
 
 **Examples**
+
 `python3 etl/main.py -c FuelRequest -dr -t -s 18-4-18T10:16:00`
 
 * drops FuelRequest in PG
