@@ -1,4 +1,3 @@
-import pprint
 import pymongo
 import time
 from extract import collection
@@ -25,10 +24,6 @@ class Extractor():
     fields = []
 
     for coll in coll_names:
-      # TODO
-      # check if relation exists
-      # get its column names and types
-      # cols_and_types = table.get_column_names_and_types(col_name)        
       cols_and_types = []
       if table.exists(coll) is True:
         if truncate:
@@ -42,6 +37,6 @@ class Extractor():
       r = relation.Relation(coll)
 
       for doc in collection.get_by_name(coll):
-        r.insert(fields, doc)
+        r.insert(doc)
         
 

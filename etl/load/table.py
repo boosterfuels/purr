@@ -14,7 +14,6 @@ def create(name):
   """
   name = name.lower()
   if exists(name) is True:
-    print('Column', name, 'already exists.')
     return
   cmd = ''.join(["CREATE TABLE IF NOT EXISTS ", name, "();"])
   
@@ -112,8 +111,6 @@ def add_column(name, column_name, column_type):
   ----
   - first check if column exists
   """
-  print('ALTERING', name)
-  print('ADD COLUMN', column_name, '\n')
   cmd = ''.join(["ALTER TABLE IF EXISTS ", name, " ADD COLUMN IF NOT EXISTS ", column_name, " ", column_type, ";"])  
   cur = db.cursor()
   cur.execute(cmd)
@@ -162,7 +159,6 @@ def get_table_names():
 def column_exists(table, column):
   cmd = ''.join(["SELECT column_name FROM information_schema.columns WHERE table_name='", table, "' AND column_name='", column, "';"])  
   cur = db.cursor()
-  print('Checking if column exists')
   cur.execute(cmd)
   rows = cur.fetchone()
   cur.close()
@@ -198,5 +194,4 @@ def create_from_oplog(fullname):
   """
   name = fullname.split(".")[1]
   if exists(name) is False:
-    print('Creating table', name)
     create(name)

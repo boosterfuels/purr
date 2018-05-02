@@ -4,13 +4,18 @@ An ETL tool for your MongoDB and Postgres.
 
 optional arguments:
 `-h, --help` show this help message and exit
+
 `-c MDB_COLLS [MDB_COLLS ...], --colls [MDB_COLLS ...]`
 MongoDB collections which will be transfered. Case
 sensitive!
 `-a, --all` Transfer all collections from MongoDB to PG
+
 `-t, --tail` Start tailing the oplog
+
 `-tr, --truncate` Clear existing tables
+
 `-dr, --drop` Drop existing tables
+
 `-s START_DATE_TIME, --start START_DATE_TIME`
 The Start Date - format YY-MM-DDTHH:MM:SS. Example
 21/1/06T16:30:00
