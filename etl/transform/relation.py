@@ -35,9 +35,9 @@ class Relation():
     """
     Transforms document and inserts it into the corresponding table.
     Parameters
+    ----------
     doc : dict
           the document we want to insert
-    ----------
     TODO 
     CHECK if self.column_names and self.column_types are still the same, do not
     """
@@ -48,12 +48,12 @@ class Relation():
 
   def update(self, doc):
     attributes = list(doc.keys())
-    print(doc)
-    # This is needed because sometimes there is no value for attributes (null)
-    # - in this case 
     (reduced_attributes, values) = self.get_attrs_and_vals(attributes, doc)
     row.update(self.relation_name, reduced_attributes, values)
 
+  def delete(self, doc):
+    attributes = list(doc.keys())
+    row.delete(self.relation_name, doc["_id"])
 
   def get_attrs_and_vals(self, attributes, doc):
     reduced_attributes = []
@@ -62,6 +62,9 @@ class Relation():
       value = doc[attr]
       (value, column_type) = typechecker.get_pg_type(value)
 
+      # Jump over nulls because there is no point to add a type 
+      # until a value exists. We need a value to determine the type and
+      # a default type would require change of schema. 
       if value == 'null' or column_type == None:
         continue
 
