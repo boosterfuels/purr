@@ -1,4 +1,3 @@
-import pprint
 import pymongo
 import time
 from extract import collection
@@ -12,7 +11,6 @@ class Relation():
   """
   This is the main parents class for transforming data.
   """
-
   def __init__(self, collection_name):
     """Constructor for Relation"""
     self.relation_name = collection_name.lower()
@@ -30,31 +28,49 @@ class Relation():
     else:
       print('Not equal')
 
-  def insert(self, fields, doc):
-    print('')
-    print("------------------ ------------------- ------------------ ")
-    print(" -----------------     NEW DOCUMENT    ----------------- ")
-    print("------------------ ------------------- ------------------ ")
-    print('')
+  def insert(self, doc):
     # solve_diffs && check_column_types()
     attributes = list(doc.keys())
 
     """
-    Prepares document and inserts it into the table.
+    Transforms document and inserts it into the corresponding table.
     Parameters
+    doc : dict
+          the document we want to insert
     ----------
     TODO 
     CHECK if self.column_names and self.column_types are still the same, do not
     """
-    values = []
+    # This is needed because sometimes there is no value for attributes (null)
+    # - in this case 
+    (reduced_attributes, values) = self.get_attrs_and_vals(attributes, doc)
+    row.insert(self.relation_name, reduced_attributes, values)
 
+  def update(self, doc):
+    attributes = list(doc.keys())
+    print(doc)
+    # This is needed because sometimes there is no value for attributes (null)
+    # - in this case 
+    (reduced_attributes, values) = self.get_attrs_and_vals(attributes, doc)
+    row.update(self.relation_name, reduced_attributes, values)
+
+
+  def get_attrs_and_vals(self, attributes, doc):
+    reduced_attributes = []
+    values = []
     for attr in attributes:
       value = doc[attr]
       (value, column_type) = typechecker.get_pg_type(value)
-      print("---", attr, value, column_type, "---")
+
+      if value == 'null' or column_type == None:
+        continue
 
       if column_type == 'json[]' or column_type == 'jsonb':
-        value = unnest.transform_jsonb(value)
+        value = unnest.transform_composites(value)
+        values.append(value)
+
+      elif column_type == 'text[]':
+        value = unnest.transform_primitive_list(value, column_type)
         values.append(value)
 
       elif column_type == 'float':
@@ -64,8 +80,8 @@ class Relation():
         values.append("'" + str(value) + "'")
 
       if table.column_exists(self.relation_name, attr) == False and column_type != None:
-        print("COLUMN TYPE", column_type)
-
         table.add_column(self.relation_name, attr, column_type)
+      
+      reduced_attributes.append(attr)
+    return reduced_attributes, values
 
-    row.insert(self.relation_name, attributes, values)

@@ -1,6 +1,8 @@
 import psycopg2
 from bson.json_util import loads, dumps
 from load import pg_init as pg, table
+from extract import collection
+from transform import relation
 db = pg.db
 # cur.execute("INSERT INTO product(store_id, url, price, charecteristics, color, dimensions) VALUES (%s, %s, %s, %s, %s, %s)", (1,  'http://www.google.com', '$20', json.dumps(thedictionary), 'red', '8.5x11'))
 
@@ -45,10 +47,8 @@ def insert(tableName, attrs, values):
   attrs = ','.join(attrs)
   for v in values:
     v = "'" + str(v) + "'"
-  print(values)
   values = ",".join(values) 
   
-  print(attrs, len(attrs))
   cmd = ''.join(["INSERT INTO ",
     tableName, "(",
     attrs,
@@ -56,7 +56,7 @@ def insert(tableName, attrs, values):
     values,
     ");"
   ])
-  print('\nCOMMAND...\n\n', cmd, '\n')
+  print(cmd, "\n")
 
   db.cursor().execute(cmd)
   db.commit()
@@ -67,7 +67,7 @@ def insert(tableName, attrs, values):
 def select(query):
   print('select')
 
-def update(attrs, values):
+def update(tableName, attrs, values):
   print('update')
   
 def delete():
@@ -77,21 +77,16 @@ def make_cmd_iud(oper, table_name, doc):
   """
   Choose a command based on what is in the oplog (insert, delete, update).
   """
-  print('making command')
-  column_name = 'bazinga'
-  column_type = 'jsonb'
-  table.create(table_name)
+  r = relation.Relation(table_name)
+  if table.exists(table_name) is False:
+    table.create(table_name)
 
-  table.add_column(table_name, column_name, column_type)
-  insert_jsonb(table_name, [column_name], doc)
-  print(doc)
   if oper == INSERT:
-    print('INSERT')
+    r.insert(doc)
 
   elif oper == UPDATE:
     # find item with the same object id
-    update([], [])
+    r.update(doc)
 
   elif oper == DELETE:
     delete()
-  
