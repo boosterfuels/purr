@@ -84,13 +84,14 @@ def update(tableName, attrs, values):
 
   object_id = ""
   nr_of_attrs = len(attrs)
-  for i in range(0, nr_of_attrs - 1):
+  if nr_of_attrs < 2:
+    return 
+  for i in range(0, nr_of_attrs):
     if(attrs[i] == "_id"):
       object_id = values[i]
       continue
-    pair = attrs[i] + " = " + values[i]
-    attr_val_pairs.append(pair)
-
+    attr_val_pairs.append(attrs[i] + " = " + values[i])
+  
   pairs = ",".join(attr_val_pairs)
   cmd = ''.join([
     "UPDATE ",
