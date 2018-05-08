@@ -4,10 +4,15 @@ import pymongo
 import time
 from extract import collection, extractor
 from load import table, row
+from transform import relation
 
 from datetime import datetime, timedelta
 from bson import Timestamp
-  
+
+INSERT = 'i'
+UPDATE = 'u'
+DELETE = 'd'
+
 class Tailer():
   """
   This is a class for extracting data from the oplog.
@@ -26,7 +31,22 @@ class Tailer():
 
     fullname = doc['ns']
     table_name = fullname.split(".")[1]
-    row.make_cmd_iud(doc['op'], table_name, doc['o'])
+
+    oper = doc['op']
+    doc_useful = doc['o']
+
+    r = relation.Relation(table_name)
+    if r.exists() is False:
+      return
+      
+    if oper == INSERT:
+      r.insert(doc_useful)
+
+    elif oper == UPDATE:
+      r.update(doc_useful)
+
+    elif oper == DELETE:
+      r.delete(doc_useful)
     
   def start_tailing_from_dt(dt):
     """
