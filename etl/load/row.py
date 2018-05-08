@@ -2,13 +2,8 @@ import psycopg2
 from bson.json_util import loads, dumps
 from load import pg_init as pg, table
 from extract import collection
-from transform import relation
 
 db = pg.db
-
-INSERT = 'i'
-UPDATE = 'u'
-DELETE = 'd'
 
 # Open a cursor to perform database operations
 def insert(tableName, attrs, values):
@@ -40,15 +35,9 @@ def insert(tableName, attrs, values):
     values,
     ");"
   ])
-
+  print(cmd)
   db.cursor().execute(cmd)
   db.commit()
-
-# attr string[]
-# values string[]
-# this will be a tricky part
-def select(query):
-  print('select')
 
 def update(tableName, attrs, values):
   """
@@ -91,8 +80,12 @@ def update(tableName, attrs, values):
     ";"
   ])
   print(cmd, "\n")
-  db.cursor().execute(cmd)
-  db.commit()
+
+  try:
+    db.cursor().execute(cmd)
+    db.commit()
+  except psycopg2.DataError:
+    print("Could not insert document")
 
 def delete(table_name, object_id):
   """
@@ -123,21 +116,3 @@ def delete(table_name, object_id):
   print(cmd, "\n")
   db.cursor().execute(cmd)
   db.commit()
-
-def make_cmd_iud(oper, table_name, doc):
-  """
-  Choose a command based on what is in the oplog (insert, delete, update).
-  """
-  r = relation.Relation(table_name)
-  if table.exists(table_name) is False:
-    table.create(table_name)
-
-  if oper == INSERT:
-    r.insert(doc)
-
-  elif oper == UPDATE:
-    # find item with the same object id
-    r.update(doc)
-
-  elif oper == DELETE:
-    r.delete(doc)
