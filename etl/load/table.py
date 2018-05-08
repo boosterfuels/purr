@@ -22,13 +22,11 @@ def create(name, attrs = [], types = []):
     attrs_and_types = ""
   
   attrs_and_types = ", ".join(attrs_and_types)
-  print(attrs_and_types)
 
   name = name.lower()
   if exists(name) is True:
     return
   cmd = ''.join(["CREATE TABLE IF NOT EXISTS ", name, "(", attrs_and_types ,");"])
-  print(cmd)
   cur = db.cursor()
   cur.execute(cmd)
   db.commit()
@@ -74,7 +72,6 @@ def truncate(tables):
   tables = ','.join(tables)
   cmd = ''.join(["TRUNCATE TABLE ", tables, ";"])
   
-  print('Truncate table(s)', cmd)
   cur = db.cursor()
   cur.execute(cmd)
   db.commit()
@@ -97,7 +94,6 @@ def drop(tables):
   - first check if all tables in the list exist
   """
   tables = ','.join(tables)
-  print('DROP TABLE(S)', tables, '\n')
   cmd = ''.join(["DROP TABLE IF EXISTS ", tables, ";"])
   
   cur = db.cursor()
@@ -129,7 +125,6 @@ def add_column(name, column_name, column_type):
   cur.close()
 
 def remove_column(name, columnName):
-  print('Removing column')
   cmd = ''.join(["ALTER TABLE IF EXISTS ", name.lower(), " DROP COLUMN IF EXISTS ", columnName, ";"])  
   cur = db.cursor()
   cur.execute(cmd)
