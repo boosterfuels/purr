@@ -5,18 +5,10 @@ from extract import collection
 from transform import relation
 
 db = pg.db
-# cur.execute("INSERT INTO product(store_id, url, price, charecteristics, color, dimensions) VALUES (%s, %s, %s, %s, %s, %s)", (1,  'http://www.google.com', '$20', json.dumps(thedictionary), 'red', '8.5x11'))
 
 INSERT = 'i'
 UPDATE = 'u'
 DELETE = 'd'
-
-def insert_jsonb(tableName, attrs, values):
-  cmd = ''.join(["INSERT INTO ", tableName, '(', ','.join(attrs), ") VALUES(%s)"])
-  cur = db.cursor()
-  cur.execute(cmd, [dumps(values)])
-  db.commit()
-  cur.close()
 
 # Open a cursor to perform database operations
 def insert(tableName, attrs, values):
@@ -39,12 +31,10 @@ def insert(tableName, attrs, values):
   insert('Audience', [attributes], [values])
   """
   attrs = ','.join(attrs)
-  # for v in values:
-  #   v = "'" + str(v) + "'"
   values = ",".join(values) 
   
   cmd = ''.join(["INSERT INTO ",
-    tableName, "(",
+    tableName.lower(), "(",
     attrs,
     ") VALUES (",
     values,
@@ -95,7 +85,7 @@ def update(tableName, attrs, values):
   pairs = ",".join(attr_val_pairs)
   cmd = ''.join([
     "UPDATE ",
-    tableName, " SET ",
+    tableName.lower(), " SET ",
     pairs,
     " WHERE _id = ",
     object_id,
@@ -113,7 +103,7 @@ def delete(tableName, object_id):
   ----------
   tableName : string
   object_id : ObjectId
-              need to get the hex encoded version of ObjectId with str(object_id)
+              (will need to get the hex encoded version of ObjectId with str(object_id))
 
   Returns
   -------
@@ -126,7 +116,7 @@ def delete(tableName, object_id):
   """
   cmd = ''.join([
     "DELETE FROM ",
-    tableName,
+    tableName.lower(),
     " WHERE _id = '",
     str(object_id),
     "';"

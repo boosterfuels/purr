@@ -2,7 +2,7 @@ import psycopg2
 from load import pg_init as pg
 db = pg.db
 
-def create(name):
+def create(name, attrs = [], types = []):
   """
   Open a cursor to perform database operations
   Create table with specific name.
@@ -12,12 +12,23 @@ def create(name):
   TODO
   ----
   """
+  nr_of_attrs = len(attrs)
+  attrs_and_types = []
+  if nr_of_attrs:
+    for i in range(0, nr_of_attrs - 1):
+      pair = attrs[i] + " " + types[i]
+      attrs_and_types.append(pair)
+  else:
+    attrs_and_types = ""
+  
+  attrs_and_types = ", ".join(attrs_and_types)
+  print(attrs_and_types)
+
   name = name.lower()
   if exists(name) is True:
     return
-  cmd = ''.join(["CREATE TABLE IF NOT EXISTS ", name, "();"])
-  
-  print('Creating table', name)
+  cmd = ''.join(["CREATE TABLE IF NOT EXISTS ", name, "(", attrs_and_types ,");"])
+  print(cmd)
   cur = db.cursor()
   cur.execute(cmd)
   db.commit()
@@ -111,7 +122,7 @@ def add_column(name, column_name, column_type):
   ----
   - first check if column exists
   """
-  cmd = ''.join(["ALTER TABLE IF EXISTS ", name, " ADD COLUMN IF NOT EXISTS ", column_name, " ", column_type, ";"])  
+  cmd = ''.join(["ALTER TABLE IF EXISTS ", name.lower(), " ADD COLUMN IF NOT EXISTS ", column_name, " ", column_type, ";"])  
   cur = db.cursor()
   cur.execute(cmd)
   db.commit()
@@ -119,7 +130,7 @@ def add_column(name, column_name, column_type):
 
 def remove_column(name, columnName):
   print('Removing column')
-  cmd = ''.join(["ALTER TABLE IF EXISTS ", name, " DROP COLUMN IF EXISTS ", columnName, ";"])  
+  cmd = ''.join(["ALTER TABLE IF EXISTS ", name.lower(), " DROP COLUMN IF EXISTS ", columnName, ";"])  
   cur = db.cursor()
   cur.execute(cmd)
   db.commit()
@@ -157,7 +168,7 @@ def get_table_names():
   return tables
 
 def column_exists(table, column):
-  cmd = ''.join(["SELECT column_name FROM information_schema.columns WHERE table_name='", table, "' AND column_name='", column, "';"])  
+  cmd = ''.join(["SELECT column_name FROM information_schema.columns WHERE table_name='", table.lower(), "' AND column_name='", column, "';"])  
   cur = db.cursor()
   cur.execute(cmd)
   rows = cur.fetchone()
