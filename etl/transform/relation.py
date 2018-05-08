@@ -16,6 +16,11 @@ class Relation():
     self.column_names = []
     self.column_types = []
     self.has_pk = False
+    self.created = False
+
+  def exists(self):
+    self.created = table.exists(self.relation_name)
+    return self.created
 
   def solve_diffs(self, cols_and_types, doc):
     fields = list(doc.keys())

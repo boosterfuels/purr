@@ -129,9 +129,9 @@ def make_cmd_iud(oper, table_name, doc):
   Choose a command based on what is in the oplog (insert, delete, update).
   """
   r = relation.Relation(table_name)
-  if table.exists(table_name) is False:
-    table.create(table_name)
-
+  if r.exists() is False:
+    return
+    
   if oper == INSERT:
     r.insert(doc)
 
