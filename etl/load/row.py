@@ -40,7 +40,6 @@ def insert(tableName, attrs, values):
     values,
     ");"
   ])
-  print(cmd, "\n")
 
   db.cursor().execute(cmd)
   db.commit()
@@ -95,13 +94,13 @@ def update(tableName, attrs, values):
   db.cursor().execute(cmd)
   db.commit()
 
-def delete(tableName, object_id):
+def delete(table_name, object_id):
   """
   Deletes a row in a specific table of the PG database.
 
   Parameters
   ----------
-  tableName : string
+  table_name : string
   object_id : ObjectId
               (will need to get the hex encoded version of ObjectId with str(object_id))
 
@@ -116,7 +115,7 @@ def delete(tableName, object_id):
   """
   cmd = ''.join([
     "DELETE FROM ",
-    tableName.lower(),
+    table_name.lower(),
     " WHERE _id = '",
     str(object_id),
     "';"
@@ -124,6 +123,7 @@ def delete(tableName, object_id):
   print(cmd, "\n")
   db.cursor().execute(cmd)
   db.commit()
+
 def make_cmd_iud(oper, table_name, doc):
   """
   Choose a command based on what is in the oplog (insert, delete, update).

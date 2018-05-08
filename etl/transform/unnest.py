@@ -75,6 +75,10 @@ def escape_chars(text):
   """
   text = text.replace("\n","\\n").replace("`", "")
   text = text.replace("'", "''")
+  if '"' in text:
+    print(text)
+    text = text.replace('"', '\\"')
+    print(text)
 
   return text
 
