@@ -25,8 +25,7 @@ def transfer_collections(collections, truncate, drop):
   """
   # collections = ['Audience', 'PaymentMethod', 'FuelRequest']
   ex = extractor.Extractor()
-  ex.transfer(collections, truncate, drop)
-  
+  ex.transfer_auto(collections, truncate, drop)
 
 def start_tailing(start_date_time):
   t = tailer.Tailer()
