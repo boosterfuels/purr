@@ -1,9 +1,8 @@
 import pymongo
 import time
 from extract import collection
-from load import table, row
-from transform import typechecker, keywordchecker, unnest
-
+from load import table, row, constraint
+from transform import typechecker, keywordchecker, unnest, config_parser
 from datetime import datetime, timedelta
 from bson import Timestamp
 
@@ -13,9 +12,10 @@ class Relation():
   """
   def __init__(self, collection_name):
     """Constructor for Relation"""
-    self.relation_name = collection_name.lower()
+    self.relation_name = collection_name
     self.column_names = []
     self.column_types = []
+    self.has_pk = False
 
   def solve_diffs(self, cols_and_types, doc):
     fields = list(doc.keys())
@@ -88,3 +88,30 @@ class Relation():
       reduced_attributes.append(attr)
     return reduced_attributes, values
 
+  def bulk_insert(self, coll_data, attrs_conf, attrs_old):
+    """
+      TODO: insert multiple rows at the same time
+    """
+    print("bulk insert", coll_data.count()) 
+
+    values = []
+    for col in coll_data:
+      nr_of_attrs = len(attrs_conf)
+      print(nr_of_attrs)
+      for i in range(0, nr_of_attrs):
+        field = attrs_old[i]
+        if field in col.keys():
+          values.append("'" + str(col[field]) + "'")
+          print(attrs_conf)
+        else:
+          values.append("'null'")
+
+      row.insert(self.relation_name, attrs_conf, values)
+      values = []
+  
+  def create(self):
+    table.create(self.relation_name)
+
+  def add_pk(self, attr):
+    constraint.add_pk(self.relation_name, attr)
+    self.has_pk = True
