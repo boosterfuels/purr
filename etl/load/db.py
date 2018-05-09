@@ -1,12 +1,37 @@
 import psycopg2
+from load import pg_init as pg
+db = pg.db
 
-"""
-TODO
-add behavior
-"""
+# check if schema exists
+# create schema
+# alter schema
+# delete schema (rollback - in case of error)
 
-def create():
-  print('Creating database')
+def create(db_name):
+  """
+  Create database.
+
+  Parameters
+  ----------
+  db_name : string
+            : name of database
+
+  Returns
+  -------
+  -
+
+  Example
+  -------
+  create('booster')
+
+  """
+  print('Adding primary key to', db_name)
+  cmd = " ".join(['CREATE DATABASE ', db_name, ';'])
+  cur = db.cursor()
+  cur.execute(cmd)
+  db.commit()
+  cur.close()
+
 
 def drop():
   print('Dropping database')
