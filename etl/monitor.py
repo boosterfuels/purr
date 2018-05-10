@@ -2,9 +2,9 @@ import logging
 
 class Logger():
   """Base class for all exceptions."""
-  def __init__(self, name):
+  def __init__(self, file, name):
     # create log file handler
-    fh = logging.FileHandler('etl.log')
+    fh = logging.FileHandler(file)
     fh.setLevel(logging.DEBUG)
     ch = logging.StreamHandler()
     ch.setLevel(logging.ERROR)

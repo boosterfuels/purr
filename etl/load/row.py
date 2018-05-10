@@ -6,7 +6,7 @@ import monitor
 
 db = pg.db
 
-logger = monitor.Logger('ROWS')
+logger = monitor.Logger('data-transfer.log', 'ROWS')
 # Open a cursor to perform database operations
 def insert(table_name, attrs, values):
   """
