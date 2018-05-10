@@ -28,10 +28,13 @@ def create(name, attrs = [], types = []):
     return
   cmd = ''.join(["CREATE TABLE IF NOT EXISTS ", name, "(", attrs_and_types ,");"])
   cur = db.cursor()
-  cur.execute(cmd)
-  db.commit()
+  try:
+    cur.execute(cmd)
+    db.commit()
+  except psycopg2.DataError as e:
+    logger.warn("".join([cmd, '\n', repr(e)]))
 
-def exists(table):  
+def exists(table_name):  
   """
   Check if a table exists in the PG database.
   
@@ -49,15 +52,18 @@ def exists(table):
   don't hardcode schema
   """
   cur = db.cursor()
-  cmd="SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND table_name=%s"
-  cur.execute(cmd, [table.lower()])
-  res = cur.fetchall()
-  db.commit()
-  cur.close()
-  if res:
-    return True
-  else:
-    return False
+  cmd="SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND table_name='" + table_name.lower()+ "';"
+  try:
+    cur.execute(cmd)
+    res = cur.fetchall()
+    db.commit()
+    cur.close()
+    if res:
+      return True
+    else:
+      return False
+  except psycopg2.DataError as e:
+    logger.warn("".join([cmd, '\n', repr(e)]))
 
 def truncate(tables):
   """
@@ -73,8 +79,12 @@ def truncate(tables):
   cmd = ''.join(["TRUNCATE TABLE ", tables, ";"])
   
   cur = db.cursor()
-  cur.execute(cmd)
-  db.commit()
+  try:
+    cur.execute(cmd)
+    db.commit()
+  except psycopg2.DataError as e:
+    logger.warn("".join([cmd, '\n', repr(e)]))
+
   cur.close()
 
 def drop(tables):
@@ -97,8 +107,11 @@ def drop(tables):
   cmd = ''.join(["DROP TABLE IF EXISTS ", tables, ";"])
   
   cur = db.cursor()
-  cur.execute(cmd)
-  db.commit()
+  try:
+    cur.execute(cmd)
+    db.commit()
+  except psycopg2.DataError as e:
+    logger.warn("".join([cmd, '\n', repr(e)]))
   cur.close()
 
 def add_column(name, column_name, column_type):
@@ -127,8 +140,11 @@ def add_column(name, column_name, column_type):
 def remove_column(name, columnName):
   cmd = ''.join(["ALTER TABLE IF EXISTS ", name.lower(), " DROP COLUMN IF EXISTS ", columnName, ";"])  
   cur = db.cursor()
-  cur.execute(cmd)
-  db.commit()
+  try:
+    cur.execute(cmd)
+    db.commit()
+  except psycopg2.DataError as e:
+    logger.warn("".join([cmd, '\n', repr(e)]))
   cur.close()  
 
 def get_table_names():
@@ -153,8 +169,12 @@ def get_table_names():
   don't hardcode schema
   """
   cur = db.cursor()
-  cur.execute("SELECT table_name FROM information_schema.tables WHERE table_schema='public'")
-  db.commit()
+  cmd = "SELECT table_name FROM information_schema.tables WHERE table_schema='public'"
+  try:
+    cur.execute(cmd)
+    db.commit()
+  except psycopg2.DataError as e:
+    logger.warn("".join([cmd, '\n', repr(e)]))
   row = map(list, cur.fetchall())
   tables = []
   for t in row:
@@ -184,8 +204,12 @@ def get_column_names_and_types(table_name):
   """
   cur = db.cursor()
   cmd = "SELECT column_name, data_type FROM information_schema.columns WHERE table_schema='public' AND table_name = '" + table_name.lower() + "';"
-  cur.execute(cmd)
-  db.commit()
+  try:
+    cur.execute(cmd)
+    db.commit()
+  except psycopg2.DataError as e:
+    logger.warn("".join([cmd, '\n', repr(e)]))
+
   rows = cur.fetchall()
   cur.close()
   return rows
