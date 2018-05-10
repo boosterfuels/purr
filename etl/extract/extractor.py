@@ -3,9 +3,9 @@ import time
 from extract import collection
 from load import table, row, constraint
 from transform import relation, config_parser
-
 from datetime import datetime, timedelta
 from bson import Timestamp
+import monitor
 
 class Extractor():
   """
@@ -14,7 +14,7 @@ class Extractor():
 
   def __init__(self):
     """Constructor for Extractor"""
-
+    self.logger = monitor.Logger('performance.log', 'COLLECTION TRANSFER')
   def transfer_auto(self, coll_names, truncate, drop):
     """
     Transfer collections using auto typecheck
@@ -22,13 +22,13 @@ class Extractor():
     ----
     replace relation 
     """
-    if collection.check(coll_names) is True:
-      print('Transfering collections', coll_names)
-    else:
+    if collection.check(coll_names) is False:
+      self.logger.info(' '.join(['Invalid collection names:', ' '.join(coll_names)]))      
       return
 
     for coll in coll_names:
-      start = time.time() 
+      self.logger.info('Started transfering collection ' + coll) 
+      start = time.time()
       r = relation.Relation(coll)
       if table.exists(coll) is True:
         if drop:
@@ -37,7 +37,7 @@ class Extractor():
         elif truncate:
           table.truncate(coll_names)
         else:
-          print("alter schema")
+          self.logger.info("Altering schema" + coll)
         # TODO: alter schema
       else:
         table.create(coll)
@@ -45,7 +45,8 @@ class Extractor():
         r.insert(doc)
         if r.has_pk is False and doc['_id']:
           r.add_pk('_id')
-      print(round(time.time()-start,4))
+      self.logger.info('Finished. Execution time: ' + str(round(time.time() - start, 4)) + ' seconds.')
+
         
 
   def transfer_conf(self, coll_names, truncate, drop):

@@ -2,18 +2,20 @@ import psycopg2
 from bson.json_util import loads, dumps
 from load import pg_init as pg, table
 from extract import collection
+import monitor
 
 db = pg.db
 
+logger = monitor.Logger('data-transfer.log', 'ROWS')
 # Open a cursor to perform database operations
-def insert(tableName, attrs, values):
+def insert(table_name, attrs, values):
   """
   Inserts a row defined by attributes and values into a specific 
   table of the PG database.
 
   Parameters
   ----------
-  tableName : string
+  table_name : string
   attrs :     string[]
   values :    string[]
 
@@ -29,23 +31,28 @@ def insert(tableName, attrs, values):
   values = ",".join(values) 
   
   cmd = ''.join(["INSERT INTO ",
-    tableName.lower(), "(",
+    table_name.lower(), "(",
     attrs,
     ") VALUES (",
     values,
     ");"
   ])
-  print(cmd)
-  db.cursor().execute(cmd)
-  db.commit()
+  # MoSQL ignores the document and logs a warning
+  # if a document could not be inserted.
+  # We will decide it later whata to do with DataErrors.
+  try:
+    db.cursor().execute(cmd)
+    db.commit()
+  except psycopg2.DataError as e:
+    logger.warn("".join([cmd, '\n' + repr(e)]))
 
-def update(tableName, attrs, values):
+def update(table_name, attrs, values):
   """
   Updates a row in a specific table of the PG database.
 
   Parameters
   ----------
-  tableName : string
+  table_name : string
   attrs :     string[]
   values :    string[]
 
@@ -55,7 +62,7 @@ def update(tableName, attrs, values):
 
   Example
   -------
-  update('Audience', [attributes], [values])
+  update('audience', [attributes], [values])
 
   """
   attr_val_pairs = []
@@ -73,19 +80,19 @@ def update(tableName, attrs, values):
   pairs = ",".join(attr_val_pairs)
   cmd = ''.join([
     "UPDATE ",
-    tableName.lower(), " SET ",
+    table_name.lower(), " SET ",
     pairs,
     " WHERE _id = ",
     object_id,
     ";"
   ])
-  print(cmd, "\n")
-
+  logger.info(cmd)
   try:
     db.cursor().execute(cmd)
     db.commit()
-  except psycopg2.DataError:
-    print("Could not insert document")
+  except psycopg2.DataError as e:
+    logger.warn("".join([cmd, '\n', repr(e)]))
+
 
 def delete(table_name, object_id):
   """
@@ -113,6 +120,9 @@ def delete(table_name, object_id):
     str(object_id),
     "';"
   ])
-  print(cmd, "\n")
-  db.cursor().execute(cmd)
-  db.commit()
+  logger.info(cmd)
+  try:
+    db.cursor().execute(cmd)
+    db.commit()
+  except psycopg2.DataError as e:
+    logger.warn("".join([cmd, '\n' + repr(e)]))
