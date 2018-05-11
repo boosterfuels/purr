@@ -1,6 +1,10 @@
 import psycopg2
 from load import pg_init as pg
 db = pg.db
+import monitor
+import sys
+
+logger = monitor.Logger('collection-transfer.log', 'TABLE')
 
 def create(name, attrs = [], types = []):
   """
@@ -24,15 +28,15 @@ def create(name, attrs = [], types = []):
   attrs_and_types = ", ".join(attrs_and_types)
 
   name = name.lower()
-  if exists(name) is True:
-    return
-  cmd = ''.join(["CREATE TABLE IF NOT EXISTS ", name, "(", attrs_and_types ,");"])
   cur = db.cursor()
+  cmd = ' '.join(["CREATE TABLE IF NOT EXISTS", name, "(", attrs_and_types, ");"])
+  logger.warn("PING")
   try:
     cur.execute(cmd)
     db.commit()
-  except psycopg2.DataError as e:
-    logger.warn("".join([cmd, '\n', repr(e)]))
+  except:
+    logger.error(cmd)
+  cur.close()
 
 def exists(table_name):  
   """
@@ -52,18 +56,23 @@ def exists(table_name):
   don't hardcode schema
   """
   cur = db.cursor()
-  cmd="SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND table_name='" + table_name.lower()+ "';"
+  cmd = "SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND table_name='" + table_name.lower()+ "';"
+  logger.warn("PING")
   try:
     cur.execute(cmd)
-    res = cur.fetchall()
-    db.commit()
-    cur.close()
-    if res:
-      return True
-    else:
-      return False
-  except psycopg2.DataError as e:
-    logger.warn("".join([cmd, '\n', repr(e)]))
+  except:
+    logger.error(cmd)
+
+  res = cur.fetchall()
+  db.commit()
+  cur.close()
+  if res:
+    return True
+  else:
+    return False
+  # except:
+  #   e = sys.exc_info()[0]
+  #   logger.warn("".join([cmd, '\n', repr(e)]))
 
 def truncate(tables):
   """
@@ -79,12 +88,12 @@ def truncate(tables):
   cmd = ''.join(["TRUNCATE TABLE ", tables, ";"])
   
   cur = db.cursor()
+  logger.warn("PING")
   try:
     cur.execute(cmd)
     db.commit()
-  except psycopg2.DataError as e:
-    logger.warn("".join([cmd, '\n', repr(e)]))
-
+  except:
+    logger.error(cmd)
   cur.close()
 
 def drop(tables):
@@ -107,11 +116,14 @@ def drop(tables):
   cmd = ''.join(["DROP TABLE IF EXISTS ", tables, ";"])
   
   cur = db.cursor()
+  logger.warn("PING")
   try:
     cur.execute(cmd)
     db.commit()
-  except psycopg2.DataError as e:
-    logger.warn("".join([cmd, '\n', repr(e)]))
+  except:
+    logger.error(cmd)
+    # except psycopg2.DataError as e:
+  #   logger.warn("".join([cmd, '\n', repr(e)]))
   cur.close()
 
 def add_column(name, column_name, column_type):
@@ -126,26 +138,60 @@ def add_column(name, column_name, column_type):
   Example
   -------
   add_column(pg.db, 'some_integer', 'integer')
+  """
+  cmd = ''.join(["ALTER TABLE IF EXISTS ", name.lower(), " ADD COLUMN IF NOT EXISTS ", column_name, " ", column_type, ";"])  
+  cur = db.cursor()
+  logger.warn("PING")
+  try:
+    cur.execute(cmd)
+    db.commit()
+  except:
+    logger.error(cmd)
+  cur.close()
+
+def add_multiple_columns(name, attrs, types):
+  """
+  Add new column to a specific table.
+  Parameters
+  ----------
+  name : str
+  column_name : str
+  column_type : str
+
+  Example
+  -------
+  add_multiple_columns(pg.db, ['nyanya', some_integer'], ['char(24)', integer'])
 
   Todo
   ----
   - first check if column exists
   """
-  cmd = ''.join(["ALTER TABLE IF EXISTS ", name.lower(), " ADD COLUMN IF NOT EXISTS ", column_name, " ", column_type, ";"])  
+
+  statements_add = []
+  for i, j in zip(attrs, types):
+    statements_add.append(' '.join(['ADD COLUMN IF NOT EXISTS', i, j]))
+  statements_merged = ', '.join(statements_add) 
+  
+  cmd = ' '.join(["ALTER TABLE IF EXISTS", name.lower(), statements_merged, ";"])  
   cur = db.cursor()
-  cur.execute(cmd)
-  db.commit()
+  logger.warn("PING")
+  try:
+    cur.execute(cmd)
+    db.commit()
+  except:
+    logger.error(cmd)
   cur.close()
 
 def remove_column(name, columnName):
   cmd = ''.join(["ALTER TABLE IF EXISTS ", name.lower(), " DROP COLUMN IF EXISTS ", columnName, ";"])  
   cur = db.cursor()
+  logger.warn("PING")
   try:
     cur.execute(cmd)
     db.commit()
-  except psycopg2.DataError as e:
-    logger.warn("".join([cmd, '\n', repr(e)]))
-  cur.close()  
+  except:
+    logger.error(cmd)
+  cur.close()
 
 def get_table_names():
   """
@@ -170,11 +216,12 @@ def get_table_names():
   """
   cur = db.cursor()
   cmd = "SELECT table_name FROM information_schema.tables WHERE table_schema='public'"
+  logger.warn("PING")
   try:
     cur.execute(cmd)
     db.commit()
-  except psycopg2.DataError as e:
-    logger.warn("".join([cmd, '\n', repr(e)]))
+  except:
+    logger.warn(cmd)
   row = map(list, cur.fetchall())
   tables = []
   for t in row:
@@ -185,12 +232,16 @@ def get_table_names():
 def column_exists(table, column):
   cmd = ''.join(["SELECT column_name FROM information_schema.columns WHERE table_name='", table.lower(), "' AND column_name='", column, "';"])  
   cur = db.cursor()
-  cur.execute(cmd)
-  rows = cur.fetchone()
+  logger.warn("PING")
+  try:
+    cur.execute(cmd)
+    rows = cur.fetchone()
+    if rows:
+      return True
+    return False
+  except:
+    logger.error(cmd)
   cur.close()
-  if rows:
-    return True
-  return False
 
 def get_column_names_and_types(table_name):
   """
@@ -207,9 +258,8 @@ def get_column_names_and_types(table_name):
   try:
     cur.execute(cmd)
     db.commit()
-  except psycopg2.DataError as e:
-    logger.warn("".join([cmd, '\n', repr(e)]))
-
+  except:
+    logger.error(cmd)
   rows = cur.fetchall()
   cur.close()
   return rows

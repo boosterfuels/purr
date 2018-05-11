@@ -63,6 +63,8 @@ class Relation():
   def get_attrs_and_vals(self, attributes, doc):
     reduced_attributes = []
     values = []
+    types = []
+
     for attr in attributes:
       value = doc[attr]
       (value, column_type) = typechecker.get_pg_type(value)
@@ -86,16 +88,31 @@ class Relation():
         values.append(str(value))
       else:
         values.append("'" + str(value) + "'")
+      types.append(column_type)
 
-      if table.column_exists(self.relation_name, attr) == False and column_type != None:
-        table.add_column(self.relation_name, attr, column_type)
-      
       reduced_attributes.append(attr)
+      if len(self.column_names) != 0:
+
+        if attr not in self.column_names:
+          if table.column_exists(self.relation_name, attr) == False and column_type != None:
+            table.add_column(self.relation_name, attr, column_type)
+            # refresh column names
+            # not appending
+
+    if len(self.column_names) == 0:
+      # - get column names and their types
+      
+      table.add_multiple_columns(self.relation_name, reduced_attributes, types)     
+      self.column_names = table.get_column_names_and_types(self.relation_name)
+
     return reduced_attributes, values
 
   def bulk_insert(self, coll_data, attrs_conf, attrs_old):
     """
       TODO: insert multiple rows at the same time
+      - schema change
+      - fill in with nulls
+      - do not request everything
     """
     print("bulk insert", coll_data.count()) 
 

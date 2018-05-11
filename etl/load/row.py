@@ -6,7 +6,7 @@ import monitor
 
 db = pg.db
 
-logger = monitor.Logger('data-transfer.log', 'ROWS')
+logger = monitor.Logger('data-transfer.log', 'ROW')
 # Open a cursor to perform database operations
 def insert(table_name, attrs, values):
   """
@@ -37,14 +37,17 @@ def insert(table_name, attrs, values):
     values,
     ");"
   ])
+  logger.warn("PING")
   # MoSQL ignores the document and logs a warning
   # if a document could not be inserted.
-  # We will decide it later whata to do with DataErrors.
+  # We will decide later what to do with DataErrors.
   try:
-    db.cursor().execute(cmd)
+    cur = db.cursor()
+    cur.execute(cmd)
     db.commit()
-  except psycopg2.DataError as e:
-    logger.warn("".join([cmd, '\n' + repr(e)]))
+  except:
+    logger.error(cmd)
+  cur.close()
 
 def update(table_name, attrs, values):
   """
@@ -86,13 +89,14 @@ def update(table_name, attrs, values):
     object_id,
     ";"
   ])
-  logger.info(cmd)
+  cur = db.cursor()
+  logger.warn("PING")
   try:
-    db.cursor().execute(cmd)
+    cur.execute(cmd)
     db.commit()
   except psycopg2.DataError as e:
     logger.warn("".join([cmd, '\n', repr(e)]))
-
+  cur.close()
 
 def delete(table_name, object_id):
   """
@@ -120,9 +124,12 @@ def delete(table_name, object_id):
     str(object_id),
     "';"
   ])
-  logger.info(cmd)
+  logger.warn("PING")
+  cur = db.cursor()
   try:
-    db.cursor().execute(cmd)
+    cur.execute(cmd)
     db.commit()
-  except psycopg2.DataError as e:
-    logger.warn("".join([cmd, '\n' + repr(e)]))
+  except:
+    logger.error(cmd)
+  cur.close()
+
