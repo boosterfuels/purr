@@ -3,6 +3,7 @@ from load import pg_init as pg, table, row, schema
 from extract import tailer, extractor
 import time
 import sys
+from datetime import datetime
 
 # check if db exists
 # check if db is empty
@@ -28,6 +29,8 @@ def transfer_collections(collections, truncate, drop):
   ex.transfer_auto(collections, truncate, drop)
 
 def start_tailing(start_date_time):
+  if start_date_time is None:
+    start_date_time = datetime.utcnow()
   t = tailer.Tailer()
   t.start(start_date_time)
 

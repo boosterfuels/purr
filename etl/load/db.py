@@ -25,7 +25,6 @@ def create(db_name):
   create('booster')
 
   """
-  print('Adding primary key to', db_name)
   cmd = " ".join(['CREATE DATABASE ', db_name, ';'])
   cur = db.cursor()
   cur.execute(cmd)

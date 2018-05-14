@@ -8,10 +8,13 @@ from transform import relation
 
 from datetime import datetime, timedelta
 from bson import Timestamp
+import monitor
 
 INSERT = 'i'
 UPDATE = 'u'
 DELETE = 'd'
+
+logger = monitor.Logger('oplog-transfer.log', 'TAILER')
 
 class Tailer():
   """
@@ -40,14 +43,23 @@ class Tailer():
       return
       
     if oper == INSERT:
-      r.insert(doc_useful)
+      try:
+        r.insert(doc_useful)
+      except:
+        logger.error("INSERT" + doc_useful)
 
     elif oper == UPDATE:
-      r.update(doc_useful)
+      try:
+        r.update(doc_useful)
+      except:
+        logger.error("UPDATE" + doc_useful)
 
     elif oper == DELETE:
-      r.delete(doc_useful)
-    
+      try:
+        r.delete(doc_useful)
+      except:
+        logger.error("DELETE" + doc_useful)
+
   def start_tailing_from_dt(dt):
     """
     Gets timestamp from specific date
@@ -86,7 +98,6 @@ class Tailer():
   def start(self, dt):
     """
     Starts tailing the oplog and prints write operation records on command line.
-    Print only write operations    
     Parameters
     ----------
     dt: datetime
@@ -100,32 +111,21 @@ class Tailer():
     start = None
     now = self.now()
     
-    if dt is not None and dt <= now:
-      start = dt
-    else:
-      start = now
+    # if dt is not None and dt <= now:
+    #   start = dt
+    # else:
+    #   start = now
     self.tailing = True
 
     client = pymongo.MongoClient()
     oplog = client.local.oplog.rs
 
     # Start reading the oplog 
-    print('Current time:', now, '\nTailing from:', start, '\nTimestamp:', Timestamp(start, 1))
-    latest = oplog.find({'ts': {'$gte': Timestamp(start, 1)}})
+    logger.info('Current time:', dt, '\nTailing from:', now, '\nTimestamp:', Timestamp(dt, 1))
 
-    # latest exists
-    if (latest.count()):
-      latest = latest.next()
-      ts_latest = latest['ts'] 
-    else:
-      print("Empty cursor! Read all...")
-      first = oplog.find().sort('$natural', pymongo.ASCENDING).limit(-1).next()
-      ts_latest = first['ts']    
     try:
-
       while True:
-
-        cursor = oplog.find({'ts': {'$gt': ts_latest}},
+        cursor = oplog.find({'ts': {'$gt': Timestamp(now, 1)}},
             cursor_type = pymongo.CursorType.TAILABLE_AWAIT,
             oplog_replay=True)
       
@@ -137,9 +137,9 @@ class Tailer():
               if(doc['op']!='n'):
                 self.transform_and_load(doc)
           time.sleep(1)
-    except StopIteration:
-      print("Reading was stopped")
+    except StopIteration as e:
+      logger.error("Tailing was stopped (exc):" + e)
 
   def stop(self):
     self.tailing = False
-    print('Good bye.')
+    logger.info("Tailing was stopped.")
