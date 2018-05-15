@@ -76,10 +76,7 @@ def escape_chars(text):
   text = text.replace("\n","\\n").replace("`", "")
   text = text.replace("'", "''")
   if '"' in text:
-    print(text)
     text = text.replace('"', '\\"')
-    print(text)
-
   return text
 
 def transform_primitive_list(prim_list, list_type):

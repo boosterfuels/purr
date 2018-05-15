@@ -1,5 +1,4 @@
 # here comes everything with the oplog
-import pprint
 import pymongo
 import time
 from extract import collection, extractor
@@ -121,7 +120,7 @@ class Tailer():
     oplog = client.local.oplog.rs
 
     # Start reading the oplog 
-    logger.info('Current time:', dt, '\nTailing from:', now, '\nTimestamp:', Timestamp(dt, 1))
+    logger.info(' '.join(['Current time:', str(dt), '\nTailing from:', str(now), '\nTimestamp:', str(Timestamp(dt, 1))]))
 
     try:
       while True:

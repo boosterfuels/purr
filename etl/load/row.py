@@ -6,7 +6,7 @@ import monitor
 
 db = pg.db
 
-logger = monitor.Logger('data-transfer.log', 'ROW')
+logger = monitor.Logger('collection-transfer.log', 'ROW')
 # Open a cursor to perform database operations
 def insert(table_name, attrs, values):
   """
@@ -37,7 +37,7 @@ def insert(table_name, attrs, values):
     values,
     ");"
   ])
-  logger.warn("PING")
+  logger.warn("INSERT PING")
   # MoSQL ignores the document and logs a warning
   # if a document could not be inserted.
   # We will decide later what to do with DataErrors.
@@ -90,7 +90,7 @@ def update(table_name, attrs, values):
     ";"
   ])
   cur = db.cursor()
-  logger.warn("PING")
+  logger.warn("UPDATE PING")
   try:
     cur.execute(cmd)
     db.commit()
@@ -124,7 +124,7 @@ def delete(table_name, object_id):
     str(object_id),
     "';"
   ])
-  logger.warn("PING")
+  logger.warn("DELETE PING")
   cur = db.cursor()
   try:
     cur.execute(cmd)

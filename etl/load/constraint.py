@@ -32,7 +32,7 @@ def add_pk(table_name, attr):
   add_pk('Audience', 'id')
 
   """
-  logger.warn("PING")
+  logger.warn("ADD PRIMARY KEY PING")
   cmd = " ".join(['ALTER TABLE', table_name.lower(), 'ADD PRIMARY KEY (', attr, ');'])
   try:
     cur = db.cursor()
