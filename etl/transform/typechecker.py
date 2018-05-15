@@ -30,7 +30,7 @@ def get_pg_type(item):
     pg_type = 'timestamp'
 
   elif item_type is bson.objectid.ObjectId:
-    pg_type = 'char(24)'
+    pg_type = 'varchar(80)'
     
   elif item_type is dict:
     pg_type = 'jsonb'
@@ -69,3 +69,29 @@ def get_list_type(curr_list):
 
   
   return lt
+
+def rename(name_old, type_orig, type_new):
+  # print("TYPE ORIG", name_old, type_orig, type_new)
+  name_new = None
+  if type_equal(type_orig, type_new) is True:
+    return name_new
+  elif type_new == 'text':
+    if type_orig not in ['character', 'char(24)', 'text']:
+      name_new = name_old + "_t"
+  elif type_new == 'float':
+    name_new = name_old + "_f"
+  elif type_new == 'boolean':
+    name_new = name_old + "_b"
+  elif type_new == 'integer':
+    name_new = name_old + "_i"
+
+  
+  return name_new
+
+def type_equal(old, new):
+  if('char' in old and 'char' in new) or (old == 'array' and new == 'json[]') or (old == 'double precision' and new == 'float'):
+    return True
+  return False
+
+def is_nan(x):
+  return x != x

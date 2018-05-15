@@ -22,19 +22,7 @@ class Relation():
     self.created = table.exists(self.relation_name)
     return self.created
 
-  def solve_diffs(self, cols_and_types, doc):
-    fields = list(doc.keys())
-
-    for col_n, col_t in cols_and_types:
-      self.column_names.append(col_n)
-      self.column_types.append(col_n)
-    if set(fields) == set(self.column_names):
-      print('Equal')    
-    else:
-      print('Not equal')
-
   def insert(self, doc):
-    # solve_diffs && check_column_types()
     attributes = list(doc.keys())
 
     """
@@ -61,9 +49,18 @@ class Relation():
     row.delete(self.relation_name, doc["_id"])
 
   def get_attrs_and_vals(self, attributes, doc):
+    """
+    Gets all attributes and values needed to insert or update one raw
+    """
     reduced_attributes = []
     values = []
     types = []
+    col_names_types = table.get_column_names_and_types(self.relation_name)
+
+    for attr_name, attr_type in col_names_types:
+      if attr_name not in self.column_names:
+        self.column_names.append(attr_name.lower())
+        self.column_types.append(attr_type.lower())
 
     for attr in attributes:
       value = doc[attr]
@@ -72,6 +69,7 @@ class Relation():
       # Jump over nulls because there is no point to add a type 
       # until a value exists. We need a value to determine the type and
       # a default type would require change of schema. 
+
       if value == 'null' or column_type == None:
         continue
 
@@ -83,27 +81,36 @@ class Relation():
         value = unnest.transform_primitive_list(value, column_type)
         values.append(value)
 
-      elif column_type == 'float':
-        #TODO check if the following line is necessary
+      elif column_type == 'float' and typechecker.is_nan(value) is False:
         values.append(str(value))
       else:
         values.append("'" + str(value) + "'")
-      types.append(column_type)
+      
+      attr = attr.lower()
+
+      if len(self.column_names) != 0:
+        if attr not in self.column_names:
+          if column_type != None:
+            table.add_column(self.relation_name, attr, column_type)
+        else:
+          # Check if types are equal.
+          idx_original = self.column_names.index(attr)
+          type_orig = self.column_types[idx_original]
+          type_new = column_type
+
+          if type_orig != type_new:
+            attr_new = typechecker.rename(attr, type_orig, type_new)
+            if attr_new is not None:
+              table.add_column(self.relation_name, attr_new, type_new)
+              attr = attr_new
 
       reduced_attributes.append(attr)
-      if len(self.column_names) != 0:
-
-        if attr not in self.column_names:
-          if table.column_exists(self.relation_name, attr) == False and column_type != None:
-            table.add_column(self.relation_name, attr, column_type)
-            # refresh column names
-            # not appending
+      types.append(column_type)
 
     if len(self.column_names) == 0:
       # - get column names and their types
       
       table.add_multiple_columns(self.relation_name, reduced_attributes, types)     
-      self.column_names = table.get_column_names_and_types(self.relation_name)
 
     return reduced_attributes, values
 
