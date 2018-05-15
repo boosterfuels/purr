@@ -30,7 +30,7 @@ def create(name, attrs = [], types = []):
   name = name.lower()
   cur = db.cursor()
   cmd = ' '.join(["CREATE TABLE IF NOT EXISTS", name, "(", attrs_and_types, ");"])
-  logger.warn("PING")
+  logger.warn("CREATE TABLE PING")
   try:
     cur.execute(cmd)
     db.commit()
@@ -57,7 +57,7 @@ def exists(table_name):
   """
   cur = db.cursor()
   cmd = "SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND table_name='" + table_name.lower()+ "';"
-  logger.warn("PING")
+  logger.warn("EXISTS PING")
   try:
     cur.execute(cmd)
   except:
@@ -70,9 +70,6 @@ def exists(table_name):
     return True
   else:
     return False
-  # except:
-  #   e = sys.exc_info()[0]
-  #   logger.warn("".join([cmd, '\n', repr(e)]))
 
 def truncate(tables):
   """
@@ -88,7 +85,7 @@ def truncate(tables):
   cmd = ''.join(["TRUNCATE TABLE ", tables, ";"])
   
   cur = db.cursor()
-  logger.warn("PING")
+  logger.warn("TRUNCATE PING")
   try:
     cur.execute(cmd)
     db.commit()
@@ -116,14 +113,12 @@ def drop(tables):
   cmd = ''.join(["DROP TABLE IF EXISTS ", tables, ";"])
   
   cur = db.cursor()
-  logger.warn("PING")
+  logger.warn("DROP PING")
   try:
     cur.execute(cmd)
     db.commit()
   except:
     logger.error(cmd)
-    # except psycopg2.DataError as e:
-  #   logger.warn("".join([cmd, '\n', repr(e)]))
   cur.close()
 
 def add_column(name, column_name, column_type):
@@ -141,7 +136,7 @@ def add_column(name, column_name, column_type):
   """
   cmd = ''.join(["ALTER TABLE IF EXISTS ", name.lower(), " ADD COLUMN IF NOT EXISTS ", column_name, " ", column_type, ";"])  
   cur = db.cursor()
-  logger.warn("PING")
+  logger.warn("ADD COLUMN PING " + name.lower() + column_name + "(" + column_type + ")")
   try:
     cur.execute(cmd)
     db.commit()
@@ -174,7 +169,7 @@ def add_multiple_columns(name, attrs, types):
   
   cmd = ' '.join(["ALTER TABLE IF EXISTS", name.lower(), statements_merged, ";"])  
   cur = db.cursor()
-  logger.warn("PING")
+  logger.warn("ADD MULTIPLE COLUMNS PING")
   try:
     cur.execute(cmd)
     db.commit()
@@ -182,10 +177,34 @@ def add_multiple_columns(name, attrs, types):
     logger.error(cmd)
   cur.close()
 
-def remove_column(name, columnName):
-  cmd = ''.join(["ALTER TABLE IF EXISTS ", name.lower(), " DROP COLUMN IF EXISTS ", columnName, ";"])  
+def column_change_type(name, column_name, column_type):
+  """
+  Add new column to a specific table.
+  Parameters
+  ----------
+  name : str
+  column_name : str
+  column_type : str
+
+  Example
+  -------
+  add_column(pg.db, 'some_integer', 'integer')
+  """
+  	# ALTER TABLE audience ALTER COLUMN _id TYPE char(30)
+  cmd = ' '.join(["ALTER TABLE IF EXISTS", name.lower(), "ADD COLUMN IF EXISTS", column_name, "TYPE", column_type, ";"])  
   cur = db.cursor()
-  logger.warn("PING")
+  logger.warn("ALTER COLUMN PING " + name.lower() + column_name + "(" + column_type + ")")
+  try:
+    cur.execute(cmd)
+    db.commit()
+  except:
+    logger.error(cmd)
+  cur.close()
+
+def remove_column(name, column_name):
+  cmd = ''.join(["ALTER TABLE IF EXISTS ", name.lower(), " DROP COLUMN IF EXISTS ", column_name, ";"])  
+  cur = db.cursor()
+  logger.warn("REMOVE COLUMN PING")
   try:
     cur.execute(cmd)
     db.commit()
@@ -216,7 +235,7 @@ def get_table_names():
   """
   cur = db.cursor()
   cmd = "SELECT table_name FROM information_schema.tables WHERE table_schema='public'"
-  logger.warn("PING")
+  logger.warn("GET TABLE NAMES PING")
   try:
     cur.execute(cmd)
     db.commit()
@@ -232,7 +251,7 @@ def get_table_names():
 def column_exists(table, column):
   cmd = ''.join(["SELECT column_name FROM information_schema.columns WHERE table_name='", table.lower(), "' AND column_name='", column, "';"])  
   cur = db.cursor()
-  logger.warn("PING")
+  logger.warn("COLUMN EXISTS PING")
   try:
     cur.execute(cmd)
     rows = cur.fetchone()
