@@ -52,7 +52,7 @@ def get_pg_type(item):
 def get_list_type(curr_list):
   """
   Determines the type of the elements in the array.
-  Default is json[].
+  Default is jsonb[].
   integer[]
   """
   lt = None
@@ -65,7 +65,7 @@ def get_list_type(curr_list):
     elif type(curr) is bson.objectid.ObjectId:
       lt = 'text[]'
     elif type(curr) is dict:
-      lt = 'json[]'
+      lt = 'jsonb[]'
 
   
   return lt
@@ -89,7 +89,7 @@ def rename(name_old, type_orig, type_new):
   return name_new
 
 def type_equal(old, new):
-  if('char' in old and 'char' in new) or (old == 'array' and new == 'json[]') or (old == 'double precision' and new == 'float'):
+  if('char' in old and 'char' in new) or (old == 'array' and new == 'jsonb[]') or (old == 'double precision' and new == 'float'):
     return True
   return False
 

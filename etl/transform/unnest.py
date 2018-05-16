@@ -93,6 +93,7 @@ def transform_primitive_list(prim_list, list_type):
   new_prim_list = []
   for p in prim_list:
     # Get a hex encoded version of ObjectId with str(p).
+    p = escape_chars(str(p))
     new_prim_list.append("'" + str(p) + "'")
 
   transformed = ",".join(new_prim_list)
@@ -101,7 +102,7 @@ def transform_primitive_list(prim_list, list_type):
 
 def transform_composites(item):
   """
-  Decide what to do with json[] and jsonb types.
+  Decide what to do with jsonb[] and jsonb types.
   base: indicates the first call of the function (needed to decide if we have to 
   put single quotes around jsonb)
   Parameters
@@ -112,8 +113,8 @@ def transform_composites(item):
   if type(item) is list: 
     decomposed = decompose_list(item, base)
     if len(decomposed) == 0:
-      return "array[]::json[]"
-    return "array[" + decomposed + "]::json[]"
+      return "array[]::jsonb[]"
+    return "array[" + decomposed + "]::jsonb[]"
   
   elif type(item) is dict:
     decomposed = decompose_dict(item, base)
