@@ -73,7 +73,7 @@ class Relation():
       if value == 'null' or column_type == None:
         continue
 
-      if column_type == 'json[]' or column_type == 'jsonb':
+      if column_type == 'jsonb[]' or column_type == 'jsonb':
         value = unnest.transform_composites(value)
         values.append(value)
 
