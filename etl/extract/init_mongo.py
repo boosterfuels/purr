@@ -7,13 +7,10 @@ class MongoConnection():
   - create a base class for Connection
   - put dbname somewhere else
   """
-  def __init__(self):
+  def __init__(self, db_name=""):
+    db_name = 'booster'
     client = pymongo.MongoClient()
-    self.db = client['booster']
+    self.db = client[db_name]
 
-def connect():
-  mongo_conn = MongoConnection()
-  return mongo_conn.db
-
-db = connect()
-  
+mongo_conn = MongoConnection()
+db = mongo_conn.db  

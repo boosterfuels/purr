@@ -1,14 +1,32 @@
 import yaml
 import pprint
+import monitor
+
 colls = {}
 
 # read file
-with open("collections.yml", 'r') as stream:
+def file_to_dict(path):
   try:
-      conf_file = yaml.load(stream)
-      colls = conf_file["booster"]
-  except yaml.YAMLError as exc:
-      print(exc)
+    with open(path, 'r') as stream:
+      try:
+        conf_file = yaml.load(stream)
+        if not conf_file:
+          monitor.logging.error('Config file is empty.')
+          return None
+        return conf_file
+      except yaml.YAMLError as exc:
+        print(exc)
+  except FileNotFoundError as err:
+    monitor.logging.error('File not found.')
+
+
+def read_collection_config():
+  with open("collections.yml", 'r') as stream:
+    try:
+        conf_file = yaml.load(stream)
+        colls = conf_file["booster"]
+    except yaml.YAMLError as exc:
+        print(exc)
 
 def get_details(relation):
   attrs_original = []

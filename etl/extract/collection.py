@@ -1,5 +1,5 @@
-from extract import mongo_init
-db = mongo_init.db
+from extract import init_mongo
+db = init_mongo.db
 
 def get_all():
   """

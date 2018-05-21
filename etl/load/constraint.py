@@ -1,18 +1,11 @@
 
 import psycopg2
-from load import pg_init as pg
-db = pg.db
 import monitor
 import sys
 
-# check if schema exists
-# create schema
-# alter schema
-# delete schema (rollback - in case of error)
-
 logger = monitor.Logger('collection-transfer.log', 'CONSTRAINT')
 
-def add_pk(table_name, attr):
+def add_pk(db, schema, table, attr):
   """
   Adds primary key to a PostgreSQL table.
 
@@ -33,7 +26,7 @@ def add_pk(table_name, attr):
 
   """
   logger.warn("ADD PRIMARY KEY PING")
-  cmd = " ".join(['ALTER TABLE', table_name.lower(), 'ADD PRIMARY KEY (', attr, ');'])
+  cmd = 'ALTER TABLE %s.%s ADD PRIMARY KEY (%s)' % (schema, table.lower(), attr)
   try:
     cur = db.cursor()
     cur.execute(cmd)

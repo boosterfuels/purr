@@ -1,12 +1,9 @@
 import psycopg2
-from load import pg_init as pg
-db = pg.db
 import monitor
 import sys
-
 logger = monitor.Logger('collection-transfer.log', 'TABLE')
 
-def create(name, attrs = [], types = []):
+def create(db, schema, name, attrs = [], types = []):
   """
   Open a cursor to perform database operations
   Create table with specific name.
@@ -29,7 +26,7 @@ def create(name, attrs = [], types = []):
 
   name = name.lower()
   cur = db.cursor()
-  cmd = ' '.join(["CREATE TABLE IF NOT EXISTS", name, "(", attrs_and_types, ");"])
+  cmd =  "CREATE TABLE IF NOT EXISTS %s.%s(%s);" % (schema, name, attrs_and_types)
   logger.warn("CREATE TABLE PING")
   try:
     cur.execute(cmd)
@@ -38,7 +35,7 @@ def create(name, attrs = [], types = []):
     logger.error(cmd)
   cur.close()
 
-def exists(table_name):  
+def exists(db, schema, table):  
   """
   Check if a table exists in the PG database.
   
@@ -56,7 +53,7 @@ def exists(table_name):
   don't hardcode schema
   """
   cur = db.cursor()
-  cmd = "SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND table_name='" + table_name.lower()+ "';"
+  cmd = "SELECT table_name FROM information_schema.tables WHERE table_schema='%s' AND table_name='%s';" % (schema, table.lower())
   logger.warn("EXISTS PING")
   try:
     cur.execute(cmd)
@@ -71,7 +68,7 @@ def exists(table_name):
   else:
     return False
 
-def truncate(tables):
+def truncate(db, schema, tables):
   """
   Parameters
   ----------
@@ -81,8 +78,11 @@ def truncate(tables):
   ----
   Check if table exists before doing anything.
   """
-  tables = ','.join(tables)
-  cmd = ''.join(["TRUNCATE TABLE ", tables, ";"])
+  tables_cmd = [] 
+  for t in tables:
+    tables_cmd.append('%s.%s' % (schema, t))
+  tables_cmd = ','.join(tables_cmd)
+  cmd = "TRUNCATE TABLE %s;" % (tables_cmd)
   
   cur = db.cursor()
   logger.warn("TRUNCATE PING")
@@ -93,7 +93,7 @@ def truncate(tables):
     logger.error(cmd)
   cur.close()
 
-def drop(tables):
+def drop(db, schema, tables):
   """
   Drop one or more tables in the PG database.
 
@@ -109,8 +109,12 @@ def drop(tables):
   ----
   - first check if all tables in the list exist
   """
-  tables = ','.join(tables)
-  cmd = ''.join(["DROP TABLE IF EXISTS ", tables, ";"])
+  tables_cmd = [] 
+  for t in tables:
+    tables_cmd.append('%s.%s' % (schema, t))
+  tables_cmd = ','.join(tables_cmd)
+
+  cmd = "DROP TABLE IF EXISTS %s" % (tables_cmd)
   
   cur = db.cursor()
   logger.warn("DROP PING")
@@ -121,12 +125,12 @@ def drop(tables):
     logger.error(cmd)
   cur.close()
 
-def add_column(name, column_name, column_type):
+def add_column(db, schema, table, column_name, column_type):
   """
   Add new column to a specific table.
   Parameters
   ----------
-  name : str
+  table : str
   column_name : str
   column_type : str
 
@@ -134,9 +138,9 @@ def add_column(name, column_name, column_type):
   -------
   add_column(pg.db, 'some_integer', 'integer')
   """
-  cmd = ''.join(["ALTER TABLE IF EXISTS ", name.lower(), " ADD COLUMN IF NOT EXISTS ", column_name, " ", column_type, ";"])  
+  cmd = "ALTER TABLE IF EXISTS %s.%s ADD COLUMN IF NOT EXISTS %s %s;" % (schema, table.lower(), column_name, column_type)  
   cur = db.cursor()
-  logger.warn("ADD COLUMN PING " + name.lower() + column_name + "(" + column_type + ")")
+  logger.warn("ADD COLUMN PING table: %s, column: %s, type: %s" % (table.lower(), column_name, column_type))
   try:
     cur.execute(cmd)
     db.commit()
@@ -144,7 +148,7 @@ def add_column(name, column_name, column_type):
     logger.error(cmd)
   cur.close()
 
-def add_multiple_columns(name, attrs, types):
+def add_multiple_columns(db, schema, table, attrs, types):
   """
   Add new column to a specific table.
   Parameters
@@ -167,7 +171,7 @@ def add_multiple_columns(name, attrs, types):
     statements_add.append(' '.join(['ADD COLUMN IF NOT EXISTS', i, j]))
   statements_merged = ', '.join(statements_add) 
   
-  cmd = ' '.join(["ALTER TABLE IF EXISTS", name.lower(), statements_merged, ";"])  
+  cmd = "ALTER TABLE IF EXISTS %s.%s %s;" % (schema, table.lower(), statements_merged)
   cur = db.cursor()
   logger.warn("ADD MULTIPLE COLUMNS PING")
   try:
@@ -177,7 +181,7 @@ def add_multiple_columns(name, attrs, types):
     logger.error(cmd)
   cur.close()
 
-def column_change_type(name, column_name, column_type):
+def column_change_type(db, name, column_name, column_type):
   """
   Add new column to a specific table.
   Parameters
@@ -201,7 +205,7 @@ def column_change_type(name, column_name, column_type):
     logger.error(cmd)
   cur.close()
 
-def remove_column(name, column_name):
+def remove_column(db, name, column_name):
   cmd = ''.join(["ALTER TABLE IF EXISTS ", name.lower(), " DROP COLUMN IF EXISTS ", column_name, ";"])  
   cur = db.cursor()
   logger.warn("REMOVE COLUMN PING")
@@ -212,7 +216,7 @@ def remove_column(name, column_name):
     logger.error(cmd)
   cur.close()
 
-def get_table_names():
+def get_table_names(db, schema):
   """
   Get existing tables from the PG database.
 
@@ -234,7 +238,7 @@ def get_table_names():
   don't hardcode schema
   """
   cur = db.cursor()
-  cmd = "SELECT table_name FROM information_schema.tables WHERE table_schema='public'"
+  cmd = "SELECT table_name FROM information_schema.tables WHERE table_schema='%s'" % (schema)
   logger.warn("GET TABLE NAMES PING")
   try:
     cur.execute(cmd)
@@ -248,7 +252,7 @@ def get_table_names():
   cur.close()
   return tables
 
-def column_exists(table, column):
+def column_exists(db, table, column):
   cmd = ''.join(["SELECT column_name FROM information_schema.columns WHERE table_name='", table.lower(), "' AND column_name='", column, "';"])  
   cur = db.cursor()
   logger.warn("COLUMN EXISTS PING")
@@ -262,7 +266,7 @@ def column_exists(table, column):
     logger.error(cmd)
   cur.close()
 
-def get_column_names_and_types(table_name):
+def get_column_names_and_types(db, schema, table):
   """
   Get column names and column types of a specific table.
   Parameters
@@ -273,13 +277,14 @@ def get_column_names_and_types(table_name):
   List of column names and corresponding types.
   """
   cur = db.cursor()
-  cmd = "SELECT column_name, data_type FROM information_schema.columns WHERE table_schema='public' AND table_name = '" + table_name.lower() + "';"
+  cmd = "SELECT column_name, data_type FROM information_schema.columns WHERE table_schema='%s' AND table_name = '%s';" % (schema, table.lower())
+  rows = []
   try:
     cur.execute(cmd)
     db.commit()
+    rows = cur.fetchall()
   except:
     logger.error(cmd)
-  rows = cur.fetchall()
   cur.close()
   return rows
 
