@@ -10,13 +10,15 @@ class Relation():
   """
   This is the main parents class for transforming data.
   """
-  def __init__(self, collection_name):
+  def __init__(self, pg_conn, schema, collection_name):
     """Constructor for Relation"""
     self.relation_name = collection_name
     self.column_names = []
     self.column_types = []
     self.has_pk = False
     self.created = False
+    self.conn = pg_conn
+    self.schema = schema
 
   def exists(self):
     self.created = table.exists(self.relation_name)
@@ -37,7 +39,7 @@ class Relation():
     # This is needed because sometimes there is no value for attributes (null)
     # - in this case 
     (reduced_attributes, values) = self.get_attrs_and_vals(attributes, doc)
-    row.insert(self.relation_name, reduced_attributes, values)
+    row.insert(self.conn, self.schema, self.relation_name, reduced_attributes, values)
 
   def update(self, doc):
     attributes = list(doc.keys())
@@ -55,7 +57,7 @@ class Relation():
     reduced_attributes = []
     values = []
     types = []
-    col_names_types = table.get_column_names_and_types(self.relation_name)
+    col_names_types = table.get_column_names_and_types(self.conn, self.schema, self.relation_name)
 
     for attr_name, attr_type in col_names_types:
       if attr_name not in self.column_names:
@@ -91,7 +93,7 @@ class Relation():
       if len(self.column_names) != 0:
         if attr not in self.column_names:
           if column_type != None:
-            table.add_column(self.relation_name, attr, column_type)
+            table.add_column(self.conn, self.schema, self.relation_name, attr, column_type)
         else:
           # Check if types are equal.
           idx_original = self.column_names.index(attr)
@@ -101,7 +103,7 @@ class Relation():
           if type_orig != type_new:
             attr_new = typechecker.rename(attr, type_orig, type_new)
             if attr_new is not None:
-              table.add_column(self.relation_name, attr_new, type_new)
+              table.add_column(self.conn, self.schema, self.relation_name, attr_new, type_new)
               attr = attr_new
 
       reduced_attributes.append(attr)
@@ -110,7 +112,7 @@ class Relation():
     if len(self.column_names) == 0:
       # - get column names and their types
       
-      table.add_multiple_columns(self.relation_name, reduced_attributes, types)     
+      table.add_multiple_columns(self.conn, self.schema, self.relation_name, reduced_attributes, types)     
 
     return reduced_attributes, values
 
@@ -139,8 +141,8 @@ class Relation():
       values = []
   
   def create(self):
-    table.create(self.relation_name)
+    table.create(self.conn, self.schema, self.relation_name)
 
   def add_pk(self, attr):
-    constraint.add_pk(self.relation_name, attr)
+    constraint.add_pk(self.conn, self.schema, self.relation_name, attr)
     self.has_pk = True

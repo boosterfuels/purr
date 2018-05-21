@@ -1,14 +1,13 @@
 import psycopg2
 from bson.json_util import loads, dumps
-from load import pg_init as pg, table
+from load import init_pg as pg, table
 from extract import collection
 import monitor
 
-db = pg.db
 
 logger = monitor.Logger('collection-transfer.log', 'ROW')
 # Open a cursor to perform database operations
-def insert(table_name, attrs, values):
+def insert(db, schema, table, attrs, values):
   """
   Inserts a row defined by attributes and values into a specific 
   table of the PG database.
@@ -29,14 +28,8 @@ def insert(table_name, attrs, values):
   """
   attrs = ','.join(attrs)
   values = ",".join(values) 
-  
-  cmd = ''.join(["INSERT INTO ",
-    table_name.lower(), "(",
-    attrs,
-    ") VALUES (",
-    values,
-    ");"
-  ])
+  cmd = "INSERT INTO %s.%s (%s) VALUES (%s) ON CONFLICT DO NOTHING;" % (schema, table.lower(), attrs, values)
+
   logger.warn("INSERT PING")
   # MoSQL ignores the document and logs a warning
   # if a document could not be inserted.
@@ -49,7 +42,7 @@ def insert(table_name, attrs, values):
     logger.error(cmd)
   cur.close()
 
-def update(table_name, attrs, values):
+def update(db, table_name, attrs, values):
   """
   Updates a row in a specific table of the PG database.
 
@@ -98,7 +91,7 @@ def update(table_name, attrs, values):
     logger.warn("".join([cmd, '\n', repr(e)]))
   cur.close()
 
-def delete(table_name, object_id):
+def delete(db, table_name, object_id):
   """
   Deletes a row in a specific table of the PG database.
 

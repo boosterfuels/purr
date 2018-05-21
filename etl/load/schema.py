@@ -1,25 +1,23 @@
 
 import psycopg2
-from load import pg_init as pg
-db = pg.db
 
-
-def reset(schema_name = 'public'):
+def reset(db, schema_name = 'public'):
   """
   Reset existing schema or create a new one.
   """
-  print('Schema is reset.')
   cur = db.cursor()
   cur.execute(' '.join(['DROP SCHEMA IF EXISTS', schema_name, 'CASCADE;']))
   cur.execute(' '.join(['CREATE SCHEMA', schema_name, ';']))
   db.commit()
+  print('Schema %s is reset.' % (schema_name))
   cur.close()
 
-def create(schema_name = 'public'):
+def create(db, schema = 'public'):
   """
   Create schema if it does not exist.
   """
   cur = db.cursor()
-  cur.execute(' '.join(['CREATE SCHEMA IF NOT EXISTS', schema_name,';']))
+  cmd = 'CREATE SCHEMA IF NOT EXISTS %s;' % (schema)
+  cur.execute(cmd)
   db.commit()
   cur.close()
