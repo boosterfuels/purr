@@ -2,6 +2,8 @@
 # jsonb
 # jsonb in array
 # array in jsonb
+from bson import ObjectId
+import json
 
 def decompose_list(items, is_base):
   """
@@ -99,25 +101,8 @@ def transform_primitive_list(prim_list, list_type):
   transformed = ",".join(new_prim_list)
   return "array[" + transformed + "]::" + list_type
 
-
-def transform_composites(item):
-  """
-  Decide what to do with jsonb[] and jsonb types.
-  base: indicates the first call of the function (needed to decide if we have to 
-  put single quotes around jsonb)
-  Parameters
-  item: dict or list
-        value which has non-primitive type
-  """
-  base = True
-  if type(item) is list: 
-    decomposed = decompose_list(item, base)
-    if len(decomposed) == 0:
-      return "array[]::jsonb[]"
-    return "array[" + decomposed + "]::jsonb[]"
-  
-  elif type(item) is dict:
-    decomposed = decompose_dict(item, base)
-    if len(decomposed) == 0:
-      return "jsonb()"
-    return "jsonb('" + decomposed + "')"
+def change_object_id(item):
+  for k, v in item.items():
+    if type(v) is ObjectId:
+      item[k] = str(v)
+  return item

@@ -4,7 +4,6 @@ from load import init_pg as pg, table
 from extract import collection
 import monitor
 
-
 logger = monitor.Logger('collection-transfer.log', 'ROW')
 # Open a cursor to perform database operations
 def insert(db, schema, table, attrs, values):
@@ -26,19 +25,31 @@ def insert(db, schema, table, attrs, values):
   -------
   insert('Audience', [attributes], [values])
   """
-  attrs = ','.join(attrs)
-  values = ",".join(values) 
-  cmd = "INSERT INTO %s.%s (%s) VALUES (%s) ON CONFLICT DO NOTHING;" % (schema, table.lower(), attrs, values)
+  temp = []
+  for v in values:
+    if type(v) is list:
+      if v[0].startswith("{"):
+        temp.append('array[%s]::jsonb[]')
+        continue
+      temp.append('%s')      
 
+    else:
+      temp.append('%s')
+
+  temp = ', '.join(temp)
+  attrs = ', '.join(attrs)
+
+  cmd = "INSERT INTO %s.%s (%s) VALUES (%s) ON CONFLICT DO NOTHING;" % (schema, table.lower(), attrs, temp)
+  
   logger.warn("INSERT PING")
   # MoSQL ignores the document and logs a warning
   # if a document could not be inserted.
   # We will decide later what to do with DataErrors.
   try:
     cur = db.cursor()
-    cur.execute(cmd)
+    cur.execute(cmd, values)
     db.commit()
-  except:
+  except psycopg2.Error as e:
     logger.error(cmd)
   cur.close()
 
@@ -83,12 +94,12 @@ def update(db, table_name, attrs, values):
     ";"
   ])
   cur = db.cursor()
-  logger.warn("UPDATE PING")
+  logger.info("UPDATE PING")
   try:
     cur.execute(cmd)
     db.commit()
   except psycopg2.DataError as e:
-    logger.warn("".join([cmd, '\n', repr(e)]))
+    logger.info("".join([cmd, '\n', repr(e)]))
   cur.close()
 
 def delete(db, table_name, object_id):
@@ -117,7 +128,7 @@ def delete(db, table_name, object_id):
     str(object_id),
     "';"
   ])
-  logger.warn("DELETE PING")
+  logger.info("DELETE PING")
   cur = db.cursor()
   try:
     cur.execute(cmd)
