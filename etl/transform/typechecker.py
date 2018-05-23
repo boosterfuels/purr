@@ -1,4 +1,4 @@
-import bson
+from bson.json_util import ObjectId
 import datetime
 
 def get_pg_type(item):
@@ -24,20 +24,16 @@ def get_pg_type(item):
 
   elif item_type is str:
     pg_type = 'text'
-    item = item.replace("'", "''")
 
   elif item_type is datetime.datetime:
     pg_type = 'timestamp'
 
-  elif item_type is bson.objectid.ObjectId:
+  elif item_type is ObjectId:
     pg_type = 'varchar(80)'
     
   elif item_type is dict:
     pg_type = 'jsonb'
   
-  # TODO create an array for this in the future
-  # lists should be mapped as ARRAY
-  # dict should be hstore
   elif item_type is list:
     pg_type = get_list_type(item)
 
@@ -58,12 +54,10 @@ def get_list_type(curr_list):
   lt = None
   if len(curr_list) > 0:
     curr = curr_list[0]
-    if type(curr) is str:
+    if type(curr) is str or type(curr) is ObjectId:
       lt = 'text[]'
     elif type(curr) is int:
       lt = 'integer[]'
-    elif type(curr) is bson.objectid.ObjectId:
-      lt = 'oid[]'
     elif type(curr) is dict:
       lt = 'jsonb[]'
 
@@ -71,12 +65,11 @@ def get_list_type(curr_list):
   return lt
 
 def rename(name_old, type_orig, type_new):
-  # print("TYPE ORIG", name_old, type_orig, type_new)
   name_new = None
   if type_equal(type_orig, type_new) is True:
     return name_new
   elif type_new == 'text':
-    if type_orig not in ['character', 'char(24)', 'text']:
+    if type_orig not in ['character', 'text']:
       name_new = name_old + "_t"
   elif type_new == 'float':
     name_new = name_old + "_f"
