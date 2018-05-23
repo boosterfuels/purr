@@ -9,6 +9,8 @@ import json
 from bson.json_util import default, ObjectId, dumps, loads, RELAXED_JSON_OPTIONS, CANONICAL_JSON_OPTIONS
 import psycopg2.extras
 
+reserved = keywordchecker.get_keywords()
+
 class Relation():
   """
   This is the main parents class for transforming data.
@@ -22,7 +24,7 @@ class Relation():
     self.created = False
     self.conn = pg_conn
     self.schema = schema
-
+    
   def exists(self):
     self.created = table.exists(self.relation_name)
     return self.created
@@ -61,15 +63,18 @@ class Relation():
     values = []
     types = []
     col_names_types = table.get_column_names_and_types(self.conn, self.schema, self.relation_name)
-
+    
     for attr_name, attr_type in col_names_types:
       if attr_name not in self.column_names:
         self.column_names.append(attr_name.lower())
         self.column_types.append(attr_type.lower())
 
     for attr in attributes:
-      value = doc[attr]
-      (value, column_type) = typechecker.get_pg_type(value)
+      # Add an underscore to the attribute if it is a reserved word in PG.
+      if attr in reserved:
+        attr = '_' + attr
+
+      (value, column_type) = typechecker.get_pg_type(doc[attr])
 
       # Jump over nulls because there is no point to add a type 
       # until a value exists. We need a value to determine the type and
@@ -77,7 +82,6 @@ class Relation():
     
       if value == 'null' or column_type == None:
         continue
-      
 
       if type(value) is ObjectId:
         values.append(str(value))
@@ -93,8 +97,7 @@ class Relation():
         values.append(json.dumps(value, default=default))
 
       elif column_type == 'text[]':
-        for i in range(len(value)):
-          value[i] = str(value[i])
+        value = [str(v) for v in value]
         values.append(value)
         
       elif column_type == 'float' and typechecker.is_nan(value) is False:
