@@ -12,7 +12,8 @@ pip-delete-this-directory.txt
 # Documentation
 doc
 
-*.yml
+collections.yml
+setup.yml
 
 **/.DS_Store
 
