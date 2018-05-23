@@ -117,7 +117,10 @@ class Relation():
           if type_orig != type_new:
             attr_new = typechecker.rename(attr, type_orig, type_new)
             if attr_new is not None:
-              table.add_column(self.conn, self.schema, self.relation_name, attr_new, type_new)
+              if attr_new not in self.column_names:
+                table.add_column(self.conn, self.schema, self.relation_name, attr_new, type_new)
+                self.column_names.append(attr_new)
+                self.column_types.append(type_new)
               attr = attr_new
 
       reduced_attributes.append(attr)
