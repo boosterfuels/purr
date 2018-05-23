@@ -5,6 +5,9 @@ from load import table, row, constraint
 from transform import typechecker, keywordchecker, unnest, config_parser
 from datetime import datetime, timedelta
 from bson import Timestamp
+import json
+from bson.json_util import default, ObjectId, dumps, loads, RELAXED_JSON_OPTIONS, CANONICAL_JSON_OPTIONS
+import psycopg2.extras
 
 class Relation():
   """
@@ -71,22 +74,33 @@ class Relation():
       # Jump over nulls because there is no point to add a type 
       # until a value exists. We need a value to determine the type and
       # a default type would require change of schema. 
-
+    
       if value == 'null' or column_type == None:
         continue
+      
 
-      if column_type == 'jsonb[]' or column_type == 'jsonb':
-        value = unnest.transform_composites(value)
-        values.append(value)
+      if type(value) is ObjectId:
+        values.append(str(value))
+
+      elif column_type == 'jsonb[]':
+        temp = []
+        for v in value:
+          temp.append(json.dumps(v, default=default))
+        values.append(temp)
+
+      elif column_type == 'jsonb':
+        value = unnest.change_object_id(value)
+        values.append(json.dumps(value, default=default))
 
       elif column_type == 'text[]':
-        value = unnest.transform_primitive_list(value, column_type)
+        for i in range(len(value)):
+          value[i] = str(value[i])
         values.append(value)
-
+        
       elif column_type == 'float' and typechecker.is_nan(value) is False:
-        values.append(str(value))
+        values.append(value)
       else:
-        values.append("'" + str(value) + "'")
+        values.append(str(value))
       
       attr = attr.lower()
 
@@ -128,12 +142,10 @@ class Relation():
     values = []
     for col in coll_data:
       nr_of_attrs = len(attrs_conf)
-      print(nr_of_attrs)
       for i in range(0, nr_of_attrs):
         field = attrs_old[i]
         if field in col.keys():
           values.append("'" + str(col[field]) + "'")
-          print(attrs_conf)
         else:
           values.append("'null'")
 

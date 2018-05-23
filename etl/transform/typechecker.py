@@ -63,7 +63,7 @@ def get_list_type(curr_list):
     elif type(curr) is int:
       lt = 'integer[]'
     elif type(curr) is bson.objectid.ObjectId:
-      lt = 'text[]'
+      lt = 'oid[]'
     elif type(curr) is dict:
       lt = 'jsonb[]'
 
