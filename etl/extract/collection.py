@@ -44,7 +44,8 @@ def get_by_name(db, name):
   try:
     logger.info('Getting collection data from %s.' % name)
     c = db[name]
-    return c.find()
+    bz = c.find()
+    return bz.batch_size(10000)
   except:
     logger.error('Getting collection data from %s failed.' % name)
     return []
