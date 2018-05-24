@@ -1,26 +1,9 @@
 from extract import init_mongo
-db = init_mongo.db
+import monitor
 
-def get_all():
-  """
-  Prints all collections
-  made sense in the beginning xD
-  ---
-  TODO:
-  remove
-  """
-  collection_names = db.collection_names(include_system_collections=False)
-  # when loading collections, load them sorted by ObjectId
-  # in case an error happens we can continue loading from that moment
-  # and output the latest successful item passed to PG 
-  for col in collection_names:
-    c = db[col]
-    pprint.pprint(col)
-    for doc in c.find():
-      pprint.pprint(doc)
-      pprint.pprint(c.find().count())
+logger = monitor.Logger('collection-transfer.log', 'COLLECTION')
 
-def get_names():
+def get_names(db):
   """
     Get collection names.
     Returns
@@ -29,7 +12,7 @@ def get_names():
   """
   return db.collection_names(include_system_collections=False)
 
-def check(req_colls):
+def check(db, req_colls):
   """
   Parameters
   ----------
@@ -43,24 +26,29 @@ def check(req_colls):
   """
   collection_names = db.collection_names(include_system_collections=False)
   if(len(req_colls) > len(collection_names)):
-    pprint.pprint('You entered more collection names than actually exist.')
+    logger.error('You entered more collection names than actually exist.')
   # when loading collections, load them sorted by ObjectId
   # in case an error happens we can continue loading from that moment
   # and output the latest successful item passed to PG 
   try:
     for col in req_colls:
       collection_names.index(col)
-    print('Checking collection names: OK')
+    logger.info('Checking collection names: OK')
   except ValueError:
-
-    print(col, 'is not a collection.')
+    logger.error(col, 'is not a collection.')
     return False
 
   return True
 
-def get_by_name(name):
-  c = db[name]
-  return c.find()
+def get_by_name(db, name):
+  try:
+    logger.info('Getting collection data from %s.' % name)
+    c = db[name]
+    bz = c.find()
+    return bz.batch_size(10000)
+  except:
+    logger.error('Getting collection data from %s failed.' % name)
+    return []
 
 def get_sorted_by_name(name):
   c = db[name]
