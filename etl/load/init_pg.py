@@ -8,9 +8,11 @@ class PgConnection():
   create a base class for Connection
   """
   def __init__(self, dbname, user):
-    self.conn = psycopg2.connect("dbname=%s user=%s" % (dbname, user))
-    self.cur = self.conn.cursor()
-    monitor.logging.error("Could not connect to Postgres.")
+    try:
+      self.conn = psycopg2.connect("dbname=%s user=%s" % (dbname, user))
+      self.cur = self.conn.cursor()
+    except:
+      monitor.logging.error("Could not connect to Postgres.")
       
   def query(self, query):
       try:
