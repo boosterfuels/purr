@@ -22,10 +22,10 @@ def transfer_collections(collections, truncate, drop, settings):
   - create table with attributes and types
   """
   setup_pg = settings['postgres']
-
+  setup_mdb = settings['mongo']
   pg = postgres.PgConnection(setup_pg['db_name'], setup_pg['user'])
-  # mongo = mongodb.MongoConnection(setup_pg['db_name'], setup_pg['user'])
-  mongo = None
+  mongo = mongodb.MongoConnection(setup_mdb['db_name'])
+  
   ex = extractor.Extractor()
   if setup_pg['table_truncate'] is True:
     truncate = True
@@ -33,7 +33,7 @@ def transfer_collections(collections, truncate, drop, settings):
     drop = True
   if setup_pg['schema_reset'] is True:
     schema.reset(pg.conn, setup_pg["schema_name"])
-  ex.transfer_auto(collections, truncate, drop, pg.conn, mongo, setup_pg["schema_name"])
+  ex.transfer_auto(collections, truncate, drop, pg.conn, mongo.conn, setup_pg["schema_name"])
 
 def start_tailing(start_date_time):
   if start_date_time is None:
@@ -44,5 +44,5 @@ def start_tailing(start_date_time):
 def get_collection_names():
   return collection.get_names()
 
-# def reset_schema(conn, schema_name):
-  # schema.reset(conn, schema_name)
+def reset_schema(conn, schema_name):
+  schema.reset(conn, schema_name)

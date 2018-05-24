@@ -16,14 +16,14 @@ class Extractor():
     """Constructor for Extractor"""
     self.logger = monitor.Logger('performance.log', 'EXTRACTOR')
     
-  def transfer_auto(self, coll_names, truncate, drop, pg, mdb_conn, schema_name):
+  def transfer_auto(self, coll_names, truncate, drop, pg, mdb, schema_name):
     """
     Transfer collections using auto typecheck
     TODO
     ----
     replace relation 
     """
-    if collection.check(coll_names) is False:
+    if collection.check(mdb, coll_names) is False:
       return
 
     if drop:
@@ -37,7 +37,7 @@ class Extractor():
       start = time.time()
       r = relation.Relation(pg, schema_name, coll)
       table.create(pg, schema_name, coll)
-      for doc in collection.get_by_name(coll):
+      for doc in collection.get_by_name(mdb, coll):
         r.insert(doc)
         if r.has_pk is False and doc['_id']:
           r.add_pk('_id')
