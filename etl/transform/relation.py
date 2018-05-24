@@ -2,14 +2,14 @@ import pymongo
 import time
 from extract import collection
 from load import table, row, constraint
-from transform import typechecker, keywordchecker, unnest, config_parser
+from transform import type_checker, keyword_checker, config_parser, unnester
 from datetime import datetime, timedelta
 from bson import Timestamp
 import json
 from bson.json_util import default, ObjectId, dumps, loads, RELAXED_JSON_OPTIONS, CANONICAL_JSON_OPTIONS
 import psycopg2.extras
 
-reserved = keywordchecker.get_keywords()
+reserved = keyword_checker.get_keywords()
 
 class Relation():
   """
@@ -74,7 +74,7 @@ class Relation():
       if attr in reserved:
         attr = '_' + attr
 
-      (value, column_type) = typechecker.get_pg_type(doc[attr])
+      (value, column_type) = type_checker.get_pg_type(doc[attr])
 
       # Jump over nulls because there is no point to add a type 
       # until a value exists. We need a value to determine the type and
@@ -93,14 +93,14 @@ class Relation():
         values.append(temp)
 
       elif column_type == 'jsonb':
-        value = unnest.change_object_id(value)
+        value = unnester.change_object_id(value)
         values.append(json.dumps(value, default=default))
 
       elif column_type == 'text[]':
         value = [str(v) for v in value]
         values.append(value)
         
-      elif column_type == 'float' and typechecker.is_nan(value) is False:
+      elif column_type == 'float' and type_checker.is_nan(value) is False:
         values.append(value)
       else:
         values.append(str(value))
@@ -118,7 +118,7 @@ class Relation():
           type_new = column_type
 
           if type_orig != type_new:
-            attr_new = typechecker.rename(attr, type_orig, type_new)
+            attr_new = type_checker.rename(attr, type_orig, type_new)
             if attr_new is not None:
               if attr_new not in self.column_names:
                 table.add_column(self.conn, self.schema, self.relation_name, attr_new, type_new)
