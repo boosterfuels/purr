@@ -27,17 +27,25 @@ class Extractor():
       return
 
     if drop:
-      table.drop(pg, schema_name, coll_names)
+      table.drop(pg.conn, schema_name, coll_names)
     elif truncate:
-      table.truncate(pg, schema_name, coll_names)
+      table.truncate(pg.conn, schema_name, coll_names)
     
-    schema.create(pg, schema_name)
+    schema.create(pg.conn, schema_name)
 
     for coll in coll_names:
       start = time.time()
       r = relation.Relation(pg, schema_name, coll)
-      table.create(pg, schema_name, coll)
-      for doc in collection.get_by_name(mdb, coll):
+      table.create(pg.conn, pg.cur, schema_name, coll)
+      docs = collection.get_by_name(mdb, coll)
+      start_docs = start
+      for i in range(docs.count()):
+        doc = docs[i]
+        if (i+1)%1000==0 and i+1>=1000:
+          print('Transferred %d documents from collection %s. (%s s)' % (i+1, coll, str(round(time.time() - start_docs, 4))))
+          start_docs = time.time()
+        if i+1 == docs.count():
+          print('Successfully transferred collection %s (%d documents).' % (coll, i+1))
         r.insert(doc)
         if r.has_pk is False and doc['_id']:
           r.add_pk('_id')

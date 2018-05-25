@@ -5,7 +5,7 @@ import sys
 
 logger = monitor.Logger('collection-transfer.log', 'CONSTRAINT')
 
-def add_pk(db, schema, table, attr):
+def add_pk(db, cur, schema, table, attr):
   """
   Adds primary key to a PostgreSQL table.
 

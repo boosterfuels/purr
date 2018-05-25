@@ -1,13 +1,7 @@
 import pymongo
-import time
-from extract import collection
 from load import table, row, constraint
 from transform import type_checker, keyword_checker, config_parser, unnester
-from datetime import datetime, timedelta
-from bson import Timestamp
-import json
-from bson.json_util import default, ObjectId, dumps, loads, RELAXED_JSON_OPTIONS, CANONICAL_JSON_OPTIONS
-import psycopg2.extras
+from bson.json_util import default
 
 reserved = keyword_checker.get_keywords()
 
@@ -15,14 +9,16 @@ class Relation():
   """
   This is the main parents class for transforming data.
   """
-  def __init__(self, pg_conn, schema, collection_name):
+  def __init__(self, pg, schema, collection_name):
     """Constructor for Relation"""
     self.relation_name = collection_name
     self.column_names = []
     self.column_types = []
     self.has_pk = False
     self.created = False
-    self.conn = pg_conn
+    self.pg = pg
+    self.conn = pg.conn
+    self.cur = pg.cur
     self.schema = schema
     
   def exists(self):
@@ -44,7 +40,7 @@ class Relation():
     # This is needed because sometimes there is no value for attributes (null)
     # - in this case 
     (reduced_attributes, values) = self.get_attrs_and_vals(attributes, doc)
-    row.insert(self.conn, self.schema, self.relation_name, reduced_attributes, values)
+    row.insert(self.conn, self.cur, self.schema, self.relation_name, reduced_attributes, values)
 
   def update(self, doc):
     attributes = list(doc.keys())
@@ -83,34 +79,14 @@ class Relation():
       if value == 'null' or column_type == None:
         continue
 
-      if type(value) is ObjectId:
-        values.append(str(value))
-
-      elif column_type == 'jsonb[]':
-        temp = []
-        for v in value:
-          temp.append(json.dumps(v, default=default))
-        values.append(temp)
-
-      elif column_type == 'jsonb':
-        value = unnester.change_object_id(value)
-        values.append(json.dumps(value, default=default))
-
-      elif column_type == 'text[]':
-        value = [str(v) for v in value]
-        values.append(value)
-        
-      elif column_type == 'float' and type_checker.is_nan(value) is False:
-        values.append(value)
-      else:
-        values.append(str(value))
+      value = unnester.cast(column_type, value)
+      values.append(value)
       
       attr = attr.lower()
 
       if len(self.column_names) != 0:
         if attr not in self.column_names:
-          if column_type != None:
-            table.add_column(self.conn, self.schema, self.relation_name, attr, column_type)
+          table.add_column(self.conn, self.schema, self.relation_name, attr, column_type)
         else:
           # Check if types are equal.
           idx_original = self.column_names.index(attr)
@@ -127,40 +103,17 @@ class Relation():
               attr = attr_new
 
       reduced_attributes.append(attr)
-      types.append(column_type)
+      if len(self.column_names) == 0:
+        types.append(column_type)
 
     if len(self.column_names) == 0:
       # - get column names and their types
-      
-      table.add_multiple_columns(self.conn, self.schema, self.relation_name, reduced_attributes, types)     
-
+      table.add_multiple_columns(self.conn, self.cur, self.schema, self.relation_name, reduced_attributes, types)
     return reduced_attributes, values
-
-  def bulk_insert(self, coll_data, attrs_conf, attrs_old):
-    """
-      TODO: insert multiple rows at the same time
-      - schema change
-      - fill in with nulls
-      - do not request everything
-    """
-    print("bulk insert", coll_data.count()) 
-
-    values = []
-    for col in coll_data:
-      nr_of_attrs = len(attrs_conf)
-      for i in range(0, nr_of_attrs):
-        field = attrs_old[i]
-        if field in col.keys():
-          values.append("'" + str(col[field]) + "'")
-        else:
-          values.append("'null'")
-
-      row.insert(self.relation_name, attrs_conf, values)
-      values = []
   
   def create(self):
-    table.create(self.conn, self.schema, self.relation_name)
+    table.create(self.conn, self.cur, self.schema, self.relation_name)
 
   def add_pk(self, attr):
-    constraint.add_pk(self.conn, self.schema, self.relation_name, attr)
+    constraint.add_pk(self.conn, self.cur, self.schema, self.relation_name, attr)
     self.has_pk = True
