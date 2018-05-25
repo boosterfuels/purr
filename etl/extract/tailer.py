@@ -1,8 +1,6 @@
 # here comes everything with the oplog
 import pymongo
 import time
-from extract import collection, extractor
-from load import table, row
 from transform import relation
 
 from datetime import datetime, timedelta
@@ -27,8 +25,6 @@ class Tailer():
 
   def transform_and_load(self, doc):
     """
-    TODO
-    - missing transform
     """
 
     fullname = doc['ns']
@@ -110,10 +106,6 @@ class Tailer():
     start = None
     now = self.now()
     
-    # if dt is not None and dt <= now:
-    #   start = dt
-    # else:
-    #   start = now
     self.tailing = True
 
     client = pymongo.MongoClient()

@@ -3,7 +3,7 @@ import monitor
 import sys
 logger = monitor.Logger('collection-transfer.log', 'TABLE')
 
-def create(db, schema, name, attrs = [], types = []):
+def create(db, cur, schema, name, attrs = [], types = []):
   """
   Open a cursor to perform database operations
   Create table with specific name.
@@ -25,7 +25,6 @@ def create(db, schema, name, attrs = [], types = []):
   attrs_and_types = ", ".join(attrs_and_types)
 
   name = name.lower()
-  cur = db.cursor()
   cmd =  "CREATE TABLE IF NOT EXISTS %s.%s(%s);" % (schema, name, attrs_and_types)
   logger.warn("CREATE TABLE PING")
   try:
@@ -33,7 +32,6 @@ def create(db, schema, name, attrs = [], types = []):
     db.commit()
   except:
     logger.error(cmd)
-  cur.close()
 
 def exists(db, schema, table):  
   """
@@ -148,7 +146,7 @@ def add_column(db, schema, table, column_name, column_type):
     logger.error(cmd)
   cur.close()
 
-def add_multiple_columns(db, schema, table, attrs, types):
+def add_multiple_columns(db, cur, schema, table, attrs, types):
   """
   Add new column to a specific table.
   Parameters
@@ -172,14 +170,12 @@ def add_multiple_columns(db, schema, table, attrs, types):
   statements_merged = ', '.join(statements_add) 
   
   cmd = "ALTER TABLE IF EXISTS %s.%s %s;" % (schema, table.lower(), statements_merged)
-  cur = db.cursor()
   logger.warn("ADD MULTIPLE COLUMNS PING")
   try:
     cur.execute(cmd)
     db.commit()
   except:
     logger.error(cmd)
-  cur.close()
 
 def column_change_type(db, name, column_name, column_type):
   """

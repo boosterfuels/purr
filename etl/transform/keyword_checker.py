@@ -19,4 +19,3 @@ def get_keywords():
         print(exc)
   except FileNotFoundError as err:
     monitor.logging.error('File not found.')
-

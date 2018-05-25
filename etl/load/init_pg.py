@@ -1,6 +1,5 @@
 import psycopg2
 import monitor
-from transform import config_parser as cp
 
 class PgConnection():
   """

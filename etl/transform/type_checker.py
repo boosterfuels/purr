@@ -54,14 +54,13 @@ def get_list_type(curr_list):
   lt = None
   if len(curr_list) > 0:
     curr = curr_list[0]
-    if type(curr) is str or type(curr) is ObjectId:
+    curr_type = type(curr)
+    if curr_type is str or curr_type is ObjectId:
       lt = 'text[]'
-    elif type(curr) is int:
+    elif curr_type is int:
       lt = 'integer[]'
-    elif type(curr) is dict:
+    elif curr_type is dict:
       lt = 'jsonb[]'
-
-  
   return lt
 
 def rename(name_old, type_orig, type_new):
@@ -70,15 +69,13 @@ def rename(name_old, type_orig, type_new):
     return name_new
   elif type_new == 'text':
     if type_orig not in ['character', 'text']:
-      name_new = name_old + "_t"
+      name_new = "%s_t" % name_old
   elif type_new == 'float':
-    name_new = name_old + "_f"
+    name_new = "%s_f" % name_old
   elif type_new == 'boolean':
-    name_new = name_old + "_b"
+    name_new = "%s_b" % name_old
   elif type_new == 'integer':
-    name_new = name_old + "_i"
-
-  
+    name_new = "%s_i" % name_old
   return name_new
 
 def type_equal(old, new):

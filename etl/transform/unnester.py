@@ -3,60 +3,9 @@
 # jsonb in array
 # array in jsonb
 from bson import ObjectId
+from bson.json_util import default
 import json
 
-def decompose_list(items, is_base):
-  """
-  Decomposes list
-  """
-  elements = []
-  objects = []
-
-  if is_composite_list(items) == False:
-    for item in items:
-      elements.append('"' + str(item) + '"')
-
-  else:
-    for item in items:
-      if type(item) is dict:
-        chunk = decompose_dict(item, False)
-        elements.append(chunk)
-      elif type(item) is list:
-        chunk = decompose_list(item, False)
-        elements.append(chunk)
-      else:
-        elements.append(str(item))
-  res = ""
-  if len(items) > 0:
-    if type(items[0]) is dict and is_base is True:
-      for item in elements:
-        objects.append("'" + str(item) + "'")
-      res = ",".join(objects)
-    else: 
-      res = ",".join(elements)
-  return res
-
-def decompose_dict(item, is_base):
-  """
-  Decomposes dictionary
-  """
-  res = []
-  
-  for key, value in item.items():
-    if type(value) is list:
-      value = decompose_list(value, False)
-      res.append('"' + key + '": [' + value + "]")
-
-    elif type(value) is dict:
-      value = decompose_dict(value, False)        
-      res.append('"' + key + '": ' + str(value))
-
-    else:
-      val = escape_chars(str(value))
-      res.append('"' + key + '":' + '"' + val + '"')
-
-  return "{" + ",".join(res) + "}"
-  
 def is_composite_list(item):
   if len(item):
     if type(item[0]) == dict or type(item[0]) == list:
@@ -106,3 +55,19 @@ def change_object_id(item):
     if type(v) is ObjectId:
       item[k] = str(v)
   return item
+
+def cast(column_type, value):
+  if column_type == 'varchar(80)':
+    value = str(value)
+
+  elif column_type == 'jsonb[]':
+    value = [json.dumps(v, default=default) for v in value]
+
+  elif column_type == 'jsonb':
+    temp = change_object_id(value)
+    value = json.dumps(temp, default=default)
+
+  elif column_type == 'text[]':
+    value = [str(v) for v in value]
+  
+  return value

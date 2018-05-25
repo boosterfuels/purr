@@ -1,12 +1,11 @@
 import psycopg2
 from bson.json_util import loads, dumps
 from load import init_pg as pg, table
-from extract import collection
 import monitor
 
 logger = monitor.Logger('collection-transfer.log', 'ROW')
 # Open a cursor to perform database operations
-def insert(db, schema, table, attrs, values):
+def insert(db, cur, schema, table, attrs, values):
   """
   Inserts a row defined by attributes and values into a specific 
   table of the PG database.
@@ -41,17 +40,14 @@ def insert(db, schema, table, attrs, values):
 
   cmd = "INSERT INTO %s.%s (%s) VALUES (%s) ON CONFLICT DO NOTHING;" % (schema, table.lower(), attrs, temp)
   
-  logger.warn("INSERT PING")
   # MoSQL ignores the document and logs a warning
   # if a document could not be inserted.
   # We will decide later what to do with DataErrors.
   try:
-    cur = db.cursor()
     cur.execute(cmd, values)
     db.commit()
   except psycopg2.Error as e:
     logger.error(cmd)
-  cur.close()
 
 def update(db, table_name, attrs, values):
   """
