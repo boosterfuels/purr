@@ -20,8 +20,10 @@ class Tailer():
   replace things to base class
   """
 
-  def __init__(self):
+  def __init__(self, pg, schema):
     self.tailing = False
+    self.db = pg
+    self.schema = schema
 
   def transform_and_load(self, doc):
     """
@@ -33,7 +35,7 @@ class Tailer():
     oper = doc['op']
     doc_useful = doc['o']
 
-    r = relation.Relation(table_name)
+    r = relation.Relation(self.db, self.schema, table_name)
     if r.exists() is False:
       return
       
@@ -41,19 +43,19 @@ class Tailer():
       try:
         r.insert(doc_useful)
       except:
-        logger.error("INSERT" + doc_useful)
+        logger.error("INSERT failed, ObjectId = " + str(doc_useful["_id"]))
 
     elif oper == UPDATE:
       try:
         r.update(doc_useful)
       except:
-        logger.error("UPDATE" + doc_useful)
+        logger.error("UPDATE failed, ObjectId = " + str(doc_useful["_id"]))
 
     elif oper == DELETE:
       try:
         r.delete(doc_useful)
       except:
-        logger.error("DELETE" + doc_useful)
+        logger.error("DELETE failed, ObjectId = " + str(doc_useful["_id"]))
 
   def start_tailing_from_dt(dt):
     """
