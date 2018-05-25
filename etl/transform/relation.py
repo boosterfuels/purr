@@ -16,13 +16,11 @@ class Relation():
     self.column_types = []
     self.has_pk = False
     self.created = False
-    self.pg = pg
-    self.conn = pg.conn
-    self.cur = pg.cur
+    self.db = pg
     self.schema = schema
     
   def exists(self):
-    self.created = table.exists(self.relation_name)
+    self.created = table.exists(self.db, self.schema, self.relation_name)
     return self.created
 
   def insert(self, doc):
@@ -40,16 +38,16 @@ class Relation():
     # This is needed because sometimes there is no value for attributes (null)
     # - in this case 
     (reduced_attributes, values) = self.get_attrs_and_vals(attributes, doc)
-    row.insert(self.conn, self.cur, self.schema, self.relation_name, reduced_attributes, values)
+    row.insert(self.db, self.schema, self.relation_name, reduced_attributes, values)
 
   def update(self, doc):
     attributes = list(doc.keys())
     (reduced_attributes, values) = self.get_attrs_and_vals(attributes, doc)
-    row.update(self.relation_name, reduced_attributes, values)
+    row.update(self.db, self.schema, self.relation_name, reduced_attributes, values)
 
   def delete(self, doc):
     attributes = list(doc.keys())
-    row.delete(self.relation_name, doc["_id"])
+    row.delete(self.db, self.schema, self.relation_name, str(doc["_id"]))
 
   def get_attrs_and_vals(self, attributes, doc):
     """
@@ -58,7 +56,7 @@ class Relation():
     reduced_attributes = []
     values = []
     types = []
-    col_names_types = table.get_column_names_and_types(self.conn, self.schema, self.relation_name)
+    col_names_types = table.get_column_names_and_types(self.db, self.schema, self.relation_name)
     
     for attr_name, attr_type in col_names_types:
       if attr_name not in self.column_names:
@@ -86,7 +84,7 @@ class Relation():
 
       if len(self.column_names) != 0:
         if attr not in self.column_names:
-          table.add_column(self.conn, self.schema, self.relation_name, attr, column_type)
+          table.add_column(self.db, self.schema, self.relation_name, attr, column_type)
         else:
           # Check if types are equal.
           idx_original = self.column_names.index(attr)
@@ -97,7 +95,7 @@ class Relation():
             attr_new = type_checker.rename(attr, type_orig, type_new)
             if attr_new is not None:
               if attr_new not in self.column_names:
-                table.add_column(self.conn, self.schema, self.relation_name, attr_new, type_new)
+                table.add_column(self.db, self.schema, self.relation_name, attr_new, type_new)
                 self.column_names.append(attr_new)
                 self.column_types.append(type_new)
               attr = attr_new
@@ -108,12 +106,12 @@ class Relation():
 
     if len(self.column_names) == 0:
       # - get column names and their types
-      table.add_multiple_columns(self.conn, self.cur, self.schema, self.relation_name, reduced_attributes, types)
+      table.add_multiple_columns(self.db, self.schema, self.relation_name, reduced_attributes, types)
     return reduced_attributes, values
   
   def create(self):
-    table.create(self.conn, self.cur, self.schema, self.relation_name)
+    table.create(self.db, self.schema, self.relation_name)
 
   def add_pk(self, attr):
-    constraint.add_pk(self.conn, self.cur, self.schema, self.relation_name, attr)
+    constraint.add_pk(self.db, self.schema, self.relation_name, attr)
     self.has_pk = True

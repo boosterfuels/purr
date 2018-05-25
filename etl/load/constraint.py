@@ -5,7 +5,7 @@ import sys
 
 logger = monitor.Logger('collection-transfer.log', 'CONSTRAINT')
 
-def add_pk(db, cur, schema, table, attr):
+def add_pk(db, schema, table, attr):
   """
   Adds primary key to a PostgreSQL table.
 
@@ -28,9 +28,7 @@ def add_pk(db, cur, schema, table, attr):
   logger.warn("ADD PRIMARY KEY PING")
   cmd = 'ALTER TABLE %s.%s ADD PRIMARY KEY (%s)' % (schema, table.lower(), attr)
   try:
-    cur = db.cursor()
-    cur.execute(cmd)
+    db.cur.execute(cmd)
+    db.conn.commit()
   except:
     logger.error(cmd)
-  db.commit()
-  cur.close()
