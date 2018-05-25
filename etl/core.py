@@ -38,7 +38,9 @@ def transfer_collections(collections, truncate, drop, settings):
   ex.transfer_auto(collections, truncate, drop, pg, mongo.conn, setup_pg["schema_name"])
   if settings['tailing'] is True:
     start_tailing(start_date_time, pg, setup_pg["schema_name"])
-
+  else:
+    pg.__del__()
+    
 def start_tailing(start_date_time, pg, schema):
   if start_date_time is None:
     start_date_time = datetime.utcnow()
