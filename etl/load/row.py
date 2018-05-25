@@ -5,7 +5,7 @@ import monitor
 
 logger = monitor.Logger('collection-transfer.log', 'ROW')
 # Open a cursor to perform database operations
-def insert(db, cur, schema, table, attrs, values):
+def insert(db, schema, table, attrs, values):
   """
   Inserts a row defined by attributes and values into a specific 
   table of the PG database.
@@ -44,12 +44,12 @@ def insert(db, cur, schema, table, attrs, values):
   # if a document could not be inserted.
   # We will decide later what to do with DataErrors.
   try:
-    cur.execute(cmd, values)
-    db.commit()
+    db.cur.execute(cmd, values)
+    db.conn.commit()
   except psycopg2.Error as e:
     logger.error(cmd)
 
-def update(db, table_name, attrs, values):
+def update(db, schema, table_name, attrs, values):
   """
   Updates a row in a specific table of the PG database.
 
@@ -68,6 +68,8 @@ def update(db, table_name, attrs, values):
   update('audience', [attributes], [values])
 
   """
+  print(attrs)
+  print(values)
   attr_val_pairs = []
 
   object_id = ""
@@ -76,29 +78,28 @@ def update(db, table_name, attrs, values):
     return 
   for i in range(0, nr_of_attrs):
     if(attrs[i] == "_id"):
-      object_id = values[i]
+      object_id = str(values[i])
       continue
-    attr_val_pairs.append(attrs[i] + " = " + values[i])
+    attr_val_pairs.append(attrs[i] + " = '" + values[i] + "'")
   
   pairs = ",".join(attr_val_pairs)
   cmd = ''.join([
     "UPDATE ",
-    table_name.lower(), " SET ",
+    schema + "." + table_name.lower(), " SET ",
     pairs,
-    " WHERE _id = ",
+    " WHERE _id = '",
     object_id,
-    ";"
+    "';"
   ])
-  cur = db.cursor()
+  print(cmd)
   logger.info("UPDATE PING")
   try:
-    cur.execute(cmd)
-    db.commit()
+    db.cur.execute(cmd)
+    db.conn.commit()
   except psycopg2.DataError as e:
     logger.info("".join([cmd, '\n', repr(e)]))
-  cur.close()
 
-def delete(db, table_name, object_id):
+def delete(db, schema, table_name, oid):
   """
   Deletes a row in a specific table of the PG database.
 
@@ -117,19 +118,10 @@ def delete(db, table_name, object_id):
   delete('Audience', ObjectId("5acf593eed101e0c1266e32b"))
 
   """
-  cmd = ''.join([
-    "DELETE FROM ",
-    table_name.lower(),
-    " WHERE _id = '",
-    str(object_id),
-    "';"
-  ])
+  cmd = "DELETE FROM %s.%s WHERE _id='%s'" % (schema, table_name.lower(), oid)
   logger.info("DELETE PING")
-  cur = db.cursor()
   try:
-    cur.execute(cmd)
-    db.commit()
+    db.cur.execute(cmd)
+    db.conn.commit()
   except:
     logger.error(cmd)
-  cur.close()
-

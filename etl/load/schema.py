@@ -1,23 +1,31 @@
 
 import psycopg2
+import monitor
 
-def reset(db, schema_name = 'public'):
+logger = monitor.Logger('collection-transfer.log', 'SCHEMA')
+
+def reset(db, schema = 'public'):
   """
   Reset existing schema or create a new one.
   """
-  cur = db.cursor()
-  cur.execute(' '.join(['DROP SCHEMA IF EXISTS', schema_name, 'CASCADE;']))
-  cur.execute(' '.join(['CREATE SCHEMA', schema_name, ';']))
-  db.commit()
-  print('Schema %s is reset.' % (schema_name))
-  cur.close()
+  cmd_drop = 'DROP SCHEMA IF EXISTS %s CASCADE;' % schema
+  cmd_create = 'CREATE SCHEMA %s;' % schema
+  try:
+    db.cur.execute(cmd_drop)
+    db.cur.execute(cmd_create)
+    db.conn.commit()
+  except:
+    logger.error("Schema reset failed.")
+  logger.info("Schema %s is reset." % schema)
 
 def create(db, schema = 'public'):
   """
   Create schema if it does not exist.
   """
-  cur = db.cursor()
   cmd = 'CREATE SCHEMA IF NOT EXISTS %s;' % (schema)
-  cur.execute(cmd)
-  db.commit()
-  cur.close()
+  try:
+    db.cur.execute(cmd)
+    db.conn.commit()
+  except:
+    logger.error("Creating schema with name %s failed." % schema)
+    

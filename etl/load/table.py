@@ -3,7 +3,7 @@ import monitor
 import sys
 logger = monitor.Logger('collection-transfer.log', 'TABLE')
 
-def create(db, cur, schema, name, attrs = [], types = []):
+def create(db, schema, name, attrs = [], types = []):
   """
   Open a cursor to perform database operations
   Create table with specific name.
@@ -28,8 +28,8 @@ def create(db, cur, schema, name, attrs = [], types = []):
   cmd =  "CREATE TABLE IF NOT EXISTS %s.%s(%s);" % (schema, name, attrs_and_types)
   logger.warn("CREATE TABLE PING")
   try:
-    cur.execute(cmd)
-    db.commit()
+    db.cur.execute(cmd)
+    db.conn.commit()
   except:
     logger.error(cmd)
 
@@ -50,21 +50,21 @@ def exists(db, schema, table):
   ----
   don't hardcode schema
   """
-  cur = db.cursor()
   cmd = "SELECT table_name FROM information_schema.tables WHERE table_schema='%s' AND table_name='%s';" % (schema, table.lower())
   logger.warn("EXISTS PING")
   try:
-    cur.execute(cmd)
+    db.cur.execute(cmd)
   except:
     logger.error(cmd)
-
-  res = cur.fetchall()
-  db.commit()
-  cur.close()
-  if res:
-    return True
-  else:
-    return False
+  try:
+    res = db.cur.fetchall()
+    db.conn.commit()
+    if res:
+      return True
+    else:
+      return False
+  except:
+    logger.error(cmd)
 
 def truncate(db, schema, tables):
   """
@@ -82,14 +82,12 @@ def truncate(db, schema, tables):
   tables_cmd = ','.join(tables_cmd)
   cmd = "TRUNCATE TABLE %s;" % (tables_cmd)
   
-  cur = db.cursor()
   logger.warn("TRUNCATE PING")
   try:
-    cur.execute(cmd)
-    db.commit()
+    db.cur.execute(cmd)
+    db.conn.commit()
   except:
     logger.error(cmd)
-  cur.close()
 
 def drop(db, schema, tables):
   """
@@ -114,14 +112,12 @@ def drop(db, schema, tables):
 
   cmd = "DROP TABLE IF EXISTS %s" % (tables_cmd)
   
-  cur = db.cursor()
   logger.warn("DROP PING")
   try:
-    cur.execute(cmd)
-    db.commit()
+    db.cur.execute(cmd)
+    db.conn.commit()
   except:
     logger.error(cmd)
-  cur.close()
 
 def add_column(db, schema, table, column_name, column_type):
   """
@@ -134,19 +130,17 @@ def add_column(db, schema, table, column_name, column_type):
 
   Example
   -------
-  add_column(pg.db, 'some_integer', 'integer')
+  add_column(db, 'some_integer', 'integer')
   """
   cmd = "ALTER TABLE IF EXISTS %s.%s ADD COLUMN IF NOT EXISTS %s %s;" % (schema, table.lower(), column_name, column_type)  
-  cur = db.cursor()
   logger.warn("ADD COLUMN PING table: %s, column: %s, type: %s" % (table.lower(), column_name, column_type))
   try:
-    cur.execute(cmd)
-    db.commit()
+    db.cur.execute(cmd)
+    db.conn.commit()
   except:
     logger.error(cmd)
-  cur.close()
 
-def add_multiple_columns(db, cur, schema, table, attrs, types):
+def add_multiple_columns(db, schema, table, attrs, types):
   """
   Add new column to a specific table.
   Parameters
@@ -157,13 +151,8 @@ def add_multiple_columns(db, cur, schema, table, attrs, types):
 
   Example
   -------
-  add_multiple_columns(pg.db, ['nyanya', some_integer'], ['char(24)', integer'])
-
-  Todo
-  ----
-  - first check if column exists
+  add_multiple_columns(db, ['nyanya', some_integer'], ['text', integer'])
   """
-
   statements_add = []
   for i, j in zip(attrs, types):
     statements_add.append(' '.join(['ADD COLUMN IF NOT EXISTS', i, j]))
@@ -172,8 +161,8 @@ def add_multiple_columns(db, cur, schema, table, attrs, types):
   cmd = "ALTER TABLE IF EXISTS %s.%s %s;" % (schema, table.lower(), statements_merged)
   logger.warn("ADD MULTIPLE COLUMNS PING")
   try:
-    cur.execute(cmd)
-    db.commit()
+    db.cur.execute(cmd)
+    db.conn.commit()
   except:
     logger.error(cmd)
 
@@ -188,29 +177,25 @@ def column_change_type(db, name, column_name, column_type):
 
   Example
   -------
-  add_column(pg.db, 'some_integer', 'integer')
+  column_change_type(pg.db, 'some_integer', 'integer')
   """
   	# ALTER TABLE audience ALTER COLUMN _id TYPE char(30)
   cmd = ' '.join(["ALTER TABLE IF EXISTS", name.lower(), "ADD COLUMN IF EXISTS", column_name, "TYPE", column_type, ";"])  
-  cur = db.cursor()
   logger.warn("ALTER COLUMN PING " + name.lower() + column_name + "(" + column_type + ")")
   try:
-    cur.execute(cmd)
-    db.commit()
+    db.cur.execute(cmd)
+    db.conn.commit()
   except:
     logger.error(cmd)
-  cur.close()
 
 def remove_column(db, name, column_name):
   cmd = ''.join(["ALTER TABLE IF EXISTS ", name.lower(), " DROP COLUMN IF EXISTS ", column_name, ";"])  
-  cur = db.cursor()
   logger.warn("REMOVE COLUMN PING")
   try:
-    cur.execute(cmd)
-    db.commit()
+    db.cur.execute(cmd)
+    db.conn.commit()
   except:
     logger.error(cmd)
-  cur.close()
 
 def get_table_names(db, schema):
   """
@@ -233,34 +218,30 @@ def get_table_names(db, schema):
   ----
   don't hardcode schema
   """
-  cur = db.cursor()
   cmd = "SELECT table_name FROM information_schema.tables WHERE table_schema='%s'" % (schema)
   logger.warn("GET TABLE NAMES PING")
   try:
-    cur.execute(cmd)
-    db.commit()
+    db.cur.execute(cmd)
+    db.conn.commit()
   except:
     logger.warn(cmd)
   row = map(list, cur.fetchall())
   tables = []
   for t in row:
     tables.append(t[0])
-  cur.close()
   return tables
 
 def column_exists(db, table, column):
   cmd = ''.join(["SELECT column_name FROM information_schema.columns WHERE table_name='", table.lower(), "' AND column_name='", column, "';"])  
-  cur = db.cursor()
   logger.warn("COLUMN EXISTS PING")
   try:
-    cur.execute(cmd)
+    db.cur.execute(cmd)
     rows = cur.fetchone()
     if rows:
       return True
     return False
   except:
     logger.error(cmd)
-  cur.close()
 
 def get_column_names_and_types(db, schema, table):
   """
@@ -272,16 +253,14 @@ def get_column_names_and_types(db, schema, table):
   -------
   List of column names and corresponding types.
   """
-  cur = db.cursor()
   cmd = "SELECT column_name, data_type FROM information_schema.columns WHERE table_schema='%s' AND table_name = '%s';" % (schema, table.lower())
   rows = []
   try:
-    cur.execute(cmd)
-    db.commit()
-    rows = cur.fetchall()
+    db.cur.execute(cmd)
+    db.conn.commit()
+    rows = db.cur.fetchall()
   except:
     logger.error(cmd)
-  cur.close()
   return rows
 
 def create_from_oplog(fullname):

@@ -27,16 +27,16 @@ class Extractor():
       return
 
     if drop:
-      table.drop(pg.conn, schema_name, coll_names)
+      table.drop(pg, schema_name, coll_names)
     elif truncate:
-      table.truncate(pg.conn, schema_name, coll_names)
+      table.truncate(pg, schema_name, coll_names)
     
-    schema.create(pg.conn, schema_name)
+    schema.create(pg, schema_name)
 
     for coll in coll_names:
       start = time.time()
       r = relation.Relation(pg, schema_name, coll)
-      table.create(pg.conn, pg.cur, schema_name, coll)
+      table.create(pg, schema_name, coll)
       docs = collection.get_by_name(mdb, coll)
       start_docs = start
       for i in range(docs.count()):
