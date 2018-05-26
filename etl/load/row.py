@@ -27,7 +27,7 @@ def insert(db, schema, table, attrs, values):
   temp = []
   for v in values:
     if type(v) is list:
-      if v[0].startswith("{"):
+      if type(v[0]) is str and v[0].startswith("{"):
         temp.append('array[%s]::jsonb[]')
         continue
       temp.append('%s')      
@@ -68,28 +68,39 @@ def update(db, schema, table_name, attrs, values):
   update('audience', [attributes], [values])
 
   """
-  print(attrs)
-  print(values)
+  print("UPDATE --", attrs)
+  print("UPDATE --", values)
   attr_val_pairs = []
 
-  object_id = ""
+  oid = ""
   nr_of_attrs = len(attrs)
+  
   if nr_of_attrs < 2:
     return 
-  for i in range(0, nr_of_attrs):
-    if(attrs[i] == "_id"):
-      object_id = str(values[i])
+  for i in range(len(attrs)):
+    pair = ""
+    if attrs[i] == "_id":
+      oid = "'%s'" % str(values[i])
       continue
-    attr_val_pairs.append(attrs[i] + " = '" + values[i] + "'")
-  
-  pairs = ",".join(attr_val_pairs)
+    if type(values[i]) is str:
+      if values[i].startswith("{") is True:
+        pair = "%s = '%s'" % (attrs[i], values[i])      
+      pair = "%s = '%s'" % (attrs[i], values[i])
+    else:
+      pair = "%s = %s" % (attrs[i], values[i])
+    print(type(values[i]))
+    print(pair)
+    attr_val_pairs.append(pair)
+      
+  pairs = ", ".join(attr_val_pairs)
+  print("PAIRS", pairs)
   cmd = ''.join([
     "UPDATE ",
     schema + "." + table_name.lower(), " SET ",
     pairs,
-    " WHERE _id = '",
-    object_id,
-    "';"
+    " WHERE _id = ",
+    oid,
+    ";"
   ])
   print(cmd)
   logger.info("UPDATE PING")
@@ -115,7 +126,7 @@ def delete(db, schema, table_name, oid):
 
   Example
   -------
-  delete('Audience', ObjectId("5acf593eed101e0c1266e32b"))
+  delete(db, schema, 'Audience', ObjectId("5acf593eed101e0c1266e32b"))
 
   """
   cmd = "DELETE FROM %s.%s WHERE _id='%s'" % (schema, table_name.lower(), oid)
