@@ -59,6 +59,8 @@ def get_list_type(curr_list):
       lt = 'text[]'
     elif curr_type is int:
       lt = 'integer[]'
+    elif curr_type is float:
+      lt = 'float[]'
     elif curr_type is dict:
       lt = 'jsonb[]'
   return lt
