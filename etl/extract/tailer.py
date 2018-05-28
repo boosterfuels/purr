@@ -2,6 +2,7 @@
 import pymongo
 import time
 from transform import relation
+from extract import extractor
 
 from datetime import datetime, timedelta
 from bson import Timestamp
@@ -41,7 +42,9 @@ class Tailer():
       
     if oper == INSERT:
       try:
+        print(doc_useful)
         r.insert(doc_useful)
+        exit()
       except:
         logger.error("INSERT failed, ObjectId = " + str(doc_useful["_id"]))
 

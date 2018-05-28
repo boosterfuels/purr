@@ -35,7 +35,10 @@ def transfer_collections(collections, truncate, drop, settings):
 
   if setup_pg['schema_reset'] is True:
     schema.reset(pg, setup_pg["schema_name"])
-  ex.transfer_auto(collections, truncate, drop, pg, mongo.conn, setup_pg["schema_name"])
+  if settings['typecheck_auto'] is True:
+    ex.transfer_auto(collections, truncate, drop, pg, mongo.conn, setup_pg["schema_name"])
+  elif settings['typecheck_auto'] is False:
+    ex.transfer_bulk(collections, truncate, drop, pg, mongo.conn, setup_pg["schema_name"])
   if settings['tailing'] is True:
     start_tailing(start_date_time, pg, setup_pg["schema_name"])
   else:

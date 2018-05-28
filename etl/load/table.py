@@ -16,8 +16,10 @@ def create(db, schema, name, attrs = [], types = []):
   nr_of_attrs = len(attrs)
   attrs_and_types = []
   if nr_of_attrs:
-    for i in range(0, nr_of_attrs - 1):
+    for i in range(nr_of_attrs):
       pair = attrs[i] + " " + types[i]
+      if attrs[i] == 'id':
+        pair = "%s PRIMARY KEY" % pair
       attrs_and_types.append(pair)
   else:
     attrs_and_types = ""
@@ -166,7 +168,29 @@ def add_multiple_columns(db, schema, table, attrs, types):
   except:
     logger.error(cmd)
 
-def column_change_type(db, name, column_name, column_type):
+# def column_change_type(db, name, column_name, column_type):
+#   """
+#   Add new column to a specific table.
+#   Parameters
+#   ----------
+#   name : str
+#   column_name : str
+#   column_type : str
+
+#   Example
+#   -------
+#   column_change_type(pg.db, 'some_integer', 'integer')
+#   """
+#   	# ALTER TABLE audience ALTER COLUMN _id TYPE char(30)
+#   cmd = ' '.join(["ALTER TABLE IF EXISTS", name.lower(), "ADD COLUMN IF EXISTS", column_name, "TYPE", column_type, ";"])  
+#   logger.warn("ALTER COLUMN PING " + name.lower() + column_name + "(" + column_type + ")")
+#   try:
+#     db.cur.execute(cmd)
+#     db.conn.commit()
+#   except:
+#     logger.error(cmd)
+
+def column_change_type(db, schema, name, column_name, column_type):
   """
   Add new column to a specific table.
   Parameters
@@ -179,9 +203,15 @@ def column_change_type(db, name, column_name, column_type):
   -------
   column_change_type(pg.db, 'some_integer', 'integer')
   """
-  	# ALTER TABLE audience ALTER COLUMN _id TYPE char(30)
-  cmd = ' '.join(["ALTER TABLE IF EXISTS", name.lower(), "ADD COLUMN IF EXISTS", column_name, "TYPE", column_type, ";"])  
+  expression = ''
+  if column_type == 'jsonb':
+    expression = 'to_json(%s)' % column_name
+  if column_type == 'double precision':
+    expression = 'CAST(%s as double precision)' % column_name
+
+  cmd = "ALTER TABLE %s.%s ALTER COLUMN %s TYPE %s USING %s;" % (schema, name.lower(), column_name, column_type, expression)
   logger.warn("ALTER COLUMN PING " + name.lower() + column_name + "(" + column_type + ")")
+  print(cmd)
   try:
     db.cur.execute(cmd)
     db.conn.commit()
@@ -259,9 +289,9 @@ def get_column_names_and_types(db, schema, table):
     db.cur.execute(cmd)
     db.conn.commit()
     rows = db.cur.fetchall()
+    return rows
   except:
     logger.error(cmd)
-  return rows
 
 def create_from_oplog(fullname):
   """

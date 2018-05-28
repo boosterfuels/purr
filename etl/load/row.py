@@ -2,7 +2,7 @@ import psycopg2
 from bson.json_util import loads, dumps
 from load import init_pg as pg, table
 import monitor
-
+from psycopg2.extras import execute_values
 logger = monitor.Logger('collection-transfer.log', 'ROW')
 # Open a cursor to perform database operations
 def insert(db, schema, table, attrs, values):
@@ -48,6 +48,51 @@ def insert(db, schema, table, attrs, values):
     db.conn.commit()
   except psycopg2.Error as e:
     logger.error(cmd)
+
+def insert_bulk(db, schema, table, attrs, values):
+  """
+  Inserts a row defined by attributes and values into a specific 
+  table of the PG database.
+
+  Parameters
+  ----------
+  table_name : string
+  attrs :     string[]
+  values :    string[]
+
+  Returns
+  -------
+  -
+
+  Example
+  -------
+  insert('Audience', [attributes], [values])
+  """
+  temp = []
+  for a in attrs:
+    temp.append('%s')      
+
+  temp = ', '.join(temp)
+  # needed for upsert
+  excluded = [('EXCLUDED.%s' % a) for a in attrs if a != 'id']
+  attrs_reduced = [a for a in attrs if a != 'id']
+  attrs_reduced = ', '.join(attrs_reduced)
+  attrs = ', '.join(attrs)
+  excluded = ', '.join(excluded)
+  # default primary key in Postgres is name_of_table_pkey
+  constraint = '%s_pkey' % table
+  cmd = "INSERT INTO %s.%s (%s) VALUES %s ON CONFLICT ON CONSTRAINT %s DO UPDATE SET (%s) = (%s);" % (schema, table.lower(), attrs, '%s', constraint, attrs_reduced, excluded)
+  
+  # MoSQL ignores the document and logs a warning
+  # if a document could not be inserted.
+  # We will decide later what to do with DataErrors.
+  try:
+    execute_values(db.cur, cmd, values)
+    db.conn.commit()
+  except psycopg2.Error as e:
+    print(e)
+    logger.error(cmd)
+    exit()
 
 def update(db, schema, table_name, attrs, values):
   """

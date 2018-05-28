@@ -27,5 +27,28 @@ def cast(column_type, value):
 
   elif column_type == 'text[]':
     value = [str(v) for v in value]
+
+  elif column_type == 'double precision':
+    print("dix")
+    exit()
+    # value = [str(v) for v in value]
+  
+  return value
+
+def cast_prim(column_type, value):
+  column_type = column_type.lower()
+  if column_type in ['varchar(80)', 'text']:
+    value = str(value)
+
+  elif column_type == 'jsonb[]':
+    value = [json.dumps(v, default=default) for v in value]
+
+  elif column_type == 'jsonb':
+    # temp = change_object_id(value)
+    # print(value)
+    value = json.dumps(value, default=default)
+
+  elif column_type == 'text[]':
+    value = [str(v) for v in value]
   
   return value
