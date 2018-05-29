@@ -72,8 +72,6 @@ class Relation():
       attributes = list(doc.keys())
       (reduced_attributes, values) = self.get_attrs_and_vals(attributes, doc)
       diff = list(set(attributes_all) - set(reduced_attributes))
-      # print(reduced_attributes)
-      # print(attributes_all)
       # needed to keep the order
       for d in diff:
         reduced_attributes.append(d)
@@ -83,16 +81,6 @@ class Relation():
 
       result.append(values)
     attributes_all.sort()
-
-
-      # diff = list(set(attributes) - set(attributes_all))
-      # attributes_all = attributes_all + diff 
-    # print(attributes_all)
-    # table.add_multiple_columns(self.db, self.schema, self.relation_name, reduced_attributes, types)
-    
-    # for doc in docs:
-    #   values = 
-    # (reduced_attributes, values) = self.get_attrs_and_vals(attributes, doc)
     row.insert_bulk(self.db, self.schema, self.relation_name, attributes_all, result)
 
   def insert_config(self, doc, attrs, attrs_and_types):
@@ -107,11 +95,7 @@ class Relation():
     """
     # This is needed because sometimes there is no value for attributes (null)
     # - in this case
-    # print(type(doc))
     attrs_temp = [a.replace("_", "") for a in attrs]
-    # print(attrs_temp)
-    # print("DOC", doc)
-    # print("ATTRS", attrs_and_types)
     values = [None] * len(attrs)
     for k, v in doc.items():
       k = k.lower().replace("_", "")
@@ -122,8 +106,6 @@ class Relation():
       else:
         continue
     
-    # print(attrs_temp)
-    # print(values)
     row.insert(self.db, self.schema, self.relation_name, attrs, values)
 
 
@@ -149,7 +131,10 @@ class Relation():
         if k in attrs_temp:
           idx = attrs_temp.index(k)
           value = unnester.cast_prim(attrs_and_types[k], v)
-          values[idx] = value
+          if value == 'undefined':
+            _extra_props.update({k: v})          
+          else:
+            values[idx] = value
         else:
           _extra_props.update({k: v})
 

@@ -135,7 +135,15 @@ class Extractor():
       attrs_types_from_db = table.get_column_names_and_types(pg, schema_name, relation_name)
       attrs_from_db = [x[0] for x in attrs_types_from_db]
       types_from_db = [x[1] for x in attrs_types_from_db]
-      # new attributes are fully contained in the attribute list from DB
+      
+      # TODO if table was dropped or schema was reset then there is no need to have fun
+      # with the type checking.
+      # if len(attrs_types_from_db) == 0:
+      
+      # When new attributes are fully contained in the attribute list from DB
+      # we need to check if the types are equal and if not, we need to check if
+      # it is possible to convert the old type into the new one. 
+      # Anything can be converted to JSONB.
       if set(attrs_new).issubset(set(attrs_from_db)):
         # check types
         for item in attrs_types_from_db:
@@ -152,18 +160,18 @@ class Extractor():
             elif type_old != type_new:
               print("TYPES ARE NOT THE SAME", attr_db, type_old, type_new)
               if is_convertable(type_old, type_new):
-                table.column_change_type(pg, schema_name, relation_name, attr_db, type_new)
                 print("Type is convertable")
-              else:
                 table.column_change_type(pg, schema_name, relation_name, attr_db, type_new)
+              else:
                 print("Type is not convertable")                
+                # table.column_change_type(pg, schema_name, relation_name, attr_db, type_new)
       else:
         # check old attrs and new ones
         diff = list(set(attrs_new) - set(attrs_from_db))
         print(attrs_types_from_db)
         print(attrs_new)
         print(attrs_from_db)
-        print('DIFF', diff)
+
         # get type of new attributes
         types_to_add = []
         attrs_to_add = []
