@@ -139,8 +139,7 @@ class Relation():
           _extra_props.update({k: v})
 
       _extra_props = unnester.cast_prim('jsonb', _extra_props)
-      if _extra_props != "{}":
-        values[attrs.index("_extra_props")] = _extra_props
+      values[attrs.index("_extra_props")] = _extra_props
       result.append(tuple(values))
     row.insert_bulk(self.db, self.schema, self.relation_name, attrs, result)
 
