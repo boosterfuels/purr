@@ -8,7 +8,7 @@ setup(name='purr',
       packages=find_packages(),
       entry_points={
           'console_scripts': [
-              'purr = etl.main:main'
+              'purr = etl.__main__:main'
           ]
       }
 )

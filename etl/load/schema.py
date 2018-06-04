@@ -1,8 +1,7 @@
-
 import psycopg2
-import monitor
+from etl.monitor import Logger
 
-logger = monitor.Logger('collection-transfer.log', 'SCHEMA')
+logger = Logger('collection-transfer.log', 'SCHEMA')
 
 def reset(db, schema = 'public'):
   """

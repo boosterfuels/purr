@@ -1,5 +1,5 @@
 import psycopg2
-import monitor
+import etl.monitor
 
 class PgConnection():
   """

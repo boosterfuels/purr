@@ -1,5 +1,5 @@
 import yaml
-import monitor
+import etl.monitor
 
 colls = {}
 

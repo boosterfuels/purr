@@ -1,11 +1,12 @@
 import pymongo
 import time
-from extract import collection
-from load import table, row, constraint, schema
-from transform import relation, config_parser
 from datetime import datetime, timedelta
 from bson import Timestamp
-import monitor
+
+from etl.extract import collection
+from etl.load import table, row, constraint, schema
+from etl.monitor import Logger
+from etl.transform import relation, config_parser
 
 class Extractor():
   """
@@ -14,7 +15,7 @@ class Extractor():
 
   def __init__(self):
     """Constructor for Extractor"""
-    self.logger = monitor.Logger('performance.log', 'EXTRACTOR')
+    self.logger = Logger('performance.log', 'EXTRACTOR')
     
   def transfer_auto(self, coll_names, truncate, drop, pg, mdb, schema_name):
     """

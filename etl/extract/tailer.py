@@ -1,17 +1,18 @@
 # here comes everything with the oplog
 import pymongo
 import time
-from transform import relation
 
 from datetime import datetime, timedelta
 from bson import Timestamp
-import monitor
+
+from etl.transform import relation
+from etl.monitor import Logger
 
 INSERT = 'i'
 UPDATE = 'u'
 DELETE = 'd'
 
-logger = monitor.Logger('oplog-transfer.log', 'TAILER')
+logger = Logger('oplog-transfer.log', 'TAILER')
 
 class Tailer():
   """

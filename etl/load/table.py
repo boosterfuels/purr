@@ -1,7 +1,9 @@
 import psycopg2
-import monitor
 import sys
-logger = monitor.Logger('collection-transfer.log', 'TABLE')
+
+from etl.monitor import Logger
+
+logger = Logger('collection-transfer.log', 'TABLE')
 
 def create(db, schema, name, attrs = [], types = []):
   """

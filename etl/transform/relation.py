@@ -1,7 +1,8 @@
 import pymongo
-from load import table, row, constraint
-from transform import type_checker, keyword_checker, config_parser, unnester
 from bson.json_util import default
+
+from etl.load import table, row, constraint
+from etl.transform import type_checker, keyword_checker, config_parser, unnester
 
 reserved = keyword_checker.get_keywords()
 
