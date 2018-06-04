@@ -5,4 +5,10 @@ setup(name='purr',
       author='Anett Balázsics',
       email='anett.balazsics@digihey.com',
       url='https://github.com/boosterfuels/purr',
-      packages=find_packages())
+      packages=find_packages(),
+      entry_points={
+          'console_scripts': [
+              'purr = etl.main:main'
+          ]
+      }
+)
