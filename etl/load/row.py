@@ -1,9 +1,14 @@
 import psycopg2
 from bson.json_util import loads, dumps
+
+from etl.load import init_pg as pg, table
+from etl.monitor import Logger
+
+logger = Logger('collection-transfer.log', 'ROW')
+
 from load import init_pg as pg, table
-import monitor
 from psycopg2.extras import execute_values
-logger = monitor.Logger('collection-transfer.log', 'ROW')
+
 # Open a cursor to perform database operations
 def insert(db, schema, table, attrs, values):
   """

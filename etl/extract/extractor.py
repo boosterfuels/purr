@@ -1,13 +1,14 @@
 import pymongo
 import time
-from extract import collection
-from load import table, row, constraint, schema
-from transform import relation, config_parser as cp
+
+from etl.extract import collection
+from etl.load import table, row, constraint, schema
+from etl.monitor import Logger
+from etl.transform import relation, config_parser  as cp
+
 from datetime import datetime, timedelta
 from bson import Timestamp
-import monitor
 import json
-import pprint
 from bson.json_util import default
 
 class Extractor():
@@ -17,7 +18,8 @@ class Extractor():
 
   def __init__(self, pg, mdb, setup_pg, settings):
     """Constructor for Extractor"""
-    self.logger = monitor.Logger('performance.log', 'EXTRACTOR')
+    self.logger = Logger('performance.log', 'EXTRACTOR')
+
     self.pg = pg
     self.mdb = mdb
     self.schema_name = setup_pg["schema_name"]

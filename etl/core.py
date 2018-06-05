@@ -1,11 +1,11 @@
-from extract import collection
-from load import schema
-from extract import tailer, extractor
 import time
 import sys
 from datetime import datetime
-from load import init_pg as postgres
-from extract import init_mongo as mongodb
+
+from etl.extract import collection, extractor, tailer
+from etl.load import schema
+from etl.extract import init_mongo as mongodb
+from etl.load import init_pg as postgres
 
 def transfer_collections(collections, truncate, drop, settings):
   """

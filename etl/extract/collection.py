@@ -1,7 +1,7 @@
-from extract import init_mongo
-import monitor
+from etl.monitor import Logger
+from etl.extract import init_mongo
 
-logger = monitor.Logger('collection-transfer.log', 'COLLECTION')
+logger = Logger('collection-transfer.log', 'COLLECTION')
 
 def get_names(db):
   """

@@ -1,9 +1,9 @@
-
 import psycopg2
-import monitor
 import sys
 
-logger = monitor.Logger('collection-transfer.log', 'CONSTRAINT')
+from etl.monitor import Logger
+
+logger = Logger('collection-transfer.log', 'CONSTRAINT')
 
 def add_pk(db, schema, table, attr):
   """

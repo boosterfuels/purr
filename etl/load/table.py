@@ -1,7 +1,9 @@
 import psycopg2
-import monitor
 import sys
-logger = monitor.Logger('collection-transfer.log', 'TABLE')
+
+from etl.monitor import Logger
+
+logger = Logger('collection-transfer.log', 'TABLE')
 
 def create(db, schema, name, attrs = [], types = []):
   """
@@ -260,6 +262,18 @@ def get_column_names_and_types(db, schema, table):
     db.cur.execute(cmd)
     db.conn.commit()
     rows = db.cur.fetchall()
+
+def create_from_oplog(fullname):
+  """
+  Creates table based on oplog entries.
+
+  Parameters
+  ----------
+  fullname : combination of schema and table name
+  """
+  name = fullname.split(".")[1]
+  if exists(name) is False:
+    create(name)
     return rows
   except Exception as ex:
     logger.error('%s when execulting command %s.' % (ex, cmd))

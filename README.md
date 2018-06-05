@@ -1,5 +1,8 @@
 # Custom ETL Pipeline
 
+## Setup
+Install requirements locally: `pip install -r requirements.txt`
+
 An ETL tool for your MongoDB and Postgres.
 
 optional arguments:
