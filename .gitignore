@@ -27,4 +27,5 @@ dist/
 downloads/
 eggs/
 .eggs/
+*.egg-info/
 lib/
