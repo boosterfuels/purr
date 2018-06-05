@@ -114,7 +114,7 @@ def drop(db, schema, tables):
     db.cur.execute(cmd)
     db.conn.commit()
   except Exception as ex:
-    logger.error('%s when execulting command %s.' % (ex, cmd))
+    logger.error('%s when executing command %s.' % (ex, cmd))
 
 def add_column(db, schema, table, column_name, column_type):
   """
@@ -135,7 +135,7 @@ def add_column(db, schema, table, column_name, column_type):
     db.cur.execute(cmd)
     db.conn.commit()
   except Exception as ex:
-    logger.error('%s when execulting command %s.' % (ex, cmd))
+    logger.error('%s when executing command %s.' % (ex, cmd))
 
 def add_multiple_columns(db, schema, table, attrs, types):
   """
@@ -262,18 +262,5 @@ def get_column_names_and_types(db, schema, table):
     db.cur.execute(cmd)
     db.conn.commit()
     rows = db.cur.fetchall()
-
-def create_from_oplog(fullname):
-  """
-  Creates table based on oplog entries.
-
-  Parameters
-  ----------
-  fullname : combination of schema and table name
-  """
-  name = fullname.split(".")[1]
-  if exists(name) is False:
-    create(name)
-    return rows
   except Exception as ex:
-    logger.error('%s when execulting command %s.' % (ex, cmd))
+    logger.error('%s when executing command %s.' % (ex, cmd))
