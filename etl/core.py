@@ -25,29 +25,25 @@ def transfer_collections(collections, truncate, drop, settings):
   setup_pg = settings['postgres']
   setup_mdb = settings['mongo']
   pg = postgres.PgConnection(setup_pg['db_name'], setup_pg['user'])
-  mongo = mongodb.MongoConnection(setup_mdb['db_name'])
-  
-  ex = extractor.Extractor()
-  if setup_pg['table_drop'] is True:
-    drop = True
-  elif setup_pg['table_truncate'] is True:
-    truncate = True
+  mongo = mongodb.MongoConnection(setup_mdb)
+  ex = extractor.Extractor(pg, mongo.conn, setup_pg, settings)
 
   if setup_pg['schema_reset'] is True:
     schema.reset(pg, setup_pg["schema_name"])
-  if settings['typecheck_auto'] is True:
-    ex.transfer_auto(collections, truncate, drop, pg, mongo.conn, setup_pg["schema_name"])
-  elif settings['typecheck_auto'] is False:
-    ex.transfer_bulk(collections, truncate, drop, pg, mongo.conn, setup_pg["schema_name"])
+  if ex.typecheck_auto is True:
+    ex.transfer_auto(collections)
+  else:
+    ex.transfer_bulk(collections)
+    
   if settings['tailing'] is True:
-    start_tailing(start_date_time, pg, setup_pg["schema_name"])
+    start_tailing(start_date_time, pg, mongo.conn, setup_pg, settings)
   else:
     pg.__del__()
     
-def start_tailing(start_date_time, pg, schema):
+def start_tailing(start_date_time, pg, mdb, setup_pg, settings):
   if start_date_time is None:
     start_date_time = datetime.utcnow()
-  t = tailer.Tailer(pg, schema)
+  t = tailer.Tailer(pg, mdb, setup_pg, settings)
   t.start(start_date_time)
 
 def get_collection_names():

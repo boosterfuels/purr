@@ -7,45 +7,47 @@ from datetime import datetime, timedelta
 from bson import Timestamp
 import monitor
 import json
+import pprint
 from bson.json_util import default
-
-
-def is_convertable(type_old, type_new):
-  if type_new == 'jsonb':
-    return True
-  return False
 
 class Extractor():
   """
   This is a class for extracting data from collections.
   """
 
-  def __init__(self):
+  def __init__(self, pg, mdb, setup_pg, settings):
     """Constructor for Extractor"""
     self.logger = monitor.Logger('performance.log', 'EXTRACTOR')
+    self.pg = pg
+    self.mdb = mdb
+    self.schema_name = setup_pg["schema_name"]
+    self.typecheck_auto = settings['typecheck_auto']
+    self.truncate = setup_pg['table_truncate']
+    self.drop = setup_pg['table_drop']
+    self.coll_settings = cp.read_collections_config()
     
-  def transfer_auto(self, coll_names, truncate, drop, pg, mdb, schema_name):
+  def transfer_auto(self, coll_names):
     """
     Transfer collections using auto typecheck
     TODO
     ----
     replace relation 
     """
-    if collection.check(mdb, coll_names) is False:
+    if collection.check(self.mdb, coll_names) is False:
       return
 
-    if drop:
-      table.drop(pg, schema_name, coll_names)
-    elif truncate:
-      table.truncate(pg, schema_name, coll_names)
+    if self.drop:
+      table.drop(self.pg, self.schema_name, coll_names)
+    elif self.truncate:
+      table.truncate(self.pg, self.schema_name, coll_names)
     
-    schema.create(pg, schema_name)
+    schema.create(self.pg, self.schema_name)
 
     for coll in coll_names:
       start = time.time()
-      r = relation.Relation(pg, schema_name, coll)
-      table.create(pg, schema_name, coll)
-      docs = collection.get_by_name(mdb, coll)
+      r = relation.Relation(self.pg, self.schema_name, coll)
+      table.create(self.pg, self.schema_name, coll)
+      docs = collection.get_by_name(self.mdb, coll)
       timer_start_docs = start
       nr_of_docs = docs.count()
       for i in range(nr_of_docs):
@@ -53,152 +55,120 @@ class Extractor():
         if (i+1)%1000==0 and i+1>=1000:
           print('Transferred %d documents from collection %s. (%s s)' % (i + 1, coll, str(round(time.time() - timer_start_docs, 4))))
           timer_start_docs = time.time()
-        if i+1 == docs.count():
+        if i+1 == nr_of_docs:
           print('Successfully transferred collection %s (%d documents).' % (coll, i+1))
         r.insert(doc)
         if r.has_pk is False and doc['_id']:
           r.add_pk('_id')
       self.logger.info(coll + ': ' + str(round(time.time() - start, 4)) + ' seconds.')
 
-  def transfer_config(self, coll_names, truncate, drop, pg, mdb, schema_name):
-      """
-      Transfer collections using auto typecheck
-      TODO
-      ----
-      replace relation 
-      """
-      if collection.check(mdb, coll_names) is False:
-        return
-
-      if drop:
-        table.drop(pg, schema_name, coll_names)
-      elif truncate:
-        table.truncate(pg, schema_name, coll_names)
-      
-      schema.create(pg, schema_name)
-
-      coll_settings = cp.read_collections_config()
-      for coll in coll_names:
-        (attrs_new, attrs_original, types) = cp.get_details(coll_settings, coll)
-        start = time.time()
-        docs = collection.get_by_name(mdb, coll)
-        timer_start_docs = start
-        nr_of_docs = docs.count()
-        transferring = []
-        nr_of_transferred = 1000
-        
-        r = relation.Relation(pg, schema_name, coll)
-        attrs_original = [x.lower().replace("_", "") for x in attrs_original]
-        r.create_with_columns(attrs_new, types)
-        attrs_new.sort()
-        i = 0
-        attrs_and_types = dict(zip(attrs_original, types))
-        for doc in docs:
-          i+=1
-          r.insert_config(doc, attrs_new, attrs_and_types)       
-          if(i + 1)%nr_of_transferred==0 and i + 1 >= nr_of_transferred:
-            print('Transferred %d documents from collection %s. (%s s)' % (i+1, coll, str(round(time.time() -  timer_start_docs, 4) )))
-        self.logger.info(coll + ': ' + str(round(time.time() - start, 4)) + ' seconds.')
-
-  def transfer_bulk(self, coll_names, truncate, drop, pg, mdb, schema_name):
+  def transfer_bulk(self, coll_names):
     """
     Transfer collections using auto typecheck
     TODO
     ----
     replace relation 
     """
-    if collection.check(mdb, coll_names) is False:
+    start_bulk = time.time()
+
+    if collection.check(self.mdb, coll_names) is False:
       return
 
-    if drop:
-      table.drop(pg, schema_name, coll_names)
-    elif truncate:
-      table.truncate(pg, schema_name, coll_names)
+    if self.drop:
+      table.drop(self.pg, self.schema_name, coll_names)
+    elif self.truncate:
+      table.truncate(self.pg, self.schema_name, coll_names)
     
-    schema.create(pg, schema_name)
+    schema.create(self.pg, self.schema_name)
 
-    coll_settings = cp.read_collections_config()
     for coll in coll_names:
-      (attrs_new, attrs_original, types, relation_name, extra_props_type) = cp.get_details(coll_settings, coll)
+      self.transfer_coll(coll)
+      print('Execution time: ' + str(round(time.time() - start_bulk, 4)) + ' seconds.')
 
-      start = time.time()
-      docs = collection.get_by_name(mdb, coll)
+  def transfer_coll(self, coll):
+    (attrs_new, attrs_original, types, relation_name, extra_props_type) = cp.get_details(self.coll_settings, coll)
+    r = relation.Relation(self.pg, self.schema_name, relation_name)
+    extra_props_pg = "_extra_props"
+    extra_props_mdb = "extraProps"
+    attrs_mdb = attrs_original
+    attrs_conf = attrs_new
+    types_conf = types
+    attrs_details = {}
 
-      timer_start_docs = start
-      nr_of_docs = docs.count()
-      transferring = []
-      nr_of_transferred = 10000
-      
-      r = relation.Relation(pg, schema_name, relation_name)
+    attrs_conf.append(extra_props_pg)
+    types_conf.append(extra_props_type)
+    attrs_mdb.append(extra_props_mdb)
 
-      # check if there were any changes in the schema
-      attrs_types_from_db = table.get_column_names_and_types(pg, schema_name, relation_name)
-      attrs_from_db = [x[0] for x in attrs_types_from_db]
-      types_from_db = [x[1] for x in attrs_types_from_db]
-      
-      # TODO if table was dropped or schema was reset then there is no need to have fun
-      # with the type checking.
-      # if len(attrs_types_from_db) == 0:
-      
-      # When new attributes are fully contained in the attribute list from DB
-      # we need to check if the types are equal and if not, we need to check if
-      # it is possible to convert the old type into the new one. 
-      # Anything can be converted to JSONB.
-      if set(attrs_new).issubset(set(attrs_from_db)):
-        # check types
-        for item in attrs_types_from_db:
-          attr_db = item[0]
-          type_db = item[1]
-          
-          if attr_db in attrs_new:
-            idx = attrs_new.index(attr_db)
-            # type from the db and type from the config file 
-            type_old = type_db.lower()
-            type_new = types[idx].lower()
-            if type_old == 'timestamp without time zone' and type_new == 'timestamp':
-              continue
-            elif type_old != type_new:
-              print("TYPES ARE NOT THE SAME", attr_db, type_old, type_new)
-              if is_convertable(type_old, type_new):
-                print("Type is convertable")
-                table.column_change_type(pg, schema_name, relation_name, attr_db, type_new)
-              else:
-                print("Type is not convertable")                
-                # table.column_change_type(pg, schema_name, relation_name, attr_db, type_new)
-      else:
-        # check old attrs and new ones
-        diff = list(set(attrs_new) - set(attrs_from_db))
-        print(attrs_types_from_db)
-        print(attrs_new)
-        print(attrs_from_db)
+    nr_of_attrs = len(attrs_mdb)
 
-        # get type of new attributes
-        types_to_add = []
-        attrs_to_add = []
-        for d in diff:
-          d_type = types[attrs_new.index(d)]
-          attrs_to_add.append(d)
-          types_to_add.append(d_type)
-        table.add_multiple_columns(pg, schema_name, relation_name, attrs_to_add, types_to_add)
-      
-      attrs_new.append('_extra_props')
-      attrs_original = [x.lower().replace("_", "") for x in attrs_original]
-      types.append(extra_props_type)
-      r.create_with_columns(attrs_new, types)
-      attrs_new.sort()
-      i = 0
-      attrs_and_types = dict(zip(attrs_original, types))
-      transferring = []   
-      for doc in docs:
-        transferring.append(doc)  
-        if (i + 1)%nr_of_transferred==0 and i + 1 >= nr_of_transferred:
-          r.insert_config_bulk(transferring, attrs_new, attrs_and_types)
-          print('Transferred %d documents from collection %s. (%s s)' % (i+1, coll, str(round(time.time() - timer_start_docs, 4) )))
-          transferring = []        
-        elif i + 1 == nr_of_docs and ( i + 1 ) % nr_of_transferred != 0:
-          r.insert_config_bulk(transferring, attrs_new, attrs_and_types)
+    for i in range(nr_of_attrs):
+      details = {}
+      details["name_conf"] = attrs_conf[i]
+      details["type_conf"] = types[i]
+      details["value"] = None
+      attrs_details[attrs_mdb[i]] = details
+
+    start = time.time()
+    docs = collection.get_by_name(self.mdb, coll)
+
+    timer_start_docs = start
+    nr_of_docs = docs.count()
+    transferring = []
+    nr_of_transferred = 5000
+    
+
+    # TODO insert function call here
+    r.columns_update(attrs_details)
+
+    i = 0
+    transferring = []
+    for doc in docs:
+      transferring.append(doc)  
+      try:
+        r.insert_config_bulk(transferring, attrs_details)
+        # if(i + 1)%nr_of_transferred==0 and i + 1 >= nr_of_transferred:
+          # print('Transferred %d documents from collection %s. (%s s)' % (i+1, coll, str(round(time.time() - timer_start_docs, 4) )))
+        if i + 1 == nr_of_docs and ( i + 1 ) % nr_of_transferred != 0:
           print('Successfully transferred collection %s (%d documents).' % (coll, i+1))
-          transferring = []        
+      except Exception as ex:
+        self.logger.error('Transfer unsuccessful. %s' % ex)
+      transferring = []
+      i += 1
+    self.logger.info(coll + ': ' + str(round(time.time() - start, 4)) + ' seconds.')
 
-        i += 1
-      self.logger.info(coll + ': ' + str(round(time.time() - start, 4)) + ' seconds.')
+
+  def transfer_doc(self, doc, r):
+    (attrs_new, attrs_original, types, relation_name, extra_props_type) = cp.get_details(self.coll_settings, r.relation_name)
+    
+    # Adding _extra_props to inserted/updated row is necessary 
+    # because this attribute is not part of the original document and anything
+    # that is not defined in the collection.yml file will be pushed in this value.
+    # This function will also create a dictionary which will contain all the information
+    # about the attribute before and after the conversion.
+    attrs_details = self.append_extra_props(attrs_new, attrs_original, types, extra_props_type)
+    
+    try:
+      r.columns_update(attrs_details)
+      r.insert_config_bulk([doc], attrs_details)
+    except Exception as ex:
+      self.logger.error('Transferring item was unsuccessful. %s' % ex)
+
+  def append_extra_props(self, attrs_conf, attrs_mdb, types_conf, extra_props_type):
+    extra_props_pg = "_extra_props"
+    extra_props_mdb = "extraProps"
+
+    attrs_conf.append(extra_props_pg)
+    attrs_mdb.append(extra_props_mdb)
+    types_conf.append(extra_props_type)
+
+    attrs_details = {}
+    
+    nr_of_attrs = len(attrs_mdb)
+
+    for i in range(nr_of_attrs):
+      details = {}
+      details["name_conf"] = attrs_conf[i]
+      details["type_conf"] = types_conf[i]
+      details["value"] = None
+      attrs_details[attrs_mdb[i]] = details
+    return attrs_details

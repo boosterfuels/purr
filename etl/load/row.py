@@ -90,9 +90,7 @@ def insert_bulk(db, schema, table, attrs, values):
     execute_values(db.cur, cmd, values)
     db.conn.commit()
   except psycopg2.Error as e:
-    print(e)
-    logger.error(cmd)
-    exit()
+    logger.error("TABLE %sexception: %s\ncommand: %s\n values: %s\nexcluded: %s" % (table.upper(), e, cmd, values, excluded))
 
 def update(db, schema, table_name, attrs, values):
   """
@@ -124,7 +122,7 @@ def update(db, schema, table_name, attrs, values):
     return 
   for i in range(len(attrs)):
     pair = ""
-    if attrs[i] == "_id":
+    if attrs[i] == "id":
       oid = "'%s'" % str(values[i])
       continue
     if type(values[i]) is str:
@@ -174,8 +172,8 @@ def delete(db, schema, table_name, oid):
   delete(db, schema, 'Audience', ObjectId("5acf593eed101e0c1266e32b"))
 
   """
-  cmd = "DELETE FROM %s.%s WHERE _id='%s'" % (schema, table_name.lower(), oid)
-  logger.info("DELETE PING")
+  cmd = "DELETE FROM %s.%s WHERE id='%s';" % (schema, table_name.lower(), oid)
+  logger.info("Deleting document from table %s with ObjectId = %s." % (table_name.lower(), oid))
   try:
     db.cur.execute(cmd)
     db.conn.commit()
