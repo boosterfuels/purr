@@ -7,9 +7,11 @@ class MongoConnection():
   - create a base class for Connection
   - put dbname somewhere else
   """
-  def __init__(self, dbname):
-    client = pymongo.MongoClient()
+  def __init__(self, settings):
+    db_name = settings['db_name']
+    repl_set_members = settings['repl_set_members']
     try:
-      self.conn = client[dbname]
-    except:
-      monitor.logging.error("Could not connect to MongoDB.")
+      client = pymongo.MongoClient(repl_set_members)
+      self.conn = client[db_name]
+    except Exception as ex:
+      monitor.logging.error("Could not connect to MongoDB: %s" % ex)

@@ -26,7 +26,7 @@ def check(db, req_colls):
   """
   collection_names = db.collection_names(include_system_collections=False)
   if(len(req_colls) > len(collection_names)):
-    logger.error('You entered more collection names than actually exist.')
+    logger.error('You entered more collection names than actually exist in the database.')
   # when loading collections, load them sorted by ObjectId
   # in case an error happens we can continue loading from that moment
   # and output the latest successful item passed to PG 
@@ -35,7 +35,7 @@ def check(db, req_colls):
       collection_names.index(col)
     logger.info('Checking collection names: OK')
   except ValueError:
-    logger.error(col, 'is not a collection.')
+    logger.error("'%s' is not a collection." % col)
     return False
 
   return True
@@ -45,7 +45,7 @@ def get_by_name(db, name):
     logger.info('Getting collection data from %s.' % name)
     c = db[name]
     bz = c.find()
-    return bz.batch_size(10000)
+    return bz.batch_size(30000)
   except:
     logger.error('Getting collection data from %s failed.' % name)
     return []
