@@ -27,5 +27,29 @@ def cast(column_type, value):
 
   elif column_type == 'text[]':
     value = [str(v) for v in value]
-  
+
   return value
+
+def cast_prim(column_type, value):
+  new_value = None
+  column_type = column_type.lower()
+  if column_type == 'text':
+    new_value = str(value)
+
+  elif column_type == 'timestamp':
+    new_value = value
+
+  elif column_type == 'double precision':
+    new_value = None;
+    try:
+      new_value = float(str(value))
+    except ValueError as e:
+      new_value = 'undefined'
+
+  elif column_type == 'jsonb':
+    new_value = json.dumps(value, default=default)
+
+  elif column_type == 'boolean':
+    new_value = bool(value)
+    
+  return new_value

@@ -6,6 +6,9 @@ from etl.monitor import Logger
 
 logger = Logger('collection-transfer.log', 'ROW')
 
+from load import init_pg as pg, table
+from psycopg2.extras import execute_values
+
 # Open a cursor to perform database operations
 def insert(db, schema, table, attrs, values):
   """
@@ -51,6 +54,49 @@ def insert(db, schema, table, attrs, values):
   except psycopg2.Error as e:
     logger.error(cmd)
 
+def insert_bulk(db, schema, table, attrs, values):
+  """
+  Inserts a row defined by attributes and values into a specific 
+  table of the PG database.
+
+  Parameters
+  ----------
+  table_name : string
+  attrs :     string[]
+  values :    string[]
+
+  Returns
+  -------
+  -
+
+  Example
+  -------
+  insert('Audience', [attributes], [values])
+  """
+  temp = []
+  for a in attrs:
+    temp.append('%s')      
+
+  temp = ', '.join(temp)
+  # needed for upsert
+  excluded = [('EXCLUDED.%s' % a) for a in attrs if a != 'id']
+  attrs_reduced = [a for a in attrs if a != 'id']
+  attrs_reduced = ', '.join(attrs_reduced)
+  attrs = ', '.join(attrs)
+  excluded = ', '.join(excluded)
+  # default primary key in Postgres is name_of_table_pkey
+  constraint = '%s_pkey' % table
+  cmd = "INSERT INTO %s.%s (%s) VALUES %s ON CONFLICT ON CONSTRAINT %s DO UPDATE SET (%s) = (%s);" % (schema, table.lower(), attrs, '%s', constraint, attrs_reduced, excluded)
+  
+  # MoSQL ignores the document and logs a warning
+  # if a document could not be inserted.
+  # We will decide later what to do with DataErrors.
+  try:
+    execute_values(db.cur, cmd, values)
+    db.conn.commit()
+  except psycopg2.Error as e:
+    logger.error("TABLE %sexception: %s\ncommand: %s\n values: %s\nexcluded: %s" % (table.upper(), e, cmd, values, excluded))
+
 def update(db, schema, table_name, attrs, values):
   """
   Updates a row in a specific table of the PG database.
@@ -81,7 +127,7 @@ def update(db, schema, table_name, attrs, values):
     return 
   for i in range(len(attrs)):
     pair = ""
-    if attrs[i] == "_id":
+    if attrs[i] == "id":
       oid = "'%s'" % str(values[i])
       continue
     if type(values[i]) is str:
@@ -131,8 +177,8 @@ def delete(db, schema, table_name, oid):
   delete(db, schema, 'Audience', ObjectId("5acf593eed101e0c1266e32b"))
 
   """
-  cmd = "DELETE FROM %s.%s WHERE _id='%s'" % (schema, table_name.lower(), oid)
-  logger.info("DELETE PING")
+  cmd = "DELETE FROM %s.%s WHERE id='%s';" % (schema, table_name.lower(), oid)
+  logger.info("Deleting document from table %s with ObjectId = %s." % (table_name.lower(), oid))
   try:
     db.cur.execute(cmd)
     db.conn.commit()

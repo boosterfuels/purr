@@ -1,8 +1,6 @@
 import yaml
 import etl.monitor
 
-colls = {}
-
 # read file
 def file_to_dict(path):
   try:
@@ -19,25 +17,27 @@ def file_to_dict(path):
     monitor.logging.error('File not found.')
 
 
-def read_collection_config():
+def read_collections_config():
   with open("collections.yml", 'r') as stream:
     try:
         conf_file = yaml.load(stream)
         colls = conf_file["booster"]
+        return colls
     except yaml.YAMLError as exc:
         print(exc)
 
-def get_details(relation):
+def get_details(colls, name):
   attrs_original = []
   attrs_new = []
   types = []
-
-  collection = colls[relation]
+  collection = colls[name]
+  relation_name = collection[":meta"][":table"]
+  extra_props_type = collection[":meta"][":extra_props"]
   for field in collection[":columns"]:
     for key, value in field.items() :
-      print(key, value)
+      # print(key, value)
       if key.startswith(":") is False:
-        print(key)
+        # print(key)
         attrs_new.append(key)
       
       else:
@@ -45,4 +45,4 @@ def get_details(relation):
           attrs_original.append(value)
         elif key == ":type":
           types.append(value)
-  return attrs_new, attrs_original, types
+  return attrs_new, attrs_original, types, relation_name, extra_props_type

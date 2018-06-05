@@ -18,8 +18,10 @@ def create(db, schema, name, attrs = [], types = []):
   nr_of_attrs = len(attrs)
   attrs_and_types = []
   if nr_of_attrs:
-    for i in range(0, nr_of_attrs - 1):
+    for i in range(nr_of_attrs):
       pair = attrs[i] + " " + types[i]
+      if attrs[i] == 'id':
+        pair = "%s PRIMARY KEY" % pair
       attrs_and_types.append(pair)
   else:
     attrs_and_types = ""
@@ -32,8 +34,8 @@ def create(db, schema, name, attrs = [], types = []):
   try:
     db.cur.execute(cmd)
     db.conn.commit()
-  except:
-    logger.error(cmd)
+  except Exception as ex:
+    logger.error('%s when execulting command %s.' % (ex, cmd))
 
 def exists(db, schema, table):  
   """
@@ -47,26 +49,19 @@ def exists(db, schema, table):
   -------
   True: table exists in the database
   False: otherwise
-
-  Todo
-  ----
-  don't hardcode schema
   """
   cmd = "SELECT table_name FROM information_schema.tables WHERE table_schema='%s' AND table_name='%s';" % (schema, table.lower())
   logger.warn("EXISTS PING")
   try:
     db.cur.execute(cmd)
-  except:
-    logger.error(cmd)
-  try:
     res = db.cur.fetchall()
     db.conn.commit()
     if res:
       return True
     else:
       return False
-  except:
-    logger.error(cmd)
+  except Exception as ex:
+    logger.error('%s when execulting command %s.' % (ex, cmd))
 
 def truncate(db, schema, tables):
   """
@@ -88,8 +83,8 @@ def truncate(db, schema, tables):
   try:
     db.cur.execute(cmd)
     db.conn.commit()
-  except:
-    logger.error(cmd)
+  except Exception as ex:
+    logger.error('%s when execulting command %s.' % (ex, cmd))
 
 def drop(db, schema, tables):
   """
@@ -118,8 +113,8 @@ def drop(db, schema, tables):
   try:
     db.cur.execute(cmd)
     db.conn.commit()
-  except:
-    logger.error(cmd)
+  except Exception as ex:
+    logger.error('%s when execulting command %s.' % (ex, cmd))
 
 def add_column(db, schema, table, column_name, column_type):
   """
@@ -139,8 +134,8 @@ def add_column(db, schema, table, column_name, column_type):
   try:
     db.cur.execute(cmd)
     db.conn.commit()
-  except:
-    logger.error(cmd)
+  except Exception as ex:
+    logger.error('%s when execulting command %s.' % (ex, cmd))
 
 def add_multiple_columns(db, schema, table, attrs, types):
   """
@@ -165,10 +160,10 @@ def add_multiple_columns(db, schema, table, attrs, types):
   try:
     db.cur.execute(cmd)
     db.conn.commit()
-  except:
-    logger.error(cmd)
+  except Exception as ex:
+    logger.error('%s when execulting command %s.' % (ex, cmd))
 
-def column_change_type(db, name, column_name, column_type):
+def column_change_type(db, schema, name, column_name, column_type):
   """
   Add new column to a specific table.
   Parameters
@@ -181,14 +176,20 @@ def column_change_type(db, name, column_name, column_type):
   -------
   column_change_type(pg.db, 'some_integer', 'integer')
   """
-  	# ALTER TABLE audience ALTER COLUMN _id TYPE char(30)
-  cmd = ' '.join(["ALTER TABLE IF EXISTS", name.lower(), "ADD COLUMN IF EXISTS", column_name, "TYPE", column_type, ";"])  
+  expression = ''
+  if column_type == 'jsonb':
+    expression = 'to_json(%s)' % column_name
+  if column_type == 'double precision':
+    expression = 'CAST(%s as double precision)' % column_name
+
+  cmd = "ALTER TABLE %s.%s ALTER COLUMN %s TYPE %s USING %s;" % (schema, name.lower(), column_name, column_type, expression)
   logger.warn("ALTER COLUMN PING " + name.lower() + column_name + "(" + column_type + ")")
+
   try:
     db.cur.execute(cmd)
     db.conn.commit()
-  except:
-    logger.error(cmd)
+  except Exception as ex:
+    logger.error('%s when execulting command %s.' % (ex, cmd))
 
 def remove_column(db, name, column_name):
   cmd = ''.join(["ALTER TABLE IF EXISTS ", name.lower(), " DROP COLUMN IF EXISTS ", column_name, ";"])  
@@ -196,8 +197,8 @@ def remove_column(db, name, column_name):
   try:
     db.cur.execute(cmd)
     db.conn.commit()
-  except:
-    logger.error(cmd)
+  except Exception as ex:
+    logger.error('%s when execulting command %s.' % (ex, cmd))
 
 def get_table_names(db, schema):
   """
@@ -225,8 +226,8 @@ def get_table_names(db, schema):
   try:
     db.cur.execute(cmd)
     db.conn.commit()
-  except:
-    logger.warn(cmd)
+  except Exception as ex:
+    logger.error('%s when execulting command %s.' % (ex, cmd))
   row = map(list, cur.fetchall())
   tables = []
   for t in row:
@@ -242,8 +243,8 @@ def column_exists(db, table, column):
     if rows:
       return True
     return False
-  except:
-    logger.error(cmd)
+  except Exception as ex:
+    logger.error('%s when execulting command %s.' % (ex, cmd))
 
 def get_column_names_and_types(db, schema, table):
   """
@@ -261,9 +262,6 @@ def get_column_names_and_types(db, schema, table):
     db.cur.execute(cmd)
     db.conn.commit()
     rows = db.cur.fetchall()
-  except:
-    logger.error(cmd)
-  return rows
 
 def create_from_oplog(fullname):
   """
@@ -276,3 +274,6 @@ def create_from_oplog(fullname):
   name = fullname.split(".")[1]
   if exists(name) is False:
     create(name)
+    return rows
+  except Exception as ex:
+    logger.error('%s when execulting command %s.' % (ex, cmd))
