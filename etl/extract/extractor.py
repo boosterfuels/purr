@@ -85,7 +85,6 @@ class Extractor():
 
     for coll in coll_names:
       self.transfer_coll(coll)
-      print('Execution time: ' + str(round(time.time() - start_bulk, 4)) + ' seconds.')
 
   def transfer_coll(self, coll):
     (attrs_new, attrs_original, types, relation_name, extra_props_type) = cp.get_details(self.coll_settings, coll)
@@ -128,8 +127,6 @@ class Extractor():
       transferring.append(doc)  
       try:
         r.insert_config_bulk(transferring, attrs_details)
-        # if(i + 1)%nr_of_transferred==0 and i + 1 >= nr_of_transferred:
-          # print('Transferred %d documents from collection %s. (%s s)' % (i+1, coll, str(round(time.time() - timer_start_docs, 4) )))
         if i + 1 == nr_of_docs and ( i + 1 ) % nr_of_transferred != 0:
           print('Successfully transferred collection %s (%d documents).' % (coll, i+1))
       except Exception as ex:
