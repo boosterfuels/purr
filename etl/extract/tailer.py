@@ -21,8 +21,8 @@ class Tailer(extractor.Extractor):
   replace things to base class
   """
 
-  def __init__(self, pg, mdb, setup_pg, settings):
-    extractor.Extractor.__init__(self, pg, mdb, setup_pg, settings)
+  def __init__(self, pg, mdb, setup_pg, settings, coll_settings):
+    extractor.Extractor.__init__(self, pg, mdb, setup_pg, settings, coll_settings)
     self.tailing = False
 
 
