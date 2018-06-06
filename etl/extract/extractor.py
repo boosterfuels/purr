@@ -115,7 +115,7 @@ class Extractor():
     timer_start_docs = start
     nr_of_docs = docs.count()
     transferring = []
-    nr_of_transferred = 5000
+    nr_of_transferred = 1000
     
 
     # TODO insert function call here
@@ -126,12 +126,15 @@ class Extractor():
     for doc in docs:
       transferring.append(doc)  
       try:
-        r.insert_config_bulk(transferring, attrs_details)
+        if (i+1)%nr_of_transferred==0 and i+1>=nr_of_transferred:
+          r.insert_config_bulk(transferring, attrs_details)
+          transferring = []      
         if i + 1 == nr_of_docs and ( i + 1 ) % nr_of_transferred != 0:
-          print('Successfully transferred collection %s (%d documents).' % (coll, i+1))
+          r.insert_config_bulk(transferring, attrs_details)
+          print('Successfully transferred collection %s (%d documents).' % (coll, i + 1))
+          transferring = []      
       except Exception as ex:
         self.logger.error('Transfer unsuccessful. %s' % ex)
-      transferring = []
       i += 1
     self.logger.info(coll + ': ' + str(round(time.time() - start, 4)) + ' seconds.')
 

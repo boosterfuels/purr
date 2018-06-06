@@ -24,7 +24,7 @@ def transfer_collections(collections, settings, coll_config):
   start_date_time = datetime.utcnow()  
   setup_pg = settings['postgres']
   setup_mdb = settings['mongo']
-  pg = postgres.PgConnection(setup_pg['db_name'], setup_pg['user'])
+  pg = postgres.PgConnection(setup_pg)
   mongo = mongodb.MongoConnection(setup_mdb)
   ex = extractor.Extractor(pg, mongo.conn, setup_pg, settings, coll_config)
 
