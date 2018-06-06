@@ -6,7 +6,6 @@ from etl.monitor import Logger
 
 logger = Logger('collection-transfer.log', 'ROW')
 
-from load import init_pg as pg, table
 from psycopg2.extras import execute_values
 
 # Open a cursor to perform database operations
