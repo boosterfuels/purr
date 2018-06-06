@@ -225,26 +225,31 @@ class Relation():
     self.has_pk = True
 
   def columns_update(self, attrs_types_conf):
-      # check if there were any changes in the schema
-      # If relation is already created in the database then we need to get the 
-      # existing attributes and types and compare them to our new attributes and types
-      # from the config file.
+      """
+      Checks if there were any changes in the schema and adds/changes attributes if needed. 
+      If relation is already created in the database then we need to get the 
+      existing attributes and types and compare them to our new attributes and types
+      from the config file.
+      """
       attrs_conf = []
       types_conf = []
       attrs_pg = []
       types_pg = []
-      if self.exists() is True:
-        attrs_types_pg = dict(table.get_column_names_and_types(self.db, self.schema, self.relation_name))
+      column_info = table.get_column_names_and_types(self.db, self.schema, self.relation_name)
+      if self.exists() is True and column_info is not None:
+        attrs_types_pg = dict(column_info)
         attrs_pg = [k for k,v in attrs_types_pg.items()]
         types_pg = [v for k, v in attrs_types_pg.items()]
 
         attrs_conf = [v["name_conf"] for k,v in attrs_types_conf.items()]
         types_conf = [v["type_conf"] for k, v in attrs_types_conf.items()]
         
-        # - find what's different in attributes from pg and conf
-        # - check existing attribute names
-        # - check types
-        # - check check is one is castable to the other
+        """
+        - find what's different in attributes from pg and conf
+        - check existing attribute names
+        - check types
+        - check check is one is castable to the other
+        """
         if(len(attrs_pg) != 0 and (set(attrs_conf) == set(attrs_pg))):
           return
         if set(attrs_conf).issubset(set(attrs_pg)):

@@ -4,7 +4,7 @@ import time
 from etl.extract import collection
 from etl.load import table, row, constraint, schema
 from etl.monitor import Logger
-from etl.transform import relation, config_parser  as cp
+from etl.transform import relation, config_parser as cp
 
 from datetime import datetime, timedelta
 from bson import Timestamp
@@ -16,7 +16,7 @@ class Extractor():
   This is a class for extracting data from collections.
   """
 
-  def __init__(self, pg, mdb, setup_pg, settings):
+  def __init__(self, pg, mdb, setup_pg, settings, coll_settings):
     """Constructor for Extractor"""
     self.logger = Logger('performance.log', 'EXTRACTOR')
 
@@ -26,7 +26,7 @@ class Extractor():
     self.typecheck_auto = settings['typecheck_auto']
     self.truncate = setup_pg['table_truncate']
     self.drop = setup_pg['table_drop']
-    self.coll_settings = cp.read_collections_config()
+    self.coll_settings = coll_settings
     
   def transfer_auto(self, coll_names):
     """
