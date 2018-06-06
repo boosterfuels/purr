@@ -1,22 +1,15 @@
 import yaml
 import os
-
-from etl.monitor import logging
+from etl.transform.constants import keywords
+from etl.monitor import Logger
 
 here = os.path.dirname(os.path.abspath(__file__))
-path = os.path.join(here, 'constants/keywords.yml')
+path = os.path.join(here, 'constants/keywords.py')
+logger = Logger('collection-transfer.log', 'COLLECTION')
 
 def get_keywords():
   try:
-    with open(path, 'r') as stream:
-      try:
-        file_keywords = yaml.load(stream)
-        if not file_keywords:
-          logging.error('Keyword file is empty.')
-        # looking for reserved keywords 
-        reserved = [item.split(",")[0] for item in file_keywords["pg"] if item.split(",")[1] == 'R']
-        return reserved
-      except yaml.YAMLError as exc:
-        print(exc)
-  except FileNotFoundError as err:
-    logging.error('File not found.')
+    reserved = [item.split(",")[0] for item in keywords.pg if item.split(",")[1] == 'R']
+    return reserved
+  except Exception as ex:
+    logger.error(ex)
