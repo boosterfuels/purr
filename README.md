@@ -1,7 +1,8 @@
 # Custom ETL Pipeline
 
-
 An ETL tool for your MongoDB and Postgres.
+
+![WatchingYou](https://i.pinimg.com/736x/46/ab/1c/46ab1c8f2dc96d112ba7304782d59599--funny-animals-funny-cats.jpg)
 
 ## Setup
 Install requirements locally: `pip install -r requirements.txt`
