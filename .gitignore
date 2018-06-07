@@ -18,6 +18,7 @@ setup.yml
 **/.DS_Store
 
 *.log
+*.out
 
 # Distribution / packaging
 .Python
