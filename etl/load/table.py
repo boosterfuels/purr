@@ -19,7 +19,7 @@ def create(db, schema, name, attrs = [], types = []):
   attrs_and_types = []
   if nr_of_attrs:
     for i in range(nr_of_attrs):
-      pair = attrs[i] + " " + types[i]
+      pair = '"%s" %s' % (attrs[i], types[i])
       if attrs[i] == 'id':
         pair = "%s PRIMARY KEY" % pair
       attrs_and_types.append(pair)

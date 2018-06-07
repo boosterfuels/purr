@@ -79,14 +79,14 @@ def insert_bulk(db, schema, table, attrs, values):
   temp = ', '.join(temp)
   # needed for upsert
   excluded = [('EXCLUDED.%s' % a) for a in attrs if a != 'id']
-  attrs_reduced = [a for a in attrs if a != 'id']
+  attrs_reduced = [('"%s"' % a) for a in attrs if a != 'id']
   attrs_reduced = ', '.join(attrs_reduced)
+  attrs = [('"%s"' % a) for a in attrs]
   attrs = ', '.join(attrs)
   excluded = ', '.join(excluded)
   # default primary key in Postgres is name_of_table_pkey
   constraint = '%s_pkey' % table
   cmd = "INSERT INTO %s.%s (%s) VALUES %s ON CONFLICT ON CONSTRAINT %s DO UPDATE SET (%s) = (%s);" % (schema, table.lower(), attrs, '%s', constraint, attrs_reduced, excluded)
-  
   # MoSQL ignores the document and logs a warning
   # if a document could not be inserted.
   # We will decide later what to do with DataErrors.
@@ -94,7 +94,7 @@ def insert_bulk(db, schema, table, attrs, values):
     execute_values(db.cur, cmd, values)
     db.conn.commit()
   except psycopg2.Error as e:
-    logger.error("TABLE %sexception: %s\ncommand: %s\n values: %s\nexcluded: %s" % (table.upper(), e, cmd, values, excluded))
+    logger.error("TABLE %s exception: %s\n command: %s\n values: %s\n excluded: %s" % (table.upper(), e, cmd, values, excluded))
 
 def update(db, schema, table_name, attrs, values):
   """
