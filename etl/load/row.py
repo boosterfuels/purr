@@ -115,8 +115,6 @@ def update(db, schema, table_name, attrs, values):
   update('audience', [attributes], [values])
 
   """
-  print("UPDATE --", attrs)
-  print("UPDATE --", values)
   attr_val_pairs = []
 
   oid = ""
@@ -135,12 +133,9 @@ def update(db, schema, table_name, attrs, values):
       pair = "%s = '%s'" % (attrs[i], values[i])
     else:
       pair = "%s = %s" % (attrs[i], values[i])
-    print(type(values[i]))
-    print(pair)
     attr_val_pairs.append(pair)
       
   pairs = ", ".join(attr_val_pairs)
-  print("PAIRS", pairs)
   cmd = ''.join([
     "UPDATE ",
     schema + "." + table_name.lower(), " SET ",
@@ -149,8 +144,6 @@ def update(db, schema, table_name, attrs, values):
     oid,
     ";"
   ])
-  print(cmd)
-  logger.info("UPDATE PING")
   try:
     db.cur.execute(cmd)
     db.conn.commit()

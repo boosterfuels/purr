@@ -1,4 +1,5 @@
 import yaml
+import etl.monitor as monitor
 
 def file_to_dict(path):
   """
@@ -24,7 +25,7 @@ def file_to_dict(path):
         return None
       return conf_file
   except Exception as ex:
-    print("Failed opening setup file: %s" % ex)
+    monitor.logging.error("Failed to open setup file: %s" % ex)
 
 def read_collections_config(path):
   """
@@ -35,13 +36,13 @@ def read_collections_config(path):
       - anything that is not defined by the user goes into _extra_props if it is castable to
       the type _extra_props has
   """
-  with open(path, 'r') as stream:
-    try:
-        conf_file = yaml.load(stream)
-        colls = conf_file["booster"]
-        return colls
-    except Exception as ex:
-      print("Failed opening collection file: %s" % ex)
+  try:
+    with open(path, 'r') as stream:
+      conf_file = yaml.load(stream)
+      colls = conf_file["booster"]
+      return colls
+  except Exception as ex:
+    monitor.logging.error("Failed to open collection file: %s" % ex)
 
 def get_details(colls, name):
   attrs_original = []
@@ -54,7 +55,6 @@ def get_details(colls, name):
     for key, value in field.items() :
       if key.startswith(":") is False:
         attrs_new.append(key)
-      
       else:
         if key == ":source":
           attrs_original.append(value)

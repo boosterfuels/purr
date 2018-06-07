@@ -30,7 +30,6 @@ def create(db, schema, name, attrs = [], types = []):
 
   name = name.lower()
   cmd =  "CREATE TABLE IF NOT EXISTS %s.%s(%s);" % (schema, name, attrs_and_types)
-  logger.warn("CREATE TABLE PING")
   try:
     db.cur.execute(cmd)
     db.conn.commit()
@@ -51,7 +50,6 @@ def exists(db, schema, table):
   False: otherwise
   """
   cmd = "SELECT table_name FROM information_schema.tables WHERE table_schema='%s' AND table_name='%s';" % (schema, table.lower())
-  logger.warn("EXISTS PING")
   try:
     db.cur.execute(cmd)
     res = db.cur.fetchall()
@@ -79,7 +77,6 @@ def truncate(db, schema, tables):
   tables_cmd = ','.join(tables_cmd)
   cmd = "TRUNCATE TABLE %s;" % (tables_cmd)
   
-  logger.warn("TRUNCATE PING")
   try:
     db.cur.execute(cmd)
     db.conn.commit()
@@ -109,7 +106,6 @@ def drop(db, schema, tables):
 
   cmd = "DROP TABLE IF EXISTS %s" % (tables_cmd)
   
-  logger.warn("DROP PING")
   try:
     db.cur.execute(cmd)
     db.conn.commit()
@@ -130,7 +126,7 @@ def add_column(db, schema, table, column_name, column_type):
   add_column(db, 'some_integer', 'integer')
   """
   cmd = "ALTER TABLE IF EXISTS %s.%s ADD COLUMN IF NOT EXISTS %s %s;" % (schema, table.lower(), column_name, column_type)  
-  logger.warn("ADD COLUMN PING table: %s, column: %s, type: %s" % (table.lower(), column_name, column_type))
+  logger.warn("Adding new column to table: %s, column: %s, type: %s" % (table.lower(), column_name, column_type))
   try:
     db.cur.execute(cmd)
     db.conn.commit()
@@ -156,14 +152,14 @@ def add_multiple_columns(db, schema, table, attrs, types):
   statements_merged = ', '.join(statements_add) 
   
   cmd = "ALTER TABLE IF EXISTS %s.%s %s;" % (schema, table.lower(), statements_merged)
-  logger.warn("ADD MULTIPLE COLUMNS PING")
+  logger.warn("Adding multiple columns to table %s %s;" % (table.lower(), statements_merged))
   try:
     db.cur.execute(cmd)
     db.conn.commit()
   except Exception as ex:
     logger.error('%s when execulting command %s.' % (ex, cmd))
 
-def column_change_type(db, schema, name, column_name, column_type):
+def column_change_type(db, schema, table, column_name, column_type):
   """
   Add new column to a specific table.
   Parameters
@@ -182,8 +178,8 @@ def column_change_type(db, schema, name, column_name, column_type):
   if column_type == 'double precision':
     expression = 'CAST(%s as double precision)' % column_name
 
-  cmd = "ALTER TABLE %s.%s ALTER COLUMN %s TYPE %s USING %s;" % (schema, name.lower(), column_name, column_type, expression)
-  logger.warn("ALTER COLUMN PING " + name.lower() + column_name + "(" + column_type + ")")
+  cmd = "ALTER TABLE %s.%s ALTER COLUMN %s TYPE %s USING %s;" % (schema, table.lower(), column_name, column_type, expression)
+  logger.info("ALTER TABLE %s, adding %s %s" % (table.lower(), column_name, column_type))
 
   try:
     db.cur.execute(cmd)
@@ -191,9 +187,9 @@ def column_change_type(db, schema, name, column_name, column_type):
   except Exception as ex:
     logger.error('%s when execulting command %s.' % (ex, cmd))
 
-def remove_column(db, name, column_name):
-  cmd = ''.join(["ALTER TABLE IF EXISTS ", name.lower(), " DROP COLUMN IF EXISTS ", column_name, ";"])  
-  logger.warn("REMOVE COLUMN PING")
+def remove_column(db, table, column_name):
+  cmd = ''.join(["ALTER TABLE IF EXISTS ", table.lower(), " DROP COLUMN IF EXISTS ", column_name, ";"])  
+  logger.info("ALTER TABLE %s, removing column %s." % (table.lower(), column_name))
   try:
     db.cur.execute(cmd)
     db.conn.commit()
@@ -222,7 +218,6 @@ def get_table_names(db, schema):
   don't hardcode schema
   """
   cmd = "SELECT table_name FROM information_schema.tables WHERE table_schema='%s'" % (schema)
-  logger.warn("GET TABLE NAMES PING")
   try:
     db.cur.execute(cmd)
     db.conn.commit()
@@ -236,7 +231,6 @@ def get_table_names(db, schema):
 
 def column_exists(db, table, column):
   cmd = ''.join(["SELECT column_name FROM information_schema.columns WHERE table_name='", table.lower(), "' AND column_name='", column, "';"])  
-  logger.warn("COLUMN EXISTS PING")
   try:
     db.cur.execute(cmd)
     rows = cur.fetchone()

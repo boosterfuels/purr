@@ -42,12 +42,12 @@ def check(db, req_colls):
 
 def get_by_name(db, name):
   try:
-    logger.info('Getting collection data from %s.' % name)
+    logger.info('Loading data from collection %s.' % name)
     c = db[name]
     bz = c.find()
     return bz.batch_size(30000)
   except:
-    logger.error('Getting collection data from %s failed.' % name)
+    logger.error('Loading data from collection %s failed.' % name)
     return []
 
 def get_sorted_by_name(name):

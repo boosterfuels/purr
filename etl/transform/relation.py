@@ -56,7 +56,6 @@ class Relation():
     # This is needed because sometimes there is no value for attributes (null)
     # - in this case 
     attributes_all = []
-    print("Transferring", len(docs), type(docs))
     
     if len(docs) != 0:
       attributes_all = list(docs[0].keys())

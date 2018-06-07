@@ -16,11 +16,11 @@ class PgConnection():
       self.conn = psycopg2.connect("dbname=%s user=%s password=%s host=%s port=%s" % (dbname, user, password, host, port))
       self.cur = self.conn.cursor()
     except Exception as ex:
-      print("Could not connect to Postgres.")
+      monitor.logging.error("Could not connect to Postgres.")
       
   def query(self, query):
       try:
-          result = self.cur.execute(query)
+        result = self.cur.execute(query)
       except Exception as ex:
         monitor.logging.error('error execting query "{}", error: {}'.format(query, ex))
         return None

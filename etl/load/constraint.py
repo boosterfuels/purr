@@ -25,7 +25,7 @@ def add_pk(db, schema, table, attr):
   add_pk('Audience', 'id')
 
   """
-  logger.warn("ADD PRIMARY KEY PING")
+  logger.warn("ADD PRIMARY KEY")
   cmd = 'ALTER TABLE %s.%s ADD PRIMARY KEY (%s)' % (schema, table.lower(), attr)
   try:
     db.cur.execute(cmd)

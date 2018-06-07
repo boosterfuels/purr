@@ -55,10 +55,10 @@ class Extractor():
       for i in range(nr_of_docs):
         doc = docs[i]
         if (i+1)%1000==0 and i+1>=1000:
-          print('Transferred %d documents from collection %s. (%s s)' % (i + 1, coll, str(round(time.time() - timer_start_docs, 4))))
+          self.logger.info('Transferred %d documents from collection %s. (%s s)' % (i + 1, coll, str(round(time.time() - timer_start_docs, 4))))
           timer_start_docs = time.time()
         if i+1 == nr_of_docs:
-          print('Successfully transferred collection %s (%d documents).' % (coll, i+1))
+          self.logger.info('Successfully transferred collection %s (%d documents).' % (coll, i+1))
         r.insert(doc)
         if r.has_pk is False and doc['_id']:
           r.add_pk('_id')
@@ -131,7 +131,7 @@ class Extractor():
           transferring = []      
         if i + 1 == nr_of_docs and ( i + 1 ) % nr_of_transferred != 0:
           r.insert_config_bulk(transferring, attrs_details)
-          print('Successfully transferred collection %s (%d documents).' % (coll, i + 1))
+          self.logger.info('Successfully transferred collection %s (%d documents).' % (coll, i + 1))
           transferring = []      
       except Exception as ex:
         self.logger.error('Transfer unsuccessful. %s' % ex)
