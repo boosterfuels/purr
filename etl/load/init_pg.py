@@ -7,13 +7,20 @@ class PgConnection():
   create a base class for Connection
   """
   def __init__(self, conn_details):
-    dbname = conn_details["db_name"]
-    user = conn_details["user"]
-    host = conn_details["host"]
-    password = conn_details["password"]
-    port = conn_details["port"]
+    settings_local = ['db_name', 'user']
+    settings_remote = ['db_name', 'user', 'password', 'host', 'port']
+    if set(settings_remote).issubset(conn_details):
+      cmd = 'dbname=%s user=%s password=%s host=%s port=%s' % (
+        conn_details['db_name'],
+        conn_details['user'],
+        conn_details['password'],
+        conn_details['host'],
+        conn_details['port']
+      )      
+    elif set(settings_local).issubset(conn_details):
+      cmd = 'dbname=%s user=%s' % (conn_details['db_name'], conn_details['user'])  
     try:
-      self.conn = psycopg2.connect("dbname=%s user=%s password=%s host=%s port=%s" % (dbname, user, password, host, port))
+      self.conn = psycopg2.connect(cmd)
       self.cur = self.conn.cursor()
     except Exception as ex:
       monitor.logging.error("Could not connect to Postgres.")
