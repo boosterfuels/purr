@@ -39,7 +39,6 @@ class Tailer(extractor.Extractor):
     doc_id = doc_useful["_id"]
     r = relation.Relation(self.pg, self.schema_name, table_name)
     if r.exists() is False:
-      logger.warn("Relation %s does not exist. Skipping %s document with ObjectId = %s." % (table_name, oper, doc_id))
       return
       
     if oper == INSERT:
