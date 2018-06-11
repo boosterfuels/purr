@@ -1,9 +1,6 @@
 import psycopg2
 import sys
-
-from etl.monitor import Logger
-
-logger = Logger('collection-transfer.log', 'TABLE')
+from etl.monitor import logger
 
 def create(db, schema, name, attrs = [], types = []):
   """
@@ -34,7 +31,7 @@ def create(db, schema, name, attrs = [], types = []):
     db.cur.execute(cmd)
     db.conn.commit()
   except Exception as ex:
-    logger.error('%s when execulting command %s.' % (ex, cmd))
+    logger.error('[TABLE] %s when execulting command %s.' % (ex, cmd))
 
 def exists(db, schema, table):  
   """
@@ -59,7 +56,7 @@ def exists(db, schema, table):
     else:
       return False
   except Exception as ex:
-    logger.error('%s when execulting command %s.' % (ex, cmd))
+    logger.error('[TABLE] %s when execulting command %s.' % (ex, cmd))
 
 def truncate(db, schema, tables):
   """
@@ -81,7 +78,7 @@ def truncate(db, schema, tables):
     db.cur.execute(cmd)
     db.conn.commit()
   except Exception as ex:
-    logger.error('%s when execulting command %s.' % (ex, cmd))
+    logger.error('[TABLE] %s when execulting command %s.' % (ex, cmd))
 
 def drop(db, schema, tables):
   """
@@ -110,7 +107,7 @@ def drop(db, schema, tables):
     db.cur.execute(cmd)
     db.conn.commit()
   except Exception as ex:
-    logger.error('%s when executing command %s.' % (ex, cmd))
+    logger.error('[TABLE] %s when executing command %s.' % (ex, cmd))
 
 def add_column(db, schema, table, column_name, column_type):
   """
@@ -126,12 +123,12 @@ def add_column(db, schema, table, column_name, column_type):
   add_column(db, 'some_integer', 'integer')
   """
   cmd = "ALTER TABLE IF EXISTS %s.%s ADD COLUMN IF NOT EXISTS %s %s;" % (schema, table.lower(), column_name, column_type)  
-  logger.warn("Adding new column to table: %s, column: %s, type: %s" % (table.lower(), column_name, column_type))
+  logger.warn("[TABLE] Adding new column to table: %s, column: %s, type: %s" % (table.lower(), column_name, column_type))
   try:
     db.cur.execute(cmd)
     db.conn.commit()
   except Exception as ex:
-    logger.error('%s when executing command %s.' % (ex, cmd))
+    logger.error('[TABLE] %s when executing command %s.' % (ex, cmd))
 
 def add_multiple_columns(db, schema, table, attrs, types):
   """
@@ -152,12 +149,12 @@ def add_multiple_columns(db, schema, table, attrs, types):
   statements_merged = ', '.join(statements_add) 
   
   cmd = "ALTER TABLE IF EXISTS %s.%s %s;" % (schema, table.lower(), statements_merged)
-  logger.warn("Adding multiple columns to table %s %s;" % (table.lower(), statements_merged))
+  logger.warn("[TABLE] Adding multiple columns to table %s %s;" % (table.lower(), statements_merged))
   try:
     db.cur.execute(cmd)
     db.conn.commit()
   except Exception as ex:
-    logger.error('%s when execulting command %s.' % (ex, cmd))
+    logger.error('[TABLE] %s when execulting command %s.' % (ex, cmd))
 
 def column_change_type(db, schema, table, column_name, column_type):
   """
@@ -179,22 +176,22 @@ def column_change_type(db, schema, table, column_name, column_type):
     expression = 'CAST(%s as double precision)' % column_name
 
   cmd = "ALTER TABLE %s.%s ALTER COLUMN %s TYPE %s USING %s;" % (schema, table.lower(), column_name, column_type, expression)
-  logger.info("ALTER TABLE %s, adding %s %s" % (table.lower(), column_name, column_type))
+  logger.info('[TABLE] ALTER TABLE %s, adding %s %s' % (table.lower(), column_name, column_type))
 
   try:
     db.cur.execute(cmd)
     db.conn.commit()
   except Exception as ex:
-    logger.error('%s when execulting command %s.' % (ex, cmd))
+    logger.error('[TABLE] %s when execulting command %s.' % (ex, cmd))
 
 def remove_column(db, table, column_name):
   cmd = ''.join(["ALTER TABLE IF EXISTS ", table.lower(), " DROP COLUMN IF EXISTS ", column_name, ";"])  
-  logger.info("ALTER TABLE %s, removing column %s." % (table.lower(), column_name))
+  logger.info('[TABLE] ALTER TABLE %s, removing column %s.' % (table.lower(), column_name))
   try:
     db.cur.execute(cmd)
     db.conn.commit()
   except Exception as ex:
-    logger.error('%s when execulting command %s.' % (ex, cmd))
+    logger.error('[TABLE] %s when execulting command %s.' % (ex, cmd))
 
 def get_table_names(db, schema):
   """
@@ -222,7 +219,7 @@ def get_table_names(db, schema):
     db.cur.execute(cmd)
     db.conn.commit()
   except Exception as ex:
-    logger.error('%s when execulting command %s.' % (ex, cmd))
+    logger.error('[TABLE] %s when execulting command %s.' % (ex, cmd))
   row = map(list, cur.fetchall())
   tables = []
   for t in row:
@@ -238,7 +235,7 @@ def column_exists(db, table, column):
       return True
     return False
   except Exception as ex:
-    logger.error('%s when execulting command %s.' % (ex, cmd))
+    logger.error('[TABLE] %s when execulting command %s.' % (ex, cmd))
 
 def get_column_names_and_types(db, schema, table):
   """
@@ -257,4 +254,4 @@ def get_column_names_and_types(db, schema, table):
     db.conn.commit()
     rows = db.cur.fetchall()
   except Exception as ex:
-    logger.error('%s when executing command %s.' % (ex, cmd))
+    logger.error('[TABLE] %s when executing command %s.' % (ex, cmd))

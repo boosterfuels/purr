@@ -1,19 +1,18 @@
 import logging
 import sys
 
+
 class Logger():
   """Base class for all exceptions."""
-  def __init__(self, file, name):
+  def __init__(self, file='', name=''):
     # create log file handler
+    self.logger = logging.getLogger("logs_purr")
     logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
     ch = logging.StreamHandler()
-    ch.setLevel(logging.ERROR)
     # add formatter to the handlers
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter('%(asctime)s - [%(levelname)s] - %(message)s')
     ch.setFormatter(formatter)
     # add the handlers to logger
-    self.logger = logging.getLogger(name)
-    self.logger.setLevel(logging.DEBUG)
 
     self.logger.addHandler(ch)
 
@@ -31,3 +30,5 @@ class Logger():
 
   def critical(self, m):
     self.logger.critical(m)
+
+logger = Logger()

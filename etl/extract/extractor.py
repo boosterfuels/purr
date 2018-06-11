@@ -3,7 +3,8 @@ import time
 
 from etl.extract import collection
 from etl.load import table, row, constraint, schema
-from etl.monitor import Logger
+from etl.monitor import logger
+
 from etl.transform import relation, config_parser as cp
 
 from datetime import datetime, timedelta
@@ -18,7 +19,6 @@ class Extractor():
 
   def __init__(self, pg, mdb, setup_pg, settings, coll_settings):
     """Constructor for Extractor"""
-    self.logger = Logger('performance.log', 'EXTRACTOR')
 
     self.pg = pg
     self.mdb = mdb
@@ -55,14 +55,14 @@ class Extractor():
       for i in range(nr_of_docs):
         doc = docs[i]
         if (i+1)%1000==0 and i+1>=1000:
-          self.logger.info('Transferred %d documents from collection %s. (%s s)' % (i + 1, coll, str(round(time.time() - timer_start_docs, 4))))
+          logger.info('[EXTRACTOR] Transferred %d documents from collection %s. (%s s)' % (i + 1, coll, str(round(time.time() - timer_start_docs, 4))))
           timer_start_docs = time.time()
         if i+1 == nr_of_docs:
-          self.logger.info('Successfully transferred collection %s (%d documents).' % (coll, i+1))
+          logger.info('[EXTRACTOR] Successfully transferred collection %s (%d documents).' % (coll, i+1))
         r.insert(doc)
         if r.has_pk is False and doc['_id']:
           r.add_pk('_id')
-      self.logger.info(coll + ': ' + str(round(time.time() - start, 4)) + ' seconds.')
+      logger.info('[EXTRACTOR] %s: %s seconds.' % (coll, str(round(time.time() - start, 4))))
 
   def transfer_bulk(self, coll_names):
     """
@@ -115,7 +115,7 @@ class Extractor():
     timer_start_docs = start
     nr_of_docs = docs.count()
     transferring = []
-    nr_of_transferred = 1000
+    nr_of_transferred = 5000
     
 
     # TODO insert function call here
@@ -129,14 +129,18 @@ class Extractor():
         if (i+1)%nr_of_transferred==0 and i+1>=nr_of_transferred:
           r.insert_config_bulk(transferring, attrs_details)
           transferring = []      
-        if i + 1 == nr_of_docs and ( i + 1 ) % nr_of_transferred != 0:
-          r.insert_config_bulk(transferring, attrs_details)
-          self.logger.info('Successfully transferred collection %s (%d documents).' % (coll, i + 1))
-          transferring = []      
+        if i + 1 == nr_of_docs and (i + 1) % nr_of_transferred != 0:
+          if table.exists(self.db, self.schema_name, relation_name):
+            r.insert_config_bulk(transferring, attrs_details)
+            logger.info('[EXTRACTOR] Successfully transferred collection %s (%d documents).' % (coll, i + 1))
+            transferring = []
+          else:
+            logger.error('[EXTRACTOR] Table does %s might be deleted.' % relation_name)
+            return
       except Exception as ex:
-        self.logger.error('Transfer unsuccessful. %s' % ex)
+        logger.error('[EXTRACTOR] Transfer unsuccessful. %s' % ex)
       i += 1
-    self.logger.info(coll + ': ' + str(round(time.time() - start, 4)) + ' seconds.')
+    logger.info(coll + ': ' + str(round(time.time() - start, 4)) + ' seconds.')
 
 
   def transfer_doc(self, doc, r):
@@ -153,7 +157,7 @@ class Extractor():
       r.columns_update(attrs_details)
       r.insert_config_bulk([doc], attrs_details)
     except Exception as ex:
-      self.logger.error('Transferring item was unsuccessful. %s' % ex)
+      logger.error('[EXTRACTOR] Transferring item was unsuccessful. %s' % ex)
 
   def append_extra_props(self, attrs_conf, attrs_mdb, types_conf, extra_props_type):
     extra_props_pg = "_extra_props"

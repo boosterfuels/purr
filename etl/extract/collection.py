@@ -1,7 +1,5 @@
-from etl.monitor import Logger
+from etl.monitor import logger
 from etl.extract import init_mongo
-
-logger = Logger('collection-transfer.log', 'COLLECTION')
 
 def get_names(db):
   """
@@ -33,21 +31,23 @@ def check(db, req_colls):
   try:
     for col in req_colls:
       collection_names.index(col)
-    logger.info('Checking collection names: OK')
+    logger.info('[COLLECTION] Checking collection names: OK')
   except ValueError:
-    logger.error("'%s' is not a collection." % col)
+    logger.error("[COLLECTION] '%s' is not a collection." % col)
+  except Exception as ex:
+    logger.error("[COLLECTION] Checking collection names failed: %s" % ex)
     return False
 
   return True
 
 def get_by_name(db, name):
   try:
-    logger.info('Loading data from collection %s.' % name)
+    logger.info('[COLLECTION] Loading data from collection %s.' % name)
     c = db[name]
     bz = c.find()
     return bz.batch_size(30000)
   except:
-    logger.error('Loading data from collection %s failed.' % name)
+    logger.error('[COLLECTION] Loading data from collection %s failed.' % name)
     return []
 
 def get_sorted_by_name(name):

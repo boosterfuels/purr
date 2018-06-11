@@ -1,7 +1,5 @@
 import psycopg2
-from etl.monitor import Logger
-
-logger = Logger('collection-transfer.log', 'SCHEMA')
+from etl.monitor import logger
 
 def reset(db, schema = 'public'):
   """
@@ -14,8 +12,8 @@ def reset(db, schema = 'public'):
     db.cur.execute(cmd_create)
     db.conn.commit()
   except:
-    logger.error("Schema reset failed.")
-  logger.info("Schema %s is reset." % schema)
+    logger.error("[SCHEMA] Schema reset failed.")
+  logger.info("[SCHEMA] Schema %s is reset." % schema)
 
 def create(db, schema = 'public'):
   """
@@ -26,5 +24,5 @@ def create(db, schema = 'public'):
     db.cur.execute(cmd)
     db.conn.commit()
   except:
-    logger.error("Creating schema with name %s failed." % schema)
+    logger.error("[SCHEMA] Creating schema with name %s failed." % schema)
     

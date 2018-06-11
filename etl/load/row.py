@@ -2,9 +2,7 @@ import psycopg2
 from bson.json_util import loads, dumps
 
 from etl.load import init_pg as pg, table
-from etl.monitor import Logger
-
-logger = Logger('collection-transfer.log', 'ROW')
+from etl.monitor import logger
 
 from psycopg2.extras import execute_values
 
@@ -50,8 +48,8 @@ def insert(db, schema, table, attrs, values):
   try:
     db.cur.execute(cmd, values)
     db.conn.commit()
-  except psycopg2.Error as e:
-    logger.error(cmd)
+  except Exception as ex:
+    logger.error("[ROW] Insert failed: %s", ex)
 
 def insert_bulk(db, schema, table, attrs, values):
   """
@@ -84,6 +82,7 @@ def insert_bulk(db, schema, table, attrs, values):
   attrs = [('"%s"' % a) for a in attrs]
   attrs = ', '.join(attrs)
   excluded = ', '.join(excluded)
+  
   # default primary key in Postgres is name_of_table_pkey
   constraint = '%s_pkey' % table
   cmd = "INSERT INTO %s.%s (%s) VALUES %s ON CONFLICT ON CONSTRAINT %s DO UPDATE SET (%s) = (%s);" % (schema, table.lower(), attrs, '%s', constraint, attrs_reduced, excluded)
@@ -93,8 +92,8 @@ def insert_bulk(db, schema, table, attrs, values):
   try:
     execute_values(db.cur, cmd, values)
     db.conn.commit()
-  except psycopg2.Error as e:
-    logger.error("TABLE %s exception: %s\n command: %s\n values: %s\n excluded: %s" % (table.upper(), e, cmd, values, excluded))
+  except Exception as ex:
+    logger.error("[ROW] Bulk insert failed: %s" % ex)
 
 def update(db, schema, table_name, attrs, values):
   """
@@ -147,8 +146,8 @@ def update(db, schema, table_name, attrs, values):
   try:
     db.cur.execute(cmd)
     db.conn.commit()
-  except psycopg2.DataError as e:
-    logger.info("".join([cmd, '\n', repr(e)]))
+  except Exception as ex:
+    logger.info('[ROW] Update failed: %s' % ex)
 
 def delete(db, schema, table_name, oid):
   """
@@ -170,9 +169,9 @@ def delete(db, schema, table_name, oid):
 
   """
   cmd = "DELETE FROM %s.%s WHERE id='%s';" % (schema, table_name.lower(), oid)
-  logger.info("Deleting document from table %s with ObjectId = %s." % (table_name.lower(), oid))
+  logger.info("[ROW] Deleting document from table %s with ObjectId = %s." % (table_name.lower(), oid))
   try:
     db.cur.execute(cmd)
     db.conn.commit()
-  except:
-    logger.error(cmd)
+  except Exception as ex:
+    logger.error("[ROW] Delete failed: %s" % ex)
