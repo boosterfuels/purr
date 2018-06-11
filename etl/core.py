@@ -36,7 +36,7 @@ def transfer_collections(collections, settings, coll_config):
     ex.transfer_bulk(collections)
     
   if settings['tailing'] is True:
-    start_tailing(start_date_time, pg, mongo.conn, setup_pg, settings, coll_config)
+    start_tailing(start_date_time, pg, mongo, setup_pg, settings, coll_config)
   else:
     pg.__del__()
     

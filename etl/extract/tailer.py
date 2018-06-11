@@ -5,14 +5,12 @@ from datetime import datetime, timedelta
 from bson import Timestamp
 
 from etl.transform import relation
-from etl.monitor import Logger
+from etl.monitor import logger
 from etl.extract import extractor
 
 INSERT = 'i'
 UPDATE = 'u'
 DELETE = 'd'
-
-logger = Logger('oplog-transfer.log', 'TAILER')
 
 class Tailer(extractor.Extractor):
   """
@@ -24,7 +22,6 @@ class Tailer(extractor.Extractor):
   def __init__(self, pg, mdb, setup_pg, settings, coll_settings):
     extractor.Extractor.__init__(self, pg, mdb, setup_pg, settings, coll_settings)
     self.tailing = False
-
 
   def transform_and_load(self, doc):
     """
@@ -117,7 +114,7 @@ class Tailer(extractor.Extractor):
       now = dt  
     self.tailing = True
 
-    client = pymongo.MongoClient()
+    client = self.mdb.client
     oplog = client.local.oplog.rs
 
     # Start reading the oplog 
@@ -135,15 +132,15 @@ class Tailer(extractor.Extractor):
               ts = doc['ts']
               if(doc['op']!='n'):
                 self.transform_and_load(doc)
+                logger.info(doc)
           time.sleep(1)
 
     except StopIteration as e:
       logger.error("Tailing was stopped unexpectedly: %s" % e)
     except KeyboardInterrupt:
-      logger.info("Tailing was stopped by the user.")
+      logger.error("Tailing was stopped by the user.")
     except Exception as ex:
-      logger.info(ex)
-
+      logger.error(ex)
 
   def stop(self):
     self.tailing = False

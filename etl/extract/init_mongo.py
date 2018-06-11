@@ -12,10 +12,10 @@ class MongoConnection():
     repl_set_members = ''
     try:
       repl_set_members = settings['repl_set_members']
-      client = pymongo.MongoClient(repl_set_members)
+      self.client = pymongo.MongoClient(repl_set_members)
     except KeyError:
-      client = pymongo.MongoClient()
+      self.client = pymongo.MongoClient()
     try:
-      self.conn = client[db_name]
+      self.conn = self.client[db_name]
     except Exception as ex:
       monitor.logging.error("Could not connect to MongoDB: %s" % ex)
