@@ -22,26 +22,28 @@ class Tailer(extractor.Extractor):
   def __init__(self, pg, mdb, setup_pg, settings, coll_settings):
     extractor.Extractor.__init__(self, pg, mdb, setup_pg, settings, coll_settings)
     self.tailing = False
+    self.coll_settings
 
   def transform_and_load(self, doc):
     """
     Gets the document and passes it to the corresponding function in order to exeucte command INSERT/UPDATE/DELETE 
     """
     fullname = doc['ns']
-    table_name = fullname.split(".")[1]
+    table_name_mdb = fullname.split(".")[1]
 
     oper = doc['op']
     doc_useful = doc['o']
 
     doc_id = doc_useful["_id"]
-    r = relation.Relation(self.pg, self.schema_name, table_name)
+    table_name_pg = self.coll_settings[table_name_mdb][":meta"][":table"]
+    r = relation.Relation(self.pg, self.schema_name, table_name_pg)
     if r.exists() is False:
       return
-      
+    
     if oper == INSERT:
       try:
         if self.typecheck_auto is False:
-          super().transfer_doc(doc_useful, r)
+          super().transfer_doc(doc_useful, r, table_name_mdb)
         else:
           r.insert(doc_useful)
       except Exception as ex:
@@ -50,7 +52,7 @@ class Tailer(extractor.Extractor):
     elif oper == UPDATE:
       try:
         if self.typecheck_auto is False:
-          super().transfer_doc(doc_useful, r)
+          super().transfer_doc(doc_useful, r, table_name_mdb)
         else:
           r.update(doc_useful)
       except Exception as ex:
