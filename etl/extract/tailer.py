@@ -47,7 +47,7 @@ class Tailer(extractor.Extractor):
         else:
           r.insert(doc_useful)
       except Exception as ex:
-        logger.error("INSERT failed, ObjectId = %s. %s %s" % (doc_id, doc_useful, ex))
+        logger.error("[TAILER] Insert into %s failed: id = %s \n Document: %s\n %s" % (table_name_pg, doc_id, doc_useful, ex))
 
     elif oper == UPDATE:
       try:
@@ -56,12 +56,12 @@ class Tailer(extractor.Extractor):
         else:
           r.update(doc_useful)
       except Exception as ex:
-        logger.error("UPDATE failed, ObjectId = %s. %s %s" % (doc_id, doc_useful, ex))
+        logger.error("[TAILER] Update of %s failed: id = %s \n Document: %s\n %s" % (table_name_pg, doc_id, doc_useful, ex))
     elif oper == DELETE:
       try:
         r.delete(doc_useful)
       except Exception as ex:
-        logger.error("DELETE failed, ObjectId = %s. %s %s" % (doc_id, doc_useful, ex))
+        logger.error("[TAILER] Delete from %s failed: id = %s \n Document: %s\n %s" % (table_name_pg, doc_id, doc_useful, ex))
 
   def start_tailing_from_dt(dt):
     """
@@ -120,7 +120,7 @@ class Tailer(extractor.Extractor):
     oplog = client.local.oplog.rs
 
     # Start reading the oplog 
-    logger.info('Tailing from: %s: [%s]' % (str(now), str(Timestamp(dt, 1))))
+    logger.info('[TAILER] Started tailing from: %s: [%s]' % (str(now), str(Timestamp(dt, 1))))
     try:
       while True:
         cursor = oplog.find({'ts': {'$gt': Timestamp(now, 1)}},
@@ -134,16 +134,15 @@ class Tailer(extractor.Extractor):
               ts = doc['ts']
               if(doc['op']!='n'):
                 self.transform_and_load(doc)
-                logger.info(doc)
           time.sleep(1)
 
     except StopIteration as e:
-      logger.error("Tailing was stopped unexpectedly: %s" % e)
+      logger.error("[TAILER] Tailing was stopped unexpectedly: %s" % e)
     except KeyboardInterrupt:
-      logger.error("Tailing was stopped by the user.")
+      logger.error("[TAILER] Tailing was stopped by the user.")
     except Exception as ex:
-      logger.error(ex)
+      logger.error("[TAILER] %s" % ex)
 
   def stop(self):
     self.tailing = False
-    logger.info("Tailing was stopped.")
+    logger.info("[TAILER] Stopped tailing.")

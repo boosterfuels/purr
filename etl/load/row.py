@@ -143,11 +143,12 @@ def update(db, schema, table_name, attrs, values):
     oid,
     ";"
   ])
+  logger.info("[ROW] Updated record from table %s: [id = %s]." % (table_name.lower(), oid))
   try:
     db.cur.execute(cmd)
     db.conn.commit()
   except Exception as ex:
-    logger.info('[ROW] Update failed: %s' % ex)
+    logger.error('[ROW] Update failed: %s' % ex)
 
 def delete(db, schema, table_name, oid):
   """
@@ -169,7 +170,7 @@ def delete(db, schema, table_name, oid):
 
   """
   cmd = "DELETE FROM %s.%s WHERE id='%s';" % (schema, table_name.lower(), oid)
-  logger.info("[ROW] Deleting document from table %s with ObjectId = %s." % (table_name.lower(), oid))
+  logger.info("[ROW] Deleted record from table %s: [id = %s]." % (table_name.lower(), oid))
   try:
     db.cur.execute(cmd)
     db.conn.commit()
