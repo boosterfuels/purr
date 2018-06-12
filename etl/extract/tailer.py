@@ -22,44 +22,46 @@ class Tailer(extractor.Extractor):
   def __init__(self, pg, mdb, setup_pg, settings, coll_settings):
     extractor.Extractor.__init__(self, pg, mdb, setup_pg, settings, coll_settings)
     self.tailing = False
+    self.coll_settings
 
   def transform_and_load(self, doc):
     """
     Gets the document and passes it to the corresponding function in order to exeucte command INSERT/UPDATE/DELETE 
     """
     fullname = doc['ns']
-    table_name = fullname.split(".")[1]
+    table_name_mdb = fullname.split(".")[1]
 
     oper = doc['op']
     doc_useful = doc['o']
 
     doc_id = doc_useful["_id"]
-    r = relation.Relation(self.pg, self.schema_name, table_name)
+    table_name_pg = self.coll_settings[table_name_mdb][":meta"][":table"]
+    r = relation.Relation(self.pg, self.schema_name, table_name_pg)
     if r.exists() is False:
       return
-      
+    
     if oper == INSERT:
       try:
         if self.typecheck_auto is False:
-          super().transfer_doc(doc_useful, r)
+          super().transfer_doc(doc_useful, r, table_name_mdb)
         else:
           r.insert(doc_useful)
       except Exception as ex:
-        logger.error("INSERT failed, ObjectId = %s. %s %s" % (doc_id, doc_useful, ex))
+        logger.error("[TAILER] Insert into %s failed: id = %s \n Document: %s\n %s" % (table_name_pg, doc_id, doc_useful, ex))
 
     elif oper == UPDATE:
       try:
         if self.typecheck_auto is False:
-          super().transfer_doc(doc_useful, r)
+          super().transfer_doc(doc_useful, r, table_name_mdb)
         else:
           r.update(doc_useful)
       except Exception as ex:
-        logger.error("UPDATE failed, ObjectId = %s. %s %s" % (doc_id, doc_useful, ex))
+        logger.error("[TAILER] Update of %s failed: id = %s \n Document: %s\n %s" % (table_name_pg, doc_id, doc_useful, ex))
     elif oper == DELETE:
       try:
         r.delete(doc_useful)
       except Exception as ex:
-        logger.error("DELETE failed, ObjectId = %s. %s %s" % (doc_id, doc_useful, ex))
+        logger.error("[TAILER] Delete from %s failed: id = %s \n Document: %s\n %s" % (table_name_pg, doc_id, doc_useful, ex))
 
   def start_tailing_from_dt(dt):
     """
@@ -118,7 +120,7 @@ class Tailer(extractor.Extractor):
     oplog = client.local.oplog.rs
 
     # Start reading the oplog 
-    logger.info('Tailing from: %s: [%s]' % (str(now), str(Timestamp(dt, 1))))
+    logger.info('[TAILER] Started tailing from: %s: [%s]' % (str(now), str(Timestamp(dt, 1))))
     try:
       while True:
         cursor = oplog.find({'ts': {'$gt': Timestamp(now, 1)}},
@@ -132,16 +134,15 @@ class Tailer(extractor.Extractor):
               ts = doc['ts']
               if(doc['op']!='n'):
                 self.transform_and_load(doc)
-                logger.info(doc)
           time.sleep(1)
 
     except StopIteration as e:
-      logger.error("Tailing was stopped unexpectedly: %s" % e)
+      logger.error("[TAILER] Tailing was stopped unexpectedly: %s" % e)
     except KeyboardInterrupt:
-      logger.error("Tailing was stopped by the user.")
+      logger.error("[TAILER] Tailing was stopped by the user.")
     except Exception as ex:
-      logger.error(ex)
+      logger.error("[TAILER] %s" % ex)
 
   def stop(self):
     self.tailing = False
-    logger.info("Tailing was stopped.")
+    logger.info("[TAILER] Stopped tailing.")

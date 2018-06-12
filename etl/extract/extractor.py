@@ -130,7 +130,7 @@ class Extractor():
           r.insert_config_bulk(transferring, attrs_details)
           transferring = []      
         if i + 1 == nr_of_docs and (i + 1) % nr_of_transferred != 0:
-          if table.exists(self.db, self.schema_name, relation_name):
+          if table.exists(self.pg, self.schema_name, relation_name):
             r.insert_config_bulk(transferring, attrs_details)
             logger.info('[EXTRACTOR] Successfully transferred collection %s (%d documents).' % (coll, i + 1))
             transferring = []
@@ -143,9 +143,9 @@ class Extractor():
     logger.info(coll + ': ' + str(round(time.time() - start, 4)) + ' seconds.')
 
 
-  def transfer_doc(self, doc, r):
-    (attrs_new, attrs_original, types, relation_name, extra_props_type) = cp.get_details(self.coll_settings, r.relation_name)
-    
+  def transfer_doc(self, doc, r, coll):
+    (attrs_new, attrs_original, types, relation_name, extra_props_type) = cp.get_details(self.coll_settings, coll)
+
     # Adding _extra_props to inserted/updated row is necessary 
     # because this attribute is not part of the original document and anything
     # that is not defined in the collection.yml file will be pushed in this value.
