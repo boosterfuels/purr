@@ -125,7 +125,8 @@ class Relation():
     result = []
     for doc in docs:
       _extra_props = {}
-      values = [None] * len(attrs)
+      for k, v in attrs.items():
+        attrs[k]["value"] = None
       for key_doc, value_doc in doc.items():
         keys_conf = list(attrs.keys())
         if key_doc in keys_conf:
