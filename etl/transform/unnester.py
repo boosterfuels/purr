@@ -40,7 +40,7 @@ def cast_prim(column_type, value):
     new_value = value
 
   elif column_type == 'double precision':
-    new_value = None;
+    new_value = None
     try:
       new_value = float(str(value))
     except ValueError as e:

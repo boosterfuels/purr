@@ -115,8 +115,7 @@ class Extractor():
     timer_start_docs = start
     nr_of_docs = docs.count()
     transferring = []
-    nr_of_transferred = 5000
-    
+    nr_of_transferred = 1000
 
     # TODO insert function call here
     r.columns_update(attrs_details)
@@ -128,7 +127,7 @@ class Extractor():
       try:
         if (i+1)%nr_of_transferred==0 and i+1>=nr_of_transferred:
           r.insert_config_bulk(transferring, attrs_details)
-          transferring = []      
+          transferring = []
         if i + 1 == nr_of_docs and (i + 1) % nr_of_transferred != 0:
           if table.exists(self.pg, self.schema_name, relation_name):
             r.insert_config_bulk(transferring, attrs_details)
