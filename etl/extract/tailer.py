@@ -35,7 +35,13 @@ class Tailer(extractor.Extractor):
     doc_useful = doc['o']
 
     doc_id = doc_useful["_id"]
-    table_name_pg = self.coll_settings[table_name_mdb][":meta"][":table"]
+
+    try:
+      table_name_pg = self.coll_settings[table_name_mdb][":meta"][":table"]
+    except Exception as ex:
+      logger.error("[TAILER] Collection %s is not described in collections.yml. %s" % (table_name_mdb, ex))
+      return
+
     r = relation.Relation(self.pg, self.schema_name, table_name_pg)
     if r.exists() is False:
       return
