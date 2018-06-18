@@ -33,13 +33,9 @@ class Tailer(extractor.Extractor):
 
     oper = doc['op']
     doc_useful = doc['o']
-
-    doc_id = doc_useful["_id"]
-
     try:
       table_name_pg = self.coll_settings[table_name_mdb][":meta"][":table"]
     except Exception as ex:
-      logger.error("[TAILER] Collection %s is not described in collections.yml. %s" % (table_name_mdb, ex))
       return
 
     r = relation.Relation(self.pg, self.schema_name, table_name_pg)
@@ -53,21 +49,23 @@ class Tailer(extractor.Extractor):
         else:
           r.insert(doc_useful)
       except Exception as ex:
-        logger.error("[TAILER] Insert into %s failed: id = %s \n Document: %s\n %s" % (table_name_pg, doc_id, doc_useful, ex))
+        logger.error("[TAILER] Insert into %s failed:\n Document: %s\n %s" % (table_name_pg, doc_useful, ex))
 
     elif oper == UPDATE:
+      doc_useful = doc_useful["$set"]
+      doc_useful["_id"] = doc['o2']["_id"]
       try:
         if self.typecheck_auto is False:
           super().transfer_doc(doc_useful, r, table_name_mdb)
         else:
           r.update(doc_useful)
       except Exception as ex:
-        logger.error("[TAILER] Update of %s failed: id = %s \n Document: %s\n %s" % (table_name_pg, doc_id, doc_useful, ex))
+        logger.error("[TAILER] Update of %s failed:\n Document: %s\n %s" % (table_name_pg, doc_useful, ex))
     elif oper == DELETE:
       try:
         r.delete(doc_useful)
       except Exception as ex:
-        logger.error("[TAILER] Delete from %s failed: id = %s \n Document: %s\n %s" % (table_name_pg, doc_id, doc_useful, ex))
+        logger.error("[TAILER] Delete from %s failed: \n Document: %s\n %s" % (table_name_pg, doc_useful, ex))
 
   def start_tailing_from_dt(dt):
     """
@@ -127,6 +125,7 @@ class Tailer(extractor.Extractor):
 
     # Start reading the oplog 
     logger.info('[TAILER] Started tailing from: %s: [%s]' % (str(now), str(Timestamp(dt, 1))))
+    temp = {}
     try:
       while True:
         cursor = oplog.find({'ts': {'$gt': Timestamp(now, 1)}},
@@ -137,9 +136,9 @@ class Tailer(extractor.Extractor):
           if not self.tailing:
             cursor.next()
           for doc in cursor:
-              ts = doc['ts']
-              if(doc['op']!='n'):
-                self.transform_and_load(doc)
+            if(doc['op']!='n'):
+              self.transform_and_load(doc)
+              temp = doc['o']
           time.sleep(1)
 
     except StopIteration as e:
@@ -147,7 +146,7 @@ class Tailer(extractor.Extractor):
     except KeyboardInterrupt:
       logger.error("[TAILER] Tailing was stopped by the user.")
     except Exception as ex:
-      logger.error("[TAILER] %s" % ex)
+      logger.error("[TAILER] %s \n%s" % (ex, temp))
 
   def stop(self):
     self.tailing = False

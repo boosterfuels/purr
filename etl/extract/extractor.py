@@ -58,11 +58,10 @@ class Extractor():
           logger.info('[EXTRACTOR] Transferred %d documents from collection %s. (%s s)' % (i + 1, coll, str(round(time.time() - timer_start_docs, 4))))
           timer_start_docs = time.time()
         if i+1 == nr_of_docs:
-          logger.info('[EXTRACTOR] Successfully transferred collection %s (%d documents).' % (coll, i+1))
+          logger.info('[EXTRACTOR] Successfully transferred collection %s (%d documents in %s seconds).' % (coll, i+1, str(round(time.time() - start, 4))))
         r.insert(doc)
         if r.has_pk is False and doc['_id']:
           r.add_pk('_id')
-      logger.info('[EXTRACTOR] %s: %s seconds.' % (coll, str(round(time.time() - start, 4))))
 
   def transfer_bulk(self, coll_names):
     """
