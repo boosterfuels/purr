@@ -31,7 +31,7 @@ def check(db, req_colls):
   try:
     for col in req_colls:
       collection_names.index(col)
-    logger.info('[COLLECTION] Checking collection names: OK')
+    logger.info('[COLLECTION] Checking collection names...')
   except ValueError:
     logger.error("[COLLECTION] '%s' is not a collection." % col)
   except Exception as ex:
