@@ -1,16 +1,22 @@
 import psycopg2
+import psycopg2.extras
+import time
 import etl.monitor as monitor
+
 
 class PgConnection():
   """
   TODO
   create a base class for Connection
   """
-  def __init__(self, conn_details):
+  def __init__(self, conn_details, ttw=1):
+    # time to wait before attempt to reconnect
+    self.ttw = ttw
+    self.conn_details = conn_details
     settings_local = ['db_name', 'user']
     settings_remote = ['db_name', 'user', 'password', 'host', 'port']
     if set(settings_remote).issubset(conn_details):
-      cmd = 'dbname=%s user=%s password=%s host=%s port=%s' % (
+      self.props = 'dbname=%s user=%s password=%s host=%s port=%s' % (
         conn_details['db_name'],
         conn_details['user'],
         conn_details['password'],
@@ -18,12 +24,17 @@ class PgConnection():
         conn_details['port']
       )      
     elif set(settings_local).issubset(conn_details):
-      cmd = 'dbname=%s user=%s' % (conn_details['db_name'], conn_details['user'])  
+      self.props = 'dbname=%s user=%s' % (conn_details['db_name'], conn_details['user'])  
     try:
-      self.conn = psycopg2.connect(cmd)
+      self.conn = psycopg2.connect(self.props)
       self.cur = self.conn.cursor()
+      monitor.logging.info("Connected to Postgres.")
+      ttw = 1
+
     except Exception as ex:
-      monitor.logging.error("Could not connect to Postgres.")
+      monitor.logging.error("Could not connect to Postgres. Reconnecting...")
+      time.sleep(self.ttw)
+      self.__init__(conn_details, self.ttw*2)
       
   def query(self, query):
       try:
@@ -33,6 +44,31 @@ class PgConnection():
         return None
       else:
           return result
+
+  def execute_cmd(self, cmd, values=None):
+    try:
+      if values is not None:
+        self.cur.execute(cmd, values)
+      else:
+        self.cur.execute(cmd)
+        self.conn.commit()
+
+    except (psycopg2.InterfaceError, psycopg2.OperationalError) as exc:
+      monitor.logging.error("Trying to reconnect...")
+      self.__init__(self.conn_details, self.ttw*2)
+
+  def execute_cmd_with_fetch(self, cmd, values=None):
+    try:
+      if values is not None:
+        self.cur.execute(cmd, values)
+      else:
+        self.cur.execute(cmd)
+        self.conn.commit()
+      return self.cur.fetchall()
+  
+    except (psycopg2.InterfaceError, psycopg2.OperationalError) as exc:
+      monitor.logging.error("Trying to reconnect...")
+      self.__init__(self.conn_details, self.ttw*2)
 
   def __del__(self):
     self.conn.close()

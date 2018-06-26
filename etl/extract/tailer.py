@@ -52,8 +52,11 @@ class Tailer(extractor.Extractor):
         logger.error("[TAILER] Insert into %s failed:\n Document: %s\n %s" % (table_name_pg, doc_useful, ex))
 
     elif oper == UPDATE:
-      doc_useful = doc_useful["$set"]
-      doc_useful["_id"] = doc['o2']["_id"]
+      keys = doc_useful.keys()
+      if "$set" in keys:
+        doc_useful = doc_useful["$set"]
+      if "_id" in keys and "o2" in keys:
+        doc_useful["_id"] = doc['o2']["_id"]
       try:
         if self.typecheck_auto is False:
           super().transfer_doc(doc_useful, r, table_name_mdb)
@@ -145,8 +148,6 @@ class Tailer(extractor.Extractor):
       logger.error("[TAILER] Tailing was stopped unexpectedly: %s" % e)
     except KeyboardInterrupt:
       logger.error("[TAILER] Tailing was stopped by the user.")
-    except Exception as ex:
-      logger.error("[TAILER] %s \n%s" % (ex, temp))
 
   def stop(self):
     self.tailing = False

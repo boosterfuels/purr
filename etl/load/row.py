@@ -46,8 +46,7 @@ def insert(db, schema, table, attrs, values):
   # if a document could not be inserted.
   # We will decide later what to do with DataErrors.
   try:
-    db.cur.execute(cmd, values)
-    db.conn.commit()
+    db.execute_cmd(cmd, values)
   except Exception as ex:
     logger.error("[ROW] Insert failed: %s", ex)
 
@@ -135,18 +134,10 @@ def update(db, schema, table_name, attrs, values):
     attr_val_pairs.append(pair)
       
   pairs = ", ".join(attr_val_pairs)
-  cmd = ''.join([
-    "UPDATE ",
-    schema + "." + table_name.lower(), " SET ",
-    pairs,
-    " WHERE _id = ",
-    oid,
-    ";"
-  ])
+  cmd = "UPDATE %s.%s SET %s WHERE _id = %s;" % (schema, table_name.lower(), pairs, oid)
   logger.info("[ROW] Updated record from table %s: [id = %s]." % (table_name.lower(), oid))
   try:
-    db.cur.execute(cmd)
-    db.conn.commit()
+    db.execute_cmd(cmd)
   except Exception as ex:
     logger.error('[ROW] Update failed: %s' % ex)
 
@@ -170,9 +161,7 @@ def delete(db, schema, table_name, oid):
 
   """
   cmd = "DELETE FROM %s.%s WHERE id='%s';" % (schema, table_name.lower(), oid)
-  logger.info("[ROW] Deleted record from table %s: [id = %s]." % (table_name.lower(), oid))
   try:
-    db.cur.execute(cmd)
-    db.conn.commit()
+    db.execute_cmd(cmd)
   except Exception as ex:
     logger.error("[ROW] Delete failed: %s" % ex)
