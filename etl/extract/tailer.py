@@ -6,7 +6,7 @@ from bson import Timestamp
 
 from etl.transform import relation
 from etl.monitor import logger
-from etl.extract import extractor
+from etl.extract import extractor, transfer_info
 
 INSERT = 'i'
 UPDATE = 'u'
@@ -22,7 +22,8 @@ class Tailer(extractor.Extractor):
   def __init__(self, pg, mdb, setup_pg, settings, coll_settings):
     extractor.Extractor.__init__(self, pg, mdb, setup_pg, settings, coll_settings)
     self.tailing = False
-    self.coll_settings
+    self.pg = pg
+    self.schema = setup_pg["schema_name"]
 
   def transform_and_load(self, doc):
     """
@@ -86,25 +87,6 @@ class Tailer(extractor.Extractor):
     start = datetime(dt)
     return start
 
-  def now(self):
-    """
-    Gets timestamp from specific date
-    Parameters
-    ----------
-    None
-    Returns
-    ----------
-    start : timestamp
-    Example
-    -------
-    start_tailing_from_now()
-    """
-    start = datetime.utcnow()
-    start = start - timedelta(minutes=0,
-                            seconds=30,
-                            microseconds = start.microsecond)
-    return start
-
   def start(self, dt = None):
     """
     Starts tailing the oplog and prints write operation records on command line.
@@ -118,7 +100,10 @@ class Tailer(extractor.Extractor):
     start_tailing()
     """
     if dt is None:
-      now = self.now()
+      start = datetime.utcnow()
+      now = start - timedelta(minutes=0,
+                              seconds=30,
+                              microseconds = start.microsecond)
     else:
       now = dt  
     self.tailing = True
@@ -127,22 +112,33 @@ class Tailer(extractor.Extractor):
     oplog = client.local.oplog.rs
 
     # Start reading the oplog 
-    logger.info('[TAILER] Started tailing from: %s: [%s]' % (str(now), str(Timestamp(dt, 1))))
     temp = {}
     try:
       while True:
-        cursor = oplog.find({'ts': {'$gt': Timestamp(now, 1)}},
+        # if there was a reconnect attempt then start tailing from specific timestamp from the db
+        if self.pg.attempt_to_reconnect is True:
+          res = transfer_info.get_latest_successful_ts(self.pg, self.schema)
+          latest_ts = int((list(res)[0])[0])
+          dt = latest_ts
+          self.pg.attempt_to_reconnect = False
+
+        logger.info('[TAILER] Started tailing from: %s: [%s]' % (str(now), str(Timestamp(dt, 1))))
+        cursor = oplog.find({'ts': {'$gt': Timestamp(dt, 1)}},
             cursor_type = pymongo.CursorType.TAILABLE_AWAIT,
             oplog_replay=True)
       
-        while cursor.alive:
-          if not self.tailing:
-            cursor.next()
+        while cursor.alive and self.pg.attempt_to_reconnect is False:
           for doc in cursor:
             if(doc['op']!='n'):
-              self.transform_and_load(doc)
               temp = doc['o']
+              try:
+                self.transform_and_load(doc)
+                transfer_info.update_latest_successful_ts(self.pg, self.schema, int(time.time())-10)        
+              except Exception as ex:
+                logger.error("[TAILER] Transfer failed for temp: %s: %s" % (temp, ex))
           time.sleep(1)
+        cursor.close()
+        continue
 
     except StopIteration as e:
       logger.error("[TAILER] Tailing was stopped unexpectedly: %s" % e)
