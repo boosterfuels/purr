@@ -24,6 +24,7 @@ def transfer_collections(collections, settings, coll_config):
     setup_mdb = settings["mongo"]
 
     pg = postgres.PgConnection(setup_pg)
+    schema.create(pg, setup_pg["schema_name"])
 
     mongo = mongodb.MongoConnection(setup_mdb)
     ex = extractor.Extractor(pg, mongo.conn, setup_pg, settings, coll_config)
