@@ -84,7 +84,7 @@ class PgConnection:
         self.conn.close()
         self.cur.close()
 
-    def handle_interface_and_oper_error():
+    def handle_interface_and_oper_error(self):
         monitor.logging.error("Trying to reconnect...")
         self.attempt_to_reconnect = True
         self.__init__(self.conn_details, self.ttw * 2)
