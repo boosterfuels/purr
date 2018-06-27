@@ -33,7 +33,9 @@ class Tailer(extractor.Extractor):
     table_name_mdb = fullname.split(".")[1]
 
     oper = doc['op']
-    doc_useful = doc['o']
+    doc_useful = {}
+    doc_useful = doc['o'] 
+
     try:
       table_name_pg = self.coll_settings[table_name_mdb][":meta"][":table"]
     except Exception as ex:
@@ -53,11 +55,12 @@ class Tailer(extractor.Extractor):
         logger.error("[TAILER] Insert into %s failed:\n Document: %s\n %s" % (table_name_pg, doc_useful, ex))
 
     elif oper == UPDATE:
-      keys = doc_useful.keys()
-      if "$set" in keys:
+      if "$set" in doc_useful.keys():
         doc_useful = doc_useful["$set"]
-      if "_id" in keys and "o2" in keys:
-        doc_useful["_id"] = doc['o2']["_id"]
+
+      if "o2" in doc.keys():
+        if "_id" in doc['o2'].keys():
+          doc_useful['_id'] = doc['o2']["_id"]
       try:
         if self.typecheck_auto is False:
           super().transfer_doc(doc_useful, r, table_name_mdb)
@@ -135,7 +138,7 @@ class Tailer(extractor.Extractor):
                 self.transform_and_load(doc)
                 transfer_info.update_latest_successful_ts(self.pg, self.schema, int(time.time())-10)        
               except Exception as ex:
-                logger.error("[TAILER] Transfer failed for temp: %s: %s" % (temp, ex))
+                logger.error("[TAILER] Transfer failed for document: %s: %s" % (temp, ex))
           time.sleep(1)
         cursor.close()
         continue
