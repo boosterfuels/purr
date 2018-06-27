@@ -75,8 +75,8 @@ def insert_bulk(db, schema, table, attrs, values):
 
   temp = ', '.join(temp)
   # needed for upsert
-  excluded = [('EXCLUDED.%s' % a) for a in attrs if a != 'id']
-  attrs_reduced = [('"%s"' % a) for a in attrs if a != 'id']
+  excluded = [('EXCLUDED.%s' % a) for a in attrs]
+  attrs_reduced = [('"%s"' % a) for a in attrs]
   attrs_reduced = ', '.join(attrs_reduced)
   attrs = [('"%s"' % a) for a in attrs]
   attrs = ', '.join(attrs)
@@ -84,7 +84,7 @@ def insert_bulk(db, schema, table, attrs, values):
   
   # default primary key in Postgres is name_of_table_pkey
   constraint = '%s_pkey' % table
-  cmd = "INSERT INTO %s.%s (%s) VALUES %s ON CONFLICT ON CONSTRAINT %s DO UPDATE SET (%s) = (%s);" % (schema, table.lower(), attrs, '%s', constraint, attrs_reduced, excluded)
+  cmd = "INSERT INTO %s.%s (%s) VALUES %s ON CONFLICT ON CONSTRAINT %s DO UPDATE SET (%s) = ROW(%s);" % (schema, table.lower(), attrs, '%s', constraint, attrs_reduced, excluded)
   # MoSQL ignores the document and logs a warning
   # if a document could not be inserted.
   # We will decide later what to do with DataErrors.

@@ -140,9 +140,16 @@ class Relation():
 
       _extra_props = unnester.cast_prim('jsonb', _extra_props)
       attrs["extraProps"]["value"] = _extra_props
-      values = [v["value"] for k, v in attrs.items()]
-      attrs_pg = [v["name_conf"] for k, v in attrs.items()]
+
+      if len(docs) > 1:
+        attrs_pg = [v["name_conf"] for k, v in attrs.items()]
+        values = [v["value"] for k, v in attrs.items()]
+      else:
+        attrs_pg = [v["name_conf"] for k, v in attrs.items() if k in doc.keys()]
+        values = [v["value"] for k, v in attrs.items() if k in doc.keys()]
+      
       result.append(tuple(values))
+
     row.insert_bulk(self.db, self.schema, self.relation_name, attrs_pg, result)
 
   def update(self, doc):
