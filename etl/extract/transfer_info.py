@@ -1,5 +1,5 @@
 import psycopg2
-from datetime import datetime
+import time
 
 from etl.load import table, row, constraint, schema
 from etl.monitor import logger
@@ -24,7 +24,7 @@ def create_stat_table(db, schema):
     table_name = "purr_info"
     attrs = ["latest_successful_ts"]
     types = ["TEXT"]
-    values = [datetime.utcnow()]
+    values = [int(time.time())]
     try:
         table.create(db, schema, table_name, attrs, types)
         row.insert(db, schema, table_name, attrs, values)
