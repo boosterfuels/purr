@@ -87,6 +87,8 @@ class Extractor():
 
   def transfer_coll(self, coll):
     (attrs_new, attrs_original, types, relation_name, extra_props_type) = cp.get_details(self.coll_settings, coll)
+    if (attrs_new, attrs_original, types, relation_name, extra_props_type) == ([],[],[],[],[]):
+      return
     r = relation.Relation(self.pg, self.schema_name, relation_name)
     extra_props_pg = "_extra_props"
     extra_props_mdb = "extraProps"
@@ -143,7 +145,8 @@ class Extractor():
 
   def transfer_doc(self, doc, r, coll):
     (attrs_new, attrs_original, types, relation_name, extra_props_type) = cp.get_details(self.coll_settings, coll)
-
+    if (attrs_new, attrs_original, types, relation_name, extra_props_type) == ([],[],[],[],[]):
+      return
     # Adding _extra_props to inserted/updated row is necessary 
     # because this attribute is not part of the original document and anything
     # that is not defined in the collection.yml file will be pushed in this value.

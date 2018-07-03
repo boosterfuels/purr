@@ -48,7 +48,12 @@ def get_details(colls, name):
   attrs_original = []
   attrs_new = []
   types = []
-  collection = colls[name]
+
+  if name in colls.keys():
+    collection = colls[name]
+  else:
+    monitor.logging.warn("Failed to find description of %s in collections.yml. Ignoring collection." % name)
+    return ([],[],[],[],[])
   relation_name = collection[":meta"][":table"]
   extra_props_type = collection[":meta"][":extra_props"]
   for field in collection[":columns"]:
