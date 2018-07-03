@@ -30,3 +30,5 @@ eggs/
 .eggs/
 *.egg-info/
 lib/
+
+.vscode/
