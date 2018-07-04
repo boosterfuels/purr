@@ -1,36 +1,23 @@
 from bson import ObjectId
 from bson.json_util import default
 import json
-
-def is_composite_list(item):
-  if len(item):
-    if type(item[0]) == dict or type(item[0]) == list:
-      return True
-  return False
-
-def change_object_id(item):
-  for k, v in item.items():
-    if type(v) is ObjectId:
-      item[k] = str(v)
-  return item
+import datetime
 
 def cast(column_type, value):
-  if column_type == 'varchar(80)':
-    value = str(value)
+  '''
+  Casts value based on required column type in collections.yml.
+  When serializing ObjectId and datetime, a string is returned instead of objects with $oid and $date keys.
+  Example:
+    { _id: { $oid: "56ac26cc05b37b4e1a4d2c22" } }
+    { _id: "56ac26cc05b37b4e1a4d2c22" }
 
-  elif column_type == 'jsonb[]':
-    value = [json.dumps(v, default=default) for v in value]
-
-  elif column_type == 'jsonb':
-    temp = change_object_id(value)
-    value = json.dumps(temp, default=default)
-
-  elif column_type == 'text[]':
-    value = [str(v) for v in value]
-
-  return value
-
-def cast_prim(column_type, value):
+  Parameters:
+  -----------
+  column_type : string
+                type of column
+  value       : anything
+                value to cast 
+  '''
   new_value = None
   column_type = column_type.lower()
   if column_type == 'text':
@@ -47,7 +34,7 @@ def cast_prim(column_type, value):
       new_value = 'undefined'
 
   elif column_type == 'jsonb':
-    new_value = json.dumps(value, default=default)
+    new_value = json.dumps(value, default=str)
 
   elif column_type == 'boolean':
     new_value = bool(value)

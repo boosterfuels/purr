@@ -101,7 +101,7 @@ class Relation():
       k = k.lower().replace("_", "")
       if k in attrs_temp:
         idx = attrs_temp.index(k)
-        value = unnester.cast_prim(attrs_and_types[k], v)
+        value = unnester.cast(attrs_and_types[k], v)
         values[idx] = value
       else:
         continue
@@ -130,7 +130,7 @@ class Relation():
       for key_doc, value_doc in doc.items():
         keys_conf = list(attrs.keys())
         if key_doc in keys_conf:
-          value = unnester.cast_prim(attrs[key_doc]["type_conf"], value_doc)
+          value = unnester.cast(attrs[key_doc]["type_conf"], value_doc)
           if value == 'undefined':
             _extra_props.update({key_doc: value_doc})          
           else:
@@ -138,7 +138,7 @@ class Relation():
         else:
           _extra_props.update({key_doc: value_doc})
 
-      _extra_props = unnester.cast_prim('jsonb', _extra_props)
+      _extra_props = unnester.cast('jsonb', _extra_props)
       attrs["extraProps"]["value"] = _extra_props
 
       if len(docs) > 1:
