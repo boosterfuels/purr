@@ -161,7 +161,7 @@ class Tailer(extractor.Extractor):
                                 # in case of disconnecting from the PGDB
                                 diff = datetime.utcnow() - updated
                                 minutes_between_update = (diff.seconds//60)%60
-                                if minutes_between_update > 0:
+                                if minutes_between_update > 2:
                                     logger.info("[TAILER] Updating purr_info...")
                                     transfer_info.update_latest_successful_ts(
                                         self.pg, self.schema, int(time.time())
