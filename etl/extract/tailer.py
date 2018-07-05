@@ -52,6 +52,7 @@ class Tailer(extractor.Extractor):
                     super().transfer_doc(doc_useful, r, table_name_mdb)
                 else:
                     r.insert(doc_useful)
+                logger.info("[TAILER] Insert %s %s" % (table_name_pg, doc_useful["_id"]))
             except Exception as ex:
                 logger.error(
                     "[TAILER] Insert into %s failed:\n Document: %s\n %s"
@@ -70,6 +71,7 @@ class Tailer(extractor.Extractor):
                     super().transfer_doc(doc_useful, r, table_name_mdb)
                 else:
                     r.update(doc_useful)
+                logger.info("[TAILER] Update %s %s" % (table_name_pg, doc_useful["_id"]))
             except Exception as ex:
                 logger.error(
                     "[TAILER] Update of %s failed:\n Document: %s\n %s"
@@ -78,6 +80,7 @@ class Tailer(extractor.Extractor):
         elif oper == DELETE:
             try:
                 r.delete(doc_useful)
+                logger.info("[TAILER] Delete %s %s" % (table_name_pg, doc_useful["_id"]))
             except Exception as ex:
                 logger.error(
                     "[TAILER] Delete from %s failed: \n Document: %s\n %s"
@@ -127,6 +130,7 @@ class Tailer(extractor.Extractor):
         # Start reading the oplog
         temp = {}
         try:
+            updated = datetime.utcnow()
             while True:
                 # if there was a reconnect attempt then start tailing from specific timestamp from the db
                 if self.pg.attempt_to_reconnect is True:
@@ -136,8 +140,7 @@ class Tailer(extractor.Extractor):
                     self.pg.attempt_to_reconnect = False
 
                 logger.info(
-                    "[TAILER] Started tailing from: %s: [%s]"
-                    % (str(now), str(Timestamp(dt, 1)))
+                    "[TAILER] Started tailing from %s." % str(dt)
                 )
                 cursor = oplog.find(
                     {"ts": {"$gt": Timestamp(dt, 1)}},
@@ -145,7 +148,6 @@ class Tailer(extractor.Extractor):
                     oplog_replay=True,
                 )
 
-                nr_of_secs = 0
                 while cursor.alive and self.pg.attempt_to_reconnect is False:
                     for doc in cursor:
                         if doc["op"] != "n":
@@ -155,17 +157,20 @@ class Tailer(extractor.Extractor):
                                 # every 30 seconds update the timestamp because
                                 # we need to start tailing from somewhere 
                                 # in case of disconnecting from the PGDB
-                                if nr_of_secs % 30 == 0:
+                                diff = datetime.utcnow() - updated
+                                minutes_between_update = (diff.seconds//60)%60
+                                if minutes_between_update > 0:
+                                    logger.info("[TAILER] Updating purr_info...")
                                     transfer_info.update_latest_successful_ts(
                                         self.pg, self.schema, int(time.time())
                                     )
-                                    nr_of_secs = 0
+                                    updated = datetime.utcnow()
+
                             except Exception as ex:
                                 logger.error(
                                     "[TAILER] Transfer failed for document: %s: %s"
                                     % (temp, ex)
                                 )
-                    nr_of_secs = nr_of_secs + 1
                     time.sleep(1)
                 cursor.close()
                 continue
