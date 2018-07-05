@@ -10,7 +10,7 @@ class Logger():
     '''
     # 
     self.logger = logging.getLogger('logs_purr')
-    self.logger.setLevel(logging.DEBUG)
+    self.logger.setLevel(logging.INFO)
     formatter = logging.Formatter('%(asctime)s - [%(levelname)s] - %(message)s')
 
     h1 = logging.StreamHandler(sys.stdout)
