@@ -14,7 +14,7 @@ class Logger():
     formatter = logging.Formatter('%(asctime)s - [%(levelname)s] - %(message)s')
 
     h1 = logging.StreamHandler(sys.stdout)
-    h1.setLevel(logging.DEBUG)
+    h1.setLevel(logging.INFO)
     h1.setFormatter(formatter)
 
     h2 = logging.StreamHandler(sys.stderr)
