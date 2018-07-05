@@ -13,11 +13,11 @@ class Logger():
     self.logger.setLevel(logging.INFO)
     formatter = logging.Formatter('%(asctime)s - [%(levelname)s] - %(message)s')
 
-    h1 = logging.StreamHandler(sys.stdout)
+    h1 = logging.StreamHandler()
     h1.setLevel(logging.INFO)
     h1.setFormatter(formatter)
 
-    h2 = logging.StreamHandler(sys.stderr)
+    h2 = logging.StreamHandler(sys.stdout)
     h2.setLevel(logging.ERROR)
     h2.setFormatter(formatter)
 
