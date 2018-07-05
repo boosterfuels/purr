@@ -15,12 +15,19 @@ DELETE = "d"
 
 class Tailer(extractor.Extractor):
     """
-  This is a class for extracting data from the oplog.
-  TODO
-  replace things to base class
-  """
+    Class for extracting data from the oplog.
+    """
 
     def __init__(self, pg, mdb, setup_pg, settings, coll_settings):
+        """
+        Parameters
+        ----------
+        pg : postgres connection
+        mdb : mongo connection
+        setup_pg : postgres specific settings from setup.yml 
+        settings : settings from setup.yml
+        coll_settings : settings for each collection from collections.yml
+        """
         extractor.Extractor.__init__(self, pg, mdb, setup_pg, settings, coll_settings)
         self.tailing = False
         self.pg = pg
@@ -28,8 +35,19 @@ class Tailer(extractor.Extractor):
 
     def transform_and_load(self, doc):
         """
-    Gets the document and passes it to the corresponding function in order to exeucte command INSERT/UPDATE/DELETE 
-    """
+        Gets the document and passes it to the corresponding function in order to exeucte command INSERT/UPDATE/DELETE 
+        Parameters
+        ----------
+        doc :   dict
+                document from MongoDB
+        Example
+        -------
+        transform_and_load({"_id":ObjectId("5acf593eed101e0c1266e32b"))
+        Return
+        ------
+        None
+        """
+
         fullname = doc["ns"]
         table_name_mdb = fullname.split(".")[1]
 
@@ -52,7 +70,6 @@ class Tailer(extractor.Extractor):
                     super().transfer_doc(doc_useful, r, table_name_mdb)
                 else:
                     r.insert(doc_useful)
-                logger.info("[TAILER] Insert %s %s" % (table_name_pg, doc_useful["_id"]))
             except Exception as ex:
                 logger.error(
                     "[TAILER] Insert into %s failed:\n Document: %s\n %s"
@@ -71,7 +88,6 @@ class Tailer(extractor.Extractor):
                     super().transfer_doc(doc_useful, r, table_name_mdb)
                 else:
                     r.update(doc_useful)
-                logger.info("[TAILER] Update %s %s" % (table_name_pg, doc_useful["_id"]))
             except Exception as ex:
                 logger.error(
                     "[TAILER] Update of %s failed:\n Document: %s\n %s"
@@ -80,41 +96,27 @@ class Tailer(extractor.Extractor):
         elif oper == DELETE:
             try:
                 r.delete(doc_useful)
-                logger.info("[TAILER] Delete %s %s" % (table_name_pg, doc_useful["_id"]))
             except Exception as ex:
                 logger.error(
                     "[TAILER] Delete from %s failed: \n Document: %s\n %s"
                     % (table_name_pg, doc_useful, ex)
                 )
 
-    def start_tailing_from_dt(dt):
-        """
-    Gets timestamp from specific date
-    Parameters
-    ----------
-    dt : date and time
-    Returns
-    ----------
-    start : timestamp
-    Example
-    -------
-    start_tailing_from_dt(2018, 4, 12, 13, 30, 3, 381)
-    """
-        start = datetime(dt)
-        return start
-
     def start(self, dt=None):
         """
-    Starts tailing the oplog and prints write operation records on command line.
-    Parameters
-    ----------
-    dt: datetime
-        If datetime is None, tailing starts from now.
-    start : timestamp
-    Example
-    -------
-    start_tailing()
-    """
+        Starts tailing the oplog and prints write operation records on command line.
+        Parameters
+        ----------
+        dt: datetime
+            If datetime is None, tailing starts from the current timestamp.
+        Example
+        -------
+        (1)
+        start()
+        
+        (2)
+        start(dt)
+        """
         if dt is None:
             start = datetime.utcnow()
             now = start - timedelta(
@@ -154,7 +156,7 @@ class Tailer(extractor.Extractor):
                             temp = doc["o"]
                             try:
                                 self.transform_and_load(doc)
-                                # every 30 seconds update the timestamp because
+                                # every minute update the timestamp because
                                 # we need to start tailing from somewhere 
                                 # in case of disconnecting from the PGDB
                                 diff = datetime.utcnow() - updated
@@ -179,7 +181,3 @@ class Tailer(extractor.Extractor):
             logger.error("[TAILER] Tailing was stopped unexpectedly: %s" % e)
         except KeyboardInterrupt:
             logger.error("[TAILER] Tailing was stopped by the user.")
-
-    def stop(self):
-        self.tailing = False
-        logger.info("[TAILER] Stopped tailing.")
