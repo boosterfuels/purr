@@ -13,16 +13,11 @@ class Logger():
     self.logger.setLevel(logging.INFO)
     formatter = logging.Formatter('%(asctime)s - [%(levelname)s] - %(message)s')
 
-    h1 = logging.StreamHandler()
-    h1.setLevel(logging.INFO)
-    h1.setFormatter(formatter)
+    h = logging.StreamHandler()
+    h.setLevel(logging.INFO)
+    h.setFormatter(formatter)
 
-    h2 = logging.StreamHandler(sys.stdout)
-    h2.setLevel(logging.ERROR)
-    h2.setFormatter(formatter)
-
-    self.logger.addHandler(h1)
-    self.logger.addHandler(h2)
+    self.logger.addHandler(h)
 
   def info(self, m):
     self.logger.info(m)
