@@ -16,13 +16,11 @@ def valid_date(s):
 
 def main():
     parser = argparse.ArgumentParser(
-        description = '''An ETL tool for your MongoDB and Postgres.'''
+        description = '''An ETL tool to transfer data from MongoDB to Postgres.'''
     )
     
-    parser.add_argument('-lc', '--list-colls', action='store_true', dest='list_colls', help='List all collections in MongoDB.')
-    parser.add_argument('-c', '--colls', type=str,  dest='mdb_colls', help='MongoDB collections which will be transfered. Case sensitive!', nargs='+')
-    parser.add_argument('-sf', '--setup-file', type=str,  dest='path_setup_file', help='Basic setup like schema name, collections to transfer.')
-    parser.add_argument('-cf', '--collection-file', type=str, dest='path_collection_file', help='Path to the file that should contain collection names with corresponding field names MongoDB and PG.')
+    parser.add_argument('-sf', '--setup-file', type=str,  dest='path_setup_file', help='Path to YAML file bith basic setup: \nconnection string for MongoDB and PG, schema name, schema reset, collections to transfer, etc.')
+    parser.add_argument('-cf', '--collection-file', type=str, dest='path_collection_file', help='Path to YAML file that contains information about collections: collection names, field names, types, PG relation and attribute names, etc.')
     args = parser.parse_args()
 
     if len(sys.argv) <= 1:
@@ -37,7 +35,4 @@ def main():
 
         if setup_file and coll_file:
             settings_postgres = setup_file["postgres"]
-            colls = setup_file["collections"]
-            if len(colls) == 0:
-                colls = core.get_collection_names()
-            etl.core.transfer_collections(colls, setup_file, coll_file)
+            etl.core.start(setup_file, coll_file)
