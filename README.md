@@ -4,6 +4,10 @@ An ETL tool for your MongoDB and Postgres.
 
 ![WatchingYou](https://i.pinimg.com/736x/46/ab/1c/46ab1c8f2dc96d112ba7304782d59599--funny-animals-funny-cats.jpg)
 
+## Support
+MongoDB 3.4.2
+PostgreSQL 9.6.8
+
 ## Setup
 Install requirements locally: `pip install -r requirements.txt`
 
