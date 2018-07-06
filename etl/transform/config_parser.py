@@ -1,9 +1,9 @@
 import yaml
 import etl.monitor as monitor
 
-def file_to_dict(path):
+def config_basic(path):
   """
-  Read a YAML file which contains the following:
+  Read a YAML file which contains the basic settings:
   Settings for postgres: 
   db_name: name of database we want to connect to 
   user: name of the database user
@@ -17,6 +17,19 @@ def file_to_dict(path):
   collections: list of collections we want to transfer (case sensitive!)
   tailing: option to start tailing the oplog (true or false)
   typecheck_auto: option to determine type for each attribute without defining a config file
+  
+  Returns
+  -------
+  conf_file : dict
+            : database name, user, schema_name, ... 
+  Parameters
+  ----------
+  path : string
+       : path to file
+  Example
+  -------
+  config_basic('path/to/file')
+
   """
   try:
     with open(path, 'r') as stream:
@@ -27,14 +40,26 @@ def file_to_dict(path):
   except Exception as ex:
     monitor.logging.error("Failed to open setup file: %s" % ex)
 
-def read_collections_config(path):
+def config_collections(path):
   """
-    Read a YAML file which contains the user-defined relation settings.
+    Read a YAML file which contains the user-defined settings for each relation.
     - names of MongoDB collections and its field names
     - corresponding relation and attribute names/types in PG
     - types of extra properties
       - anything that is not defined by the user goes into _extra_props if it is castable to
       the type _extra_props has
+
+    Returns
+    -------
+    colls : dict
+          : collection details 
+    Parameters
+    ----------
+    path : string
+         : path to file
+    Example
+    -------
+    config_collections('path/to/file')
   """
   try:
     with open(path, 'r') as stream:
@@ -44,7 +69,27 @@ def read_collections_config(path):
   except Exception as ex:
     monitor.logging.error("Failed to open collection file: %s" % ex)
 
-def get_details(colls, name):
+def config_fields(colls, name):
+  '''
+  Returns details based on collection.yml in order to prepare rows for pg.
+  Returns
+  -------
+  attrs_new: names of columns in PG
+  attrs_original: names of fields from MongoDB
+  types : column types
+  relation_name: names of relation in PG
+  extra_props_type: type of extra properties (preferred JSONB)
+
+  Parameters
+  ----------
+  colls : dict
+        : collection names with settings from collections.yml
+  name : string
+       : name of collection
+  Example
+  -------
+  config_fields(collections_with_settings, collection_name)
+  '''
   attrs_original = []
   attrs_new = []
   types = []

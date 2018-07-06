@@ -86,7 +86,7 @@ class Extractor():
       self.transfer_coll(coll)
 
   def transfer_coll(self, coll):
-    (attrs_new, attrs_original, types, relation_name, extra_props_type) = cp.get_details(self.coll_settings, coll)
+    (attrs_new, attrs_original, types, relation_name, extra_props_type) = cp.config_fields(self.coll_settings, coll)
     if (attrs_new, attrs_original, types, relation_name, extra_props_type) == ([],[],[],[],[]):
       return
     r = relation.Relation(self.pg, self.schema_name, relation_name)
@@ -140,11 +140,9 @@ class Extractor():
       except Exception as ex:
         logger.error('[EXTRACTOR] Transfer unsuccessful. %s' % ex)
       i += 1
-    logger.info(coll + ': ' + str(round(time.time() - start, 4)) + ' seconds.')
-
 
   def transfer_doc(self, doc, r, coll):
-    (attrs_new, attrs_original, types, relation_name, extra_props_type) = cp.get_details(self.coll_settings, coll)
+    (attrs_new, attrs_original, types, relation_name, extra_props_type) = cp.config_fields(self.coll_settings, coll)
     if (attrs_new, attrs_original, types, relation_name, extra_props_type) == ([],[],[],[],[]):
       return
     # Adding _extra_props to inserted/updated row is necessary 

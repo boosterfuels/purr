@@ -28,15 +28,12 @@ def main():
     if len(sys.argv) <= 1:
         sys.argv.append('--help')
 
-
-    
-
     setup_file = {}
     coll_file = {}
     if args.path_setup_file:
-        setup_file = config_parser.file_to_dict(args.path_setup_file)
+        setup_file = config_parser.config_basic(args.path_setup_file)
     if args.path_collection_file:
-        coll_file = config_parser.read_collections_config(args.path_collection_file)
+        coll_file = config_parser.config_collections(args.path_collection_file)
 
         if setup_file and coll_file:
             settings_postgres = setup_file["postgres"]
