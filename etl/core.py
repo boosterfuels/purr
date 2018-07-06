@@ -5,6 +5,7 @@ from datetime import datetime
 from etl.extract import collection, extractor, tailer, init_mongo as mongodb, transfer_info
 from etl.load import schema, init_pg as postgres
 from etl.monitor import logger
+from etl.transform import config_parser as cp
 
 def start(settings, coll_config):
     """
@@ -30,7 +31,7 @@ def start(settings, coll_config):
     setup_mdb = settings["mongo"]
     # setup_file["collections"] contains list of collections
     # which will be transferred
-    collections = settings["collections"]
+    collections = cp.config_collection_names(coll_config)
     
     if collections is None:
         logger.error("No collections found. Check your collection names in the setup file.")

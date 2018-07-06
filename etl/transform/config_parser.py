@@ -69,6 +69,9 @@ def config_collections(path):
   except Exception as ex:
     monitor.logging.error("Failed to open collection file: %s" % ex)
 
+def config_collection_names(colls):
+  return list(colls.keys())
+
 def config_fields(colls, name):
   '''
   Returns details based on collection.yml in order to prepare rows for pg.
