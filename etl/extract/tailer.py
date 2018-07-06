@@ -55,11 +55,19 @@ class Tailer(extractor.Extractor):
         doc_useful = {}
         doc_useful = doc["o"]
 
+        '''
+        Get table name from collections.yml. 
+        Skip the document if the table name does not exist.
+        '''
         try:
             table_name_pg = self.coll_settings[table_name_mdb][":meta"][":table"]
         except Exception as ex:
             return
 
+        '''
+        Check if relation exists in the PG database. 
+        Skip the document if the trelation does not exist.
+        '''
         r = relation.Relation(self.pg, self.schema_name, table_name_pg)
         if r.exists() is False:
             return
@@ -141,9 +149,7 @@ class Tailer(extractor.Extractor):
                     dt = latest_ts
                     self.pg.attempt_to_reconnect = False
 
-                logger.info(
-                    "[TAILER] Started tailing from %s." % str(dt)
-                )
+                logger.info("[TAILER] Started tailing from %s." % str(dt))
                 cursor = oplog.find(
                     {"ts": {"$gt": Timestamp(dt, 1)}},
                     cursor_type=pymongo.CursorType.TAILABLE_AWAIT,
@@ -161,8 +167,7 @@ class Tailer(extractor.Extractor):
                                 # in case of disconnecting from the PGDB
                                 diff = datetime.utcnow() - updated
                                 minutes_between_update = (diff.seconds//60)%60
-                                if minutes_between_update > 2:
-                                    logger.info("[TAILER] Updating purr_info...")
+                                if minutes_between_update > 5:
                                     transfer_info.update_latest_successful_ts(
                                         self.pg, self.schema, int(time.time())
                                     )

@@ -30,10 +30,8 @@ class Extractor():
     
   def transfer_auto(self, coll_names):
     """
-    Transfer collections using auto typecheck
-    TODO
-    ----
-    replace relation 
+    Transfers documents or whole collections if the number of fields is less than 30 000 (batch_size).
+    Types of attributes are determined using auto typechecking.
     """
     if collection.check(self.mdb, coll_names) is False:
       return
@@ -63,12 +61,17 @@ class Extractor():
         if r.has_pk is False and doc['_id']:
           r.add_pk('_id')
 
-  def transfer_bulk(self, coll_names):
+  def transfer_conf(self, coll_names):
     """
-    Transfer collections using auto typecheck
-    TODO
-    ----
-    replace relation 
+    Transfers documents or whole collections if the number of fields is less than 30 000 (batch_size).
+    Types of attributes are determined using the collections.yml file.
+    Returns
+    -------
+    -
+    Parameters
+    ----------
+    coll_names : list
+               : list of collection names
     """
     start_bulk = time.time()
 
@@ -86,6 +89,16 @@ class Extractor():
       self.transfer_coll(coll)
 
   def transfer_coll(self, coll):
+    '''
+    Transfers documents or whole collections if the number of fields is less than 30 000 (batch_size).
+    Returns
+    -------
+    -
+    Parameters
+    ----------
+    coll : string
+         : name of collection which is going to be transferred
+    '''
     (attrs_new, attrs_original, types, relation_name, extra_props_type) = cp.config_fields(self.coll_settings, coll)
     if (attrs_new, attrs_original, types, relation_name, extra_props_type) == ([],[],[],[],[]):
       return
@@ -142,6 +155,20 @@ class Extractor():
       i += 1
 
   def transfer_doc(self, doc, r, coll):
+    '''
+    Transfers single document.
+    Returns
+    -------
+    -
+    Parameters
+    ----------
+    doc : dict
+        : document 
+    r : Relation
+        relation in PG
+    coll : string
+         : collection name
+    '''
     (attrs_new, attrs_original, types, relation_name, extra_props_type) = cp.config_fields(self.coll_settings, coll)
     if (attrs_new, attrs_original, types, relation_name, extra_props_type) == ([],[],[],[],[]):
       return
@@ -159,6 +186,33 @@ class Extractor():
       logger.error('[EXTRACTOR] Transferring item was unsuccessful. %s' % ex)
 
   def append_extra_props(self, attrs_conf, attrs_mdb, types_conf, extra_props_type):
+    '''
+    Adds extra properties field.
+    This field needs to be added like this because it is not part of the original document.
+    It can also have any type.
+    Returns
+    -------
+    attrs_details : list
+                  : attribute details with extra property
+
+    Parameters
+    ----------
+    attrs_conf : list
+                : attribute names from config file
+    attrs_mdb : list
+                : field names of MongoDB document
+    types_conf : list
+                : types from config files
+    extra_props_type : string
+                : type of the extra property
+    Example
+    -------
+    attrs_new = [kit_cat, birdy_bird]
+    attrs_original = [kitCat, birdyBird]
+    types = ['text', 'text']
+    extra_props_type = 'jsonb'
+    res = append_extra_props(attrs_new, attrs_original, types, extra_props_type)
+    '''
     extra_props_pg = "_extra_props"
     extra_props_mdb = "extraProps"
 
