@@ -133,6 +133,8 @@ class Tailer(extractor.Extractor):
         else:
             now = dt
         self.tailing = True
+        
+        disconnected = False
 
         client = self.mdb.client
         oplog = client.local.oplog.rs
@@ -143,42 +145,50 @@ class Tailer(extractor.Extractor):
             updated = datetime.utcnow()
             while True:
                 # if there was a reconnect attempt then start tailing from specific timestamp from the db
-                if self.pg.attempt_to_reconnect is True:
+                if self.pg.attempt_to_reconnect is True or disconnected is True:
                     res = transfer_info.get_latest_successful_ts(self.pg, self.schema)
                     latest_ts = int((list(res)[0])[0])
                     dt = latest_ts
                     self.pg.attempt_to_reconnect = False
-
-                logger.info("[TAILER] Started tailing from %s." % str(dt))
+                
                 cursor = oplog.find(
                     {"ts": {"$gt": Timestamp(dt, 1)}},
                     cursor_type=pymongo.CursorType.TAILABLE_AWAIT,
                     oplog_replay=True,
                 )
+                if disconnected is False:
+                    logger.info("[TAILER] Started tailing from %s." % str(dt))
 
                 while cursor.alive and self.pg.attempt_to_reconnect is False:
-                    for doc in cursor:
-                        if doc["op"] != "n":
-                            temp = doc["o"]
-                            try:
-                                self.transform_and_load(doc)
-                                # every minute update the timestamp because
-                                # we need to start tailing from somewhere 
-                                # in case of disconnecting from the PGDB
-                                diff = datetime.utcnow() - updated
-                                minutes_between_update = (diff.seconds//60)%60
-                                if minutes_between_update > 5:
-                                    transfer_info.update_latest_successful_ts(
-                                        self.pg, self.schema, int(time.time())
-                                    )
-                                    updated = datetime.utcnow()
+                    try:
+                        for doc in cursor:
+                            if doc["op"] != "n":
+                                temp = doc["o"]
+                                try:
+                                    self.transform_and_load(doc)
+                                    # every minute update the timestamp because
+                                    # we need to start tailing from somewhere 
+                                    # in case of disconnecting from the PGDB
+                                    diff = datetime.utcnow() - updated
+                                    minutes_between_update = (diff.seconds//60)%60
+                                    if minutes_between_update > 5:
+                                        transfer_info.update_latest_successful_ts(
+                                            self.pg, self.schema, int(time.time())
+                                        )
+                                        updated = datetime.utcnow()
 
-                            except Exception as ex:
-                                logger.error(
-                                    "[TAILER] Transfer failed for document: %s: %s"
-                                    % (temp, ex)
-                                )
-                    time.sleep(1)
+                                except Exception as ex:
+                                    logger.error(
+                                        "[TAILER] Transfer failed for document: %s: %s"
+                                        % (temp, ex)
+                                    )
+                        if disconnected is True:
+                            logger.info("[TAILER] Started tailing from %s." % str(dt))
+                            disconnected = False
+                        time.sleep(1)
+                    except Exception as ex:
+                        disconnected = True
+                        logger.error("[TAILER] Disconnected from MongoDB. Reconnecting...") 
                 cursor.close()
                 continue
 
