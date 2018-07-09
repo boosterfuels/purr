@@ -30,16 +30,12 @@ postgres:
 mongo:
   db_name: my_mongo_database
   repl_set_members: mongo_conn_string
-  collections:
-    - Company
-    - Customer
-    - User
 tailing: true
 typecheck_auto: false
 ```
 It is not necessary to add all the collections in setup.yml. These collection must be in collections.yml, otherwise they cannot be transferred to the Postgres database.
 
-`-cf, --collection-file` - define path to collection.yml file which contains information about the collections and its fields which will be transfered.
+`-cf, --collection-file` - define path to collections.yml file which contains information about the collections and its fields which will be transfered.
 ```
 my_mongo_database:
   Company:
@@ -67,5 +63,4 @@ my_mongo_database:
 **Examples**
 
 `purr -sf setup.yml -cf collections.yml`
-* transfers collections defined in setup.yml with attribute names and types from collections.yml
-
+* start transfering collections
