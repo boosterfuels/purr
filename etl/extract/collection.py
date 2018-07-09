@@ -1,108 +1,82 @@
 from etl.monitor import logger
 from etl.extract import init_mongo
 
-def get_names(db):
+def check(db, colls_requested):
   """
-    Get collection names.
-    Returns
-    -------
-    List of strings.
-  """
-  return db.collection_names(include_system_collections=False)
-
-def check(db, req_colls):
-  """
-  Parameters
-  ----------
-  req_colls: 
-   - list of requested collection names; 
+  Checks if requested collections exist in the database. 
+  Gets all collection names from MongoDB (colls_name) and creates a new list which contains only the existing collection names (colls_existing).
   
-  Example
-  -------
-  checkCollectionNames(['Tanker'])  
-  checkCollectionNames(['Territory', 'FleetOrder']
-  """
-  collection_names = db.collection_names(include_system_collections=False)
-  if(len(req_colls) > len(collection_names)):
-    logger.error('You entered more collection names than actually exist in the database.')
-  # when loading collections, load them sorted by ObjectId
-  # in case an error happens we can continue loading from that moment
-  # and output the latest successful item passed to PG 
-  try:
-    for col in req_colls:
-      collection_names.index(col)
-    logger.info('[COLLECTION] Checking collection names...')
-  except ValueError:
-    logger.error("[COLLECTION] '%s' is not a collection." % col)
-  except Exception as ex:
-    logger.error("[COLLECTION] Checking collection names failed: %s" % ex)
-    return False
-
-  return True
-
-def get_by_name(db, name):
-  try:
-    logger.info('[COLLECTION] Loading data from collection %s.' % name)
-    c = db[name]
-    bz = c.find()
-    return bz.batch_size(30000)
-  except:
-    logger.error('[COLLECTION] Loading data from collection %s failed.' % name)
-    return []
-
-def get_sorted_by_name(name):
-  c = db[name]
-  return c.find().sort([("updatedAt", -1)])
-
-def get_latest_update(name):
-  """
-  Example
-  -------
-  getLatestUpdate('FuelRequest')
-  Prerequisite
-  ------------
-  non-empty coll
-  TODO
-  check if empty
-  """
-  c = db[name]
-  docs = c.find({}, {'updatedAt': 1, 'ObjectId': 1}).sort([("updatedAt", -1)])
-  if docs.count():
-    return docs[0]
-  else:
-    return None
-
-def get_field_names(collection_name):
-  """
-  Example
-  -------
-  TODO
-  ----
-  check if empty
-  """
-  c = db[collection_name]
-  docs = c.find({}, {'updatedAt': 1, 'ObjectId': 1}).sort([("updatedAt", -1)])
-  if docs.count():
-    return docs[0]
-  else:
-    return None
-
-def get_fields_op(doc):
-  """
   Parameters
   ----------
-  An object (JSON) from a document (fields+values).
+  db : pymongo.database.Database
+    Database connection and name
+  colls_requested : list
+    Contains the list of requested collection names.
+
   Returns
   -------
-  Names of fields.
+  colls_existing : list
+    Contains only existing collection names.
+
+  Raises
+  ------
+  ValueError
+    when a requested collection does not exist in the database (MongoDB)
+
   Example
   -------
-  get_fields_op(doc)
+  check(db, ['Car'])  
+    []
+  check(db, ['Region', 'Customer']
+    ['Region', 'Customer']
+  """
+  colls_name = db.collection_names(include_system_collections=False)
+  colls_existing = []
+  logger.info('[COLLECTION] Checking collection names...')
+  try:
+    for coll in colls_requested:
+      try:
+        colls_name.index(coll)
+        colls_existing.append(coll)
+      except ValueError:
+        logger.error("[COLLECTION] '%s' is not in the database." % coll)
+  except Exception as ex:
+    logger.error("[COLLECTION] Checking collection names failed: %s" % ex)
+  return colls_existing
+
+def get_by_name(db, name):
+  """
+  Gets data from collection limited by batch size.
+  
+  Parameters
+  ----------
+  db : pymongo.database.Database
+    Database connection and name
+  name : string
+    Name of collection.
+
+  Returns
+  -------
+  docs : pymongo.cursor.Cursor
+
+  Raises
+  ------
+
+  Example
+  -------
+  get_by_name(db, 'Car')
+
   TODO
   ----
-  check if empty
+  - let the user decide batch size
   """
-  keys = []
-  for key, value in doc.items():
-    keys.append(key)
-  return keys
+  size = 30000
+  docs = []
+  try:
+    logger.info('[COLLECTION] Loading data from collection %s...' % name)
+    c = db[name]
+    bz = c.find()
+    docs = bz.batch_size(size)
+  except Exception as ex:
+    logger.error('[COLLECTION] Loading data from collection %s failed.' % name)
+  return docs

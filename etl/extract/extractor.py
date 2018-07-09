@@ -75,7 +75,8 @@ class Extractor():
     """
     start_bulk = time.time()
 
-    if collection.check(self.mdb, coll_names) is False:
+    coll_names = collection.check(self.mdb, coll_names)
+    if len(coll_names) == 0:
       return
 
     if self.drop:
