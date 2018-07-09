@@ -9,10 +9,10 @@ class MongoConnection():
   """
   def __init__(self, settings):
     db_name = settings['db_name']
-    repl_set_members = ''
+    connection_string = ''
     try:
-      repl_set_members = settings['repl_set_members']
-      self.client = pymongo.MongoClient(repl_set_members)
+      connection_string = settings['connection']
+      self.client = pymongo.MongoClient(connection_string)
     except KeyError:
       self.client = pymongo.MongoClient()
     try:

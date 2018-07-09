@@ -29,7 +29,7 @@ postgres:
   table_drop: false
 mongo:
   db_name: my_mongo_database
-  repl_set_members: mongo_conn_string
+  connection: mongo_connection_string
 tailing: true
 typecheck_auto: false
 ```

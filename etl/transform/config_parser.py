@@ -13,7 +13,7 @@ def config_basic(path):
   table_drop: drop tables before transfer
   Settings for mongo: 
   db_name: name of the database we want to connect to
-  repl_set_members: connection string; leave out if you want to connect to your local Mongo instance
+  connection: connection string; leave out if you want to connect to your local Mongo instance
   tailing: option to start tailing the oplog (true or false)
   typecheck_auto: option to determine type for each attribute without defining a config file
   
