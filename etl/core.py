@@ -9,7 +9,7 @@ from etl.transform import config_parser as cp
 
 def start(settings, coll_config):
     """
-    Starts 
+    Starts Purr.
     Returns
     -------
     -
@@ -26,11 +26,11 @@ def start(settings, coll_config):
     ----
     - create table with attributes and types
     """
+    logger.info("Starting Purr...")
 
     setup_pg = settings["postgres"]
     setup_mdb = settings["mongo"]
-    # setup_file["collections"] contains list of collections
-    # which will be transferred
+    # collections which will be transferred
     collections = cp.config_collection_names(coll_config)
     
     if collections is None:
@@ -41,11 +41,12 @@ def start(settings, coll_config):
     schema.create(pg, setup_pg["schema_name"])
 
     mongo = mongodb.MongoConnection(setup_mdb)
+
+    # initialize extractor
     ex = extractor.Extractor(pg, mongo.conn, setup_pg, settings, coll_config)
 
+    # after extracting all collections tailing will start from this timestamp
     start_date_time = datetime.utcnow()
-    if settings["tailing"] is True:
-        t = tailer.Tailer(pg, mongo, setup_pg, settings, coll_config)
 
     if setup_pg["schema_reset"] is True:
         schema.reset(pg, setup_pg["schema_name"])
@@ -58,6 +59,7 @@ def start(settings, coll_config):
         ex.transfer_conf(collections)
 
     if settings["tailing"] is True:
+        t = tailer.Tailer(pg, mongo, setup_pg, settings, coll_config)
         t.start(start_date_time)
     else:
         pg.__del__()
