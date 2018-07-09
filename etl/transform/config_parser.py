@@ -37,7 +37,7 @@ def config_basic(path):
         return None
       return conf_file
   except Exception as ex:
-    monitor.logging.error("Failed to open setup file: %s" % ex)
+    monitor.logging.error("[CONFIG PARSER] Failed to open setup file: %s" % ex)
 
 def config_collections(path):
   """
@@ -66,7 +66,7 @@ def config_collections(path):
       colls = conf_file["booster"]
       return colls
   except Exception as ex:
-    monitor.logging.error("Failed to open collection file: %s" % ex)
+    monitor.logging.error("[CONFIG PARSER] Failed to open collection file: %s" % ex)
 
 def config_collection_names(colls):
   return list(colls.keys())
@@ -99,7 +99,7 @@ def config_fields(colls, name):
   if name in colls.keys():
     collection = colls[name]
   else:
-    monitor.logging.warn("Failed to find description of %s in collections.yml. Ignoring collection." % name)
+    monitor.logging.warn("[CONFIG PARSER] Failed to find description of %s in collections.yml. Skipping collection." % name)
     return ([],[],[],[],[])
   relation_name = collection[":meta"][":table"]
   extra_props_type = collection[":meta"][":extra_props"]

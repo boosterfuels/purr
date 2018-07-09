@@ -28,7 +28,7 @@ def create_stat_table(db, schema):
     try:
         table.create(db, schema, table_name, attrs, types)
         row.insert(db, schema, table_name, attrs, values)
-        logger.info("Created table %s." % (table_name))
+        logger.info("[TRANSFER INFO] Created table %s." % (table_name))
     except Exception as ex:
         logger.error("[TRANSFER_INFO] Failed to create table purr_info: %s" % (ex))
 

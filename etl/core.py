@@ -34,7 +34,7 @@ def start(settings, coll_config):
     collections = cp.config_collection_names(coll_config)
     
     if collections is None:
-        logger.error("No collections found. Check your collection names in the setup file.")
+        logger.error("[CORE] No collections found. Check your collection names in the setup file.")
         return
 
     pg = postgres.PgConnection(setup_pg)

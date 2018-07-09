@@ -1,7 +1,7 @@
 import psycopg2
 import psycopg2.extras
 import time
-import etl.monitor as monitor
+from etl.monitor import logger
 
 
 class PgConnection:
@@ -34,28 +34,17 @@ class PgConnection:
         try:
             self.conn = psycopg2.connect(self.props)
             self.cur = self.conn.cursor()
-            monitor.logging.info("Connected to Postgres.")
+            logger.info("[INIT_PG] Connected to Postgres.")
             self.ttw = 1
         except Exception as ex:
             self.attempt_to_reconnect = True
-            monitor.logging.error(
-                "Could not connect to Postgres. Reconnecting in %s seconds..."
+            logger.error(
+                "[INIT_PG] Could not connect to Postgres. Reconnecting in %s seconds..."
                 % self.ttw
             )
             time.sleep(self.ttw)
 
             self.__init__(conn_details, self.ttw * 2)
-
-    def query(self, query):
-        try:
-            result = self.cur.execute(query)
-        except Exception as ex:
-            monitor.logging.error(
-                'error execting query "{}", error: {}'.format(query, ex)
-            )
-            return None
-        else:
-            return result
 
     def execute_cmd(self, cmd, values=None):
         try:
@@ -85,6 +74,6 @@ class PgConnection:
         self.cur.close()
 
     def handle_interface_and_oper_error(self):
-        monitor.logging.error("Trying to reconnect...")
+        logger.error("[INIT_PG] Trying to reconnect to Postgres...")
         self.attempt_to_reconnect = True
         self.__init__(self.conn_details, self.ttw * 2)
