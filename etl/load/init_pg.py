@@ -7,6 +7,8 @@ from etl.monitor import logger
 class PgConnection:
 
     def __init__(self, conn_details, ttw=1):
+        logger.info("[INIT_PG] Connecting to %s" % conn_details)
+
         # time to wait before attempt to reconnect
         self.ttw = ttw
         self.conn_details = conn_details
@@ -25,7 +27,7 @@ class PgConnection:
             )
             time.sleep(self.ttw)
 
-            self.__init__(conn_details, self.ttw * 2)
+            self.__init__(self.conn_details, self.ttw * 2)
 
     def execute_cmd(self, cmd, values=None):
         try:
