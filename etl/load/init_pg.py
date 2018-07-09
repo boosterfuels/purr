@@ -5,10 +5,6 @@ from etl.monitor import logger
 
 
 class PgConnection:
-    """
-  TODO
-  create a base class for Connection
-  """
 
     def __init__(self, conn_details, ttw=1):
         # time to wait before attempt to reconnect
@@ -16,23 +12,8 @@ class PgConnection:
         self.conn_details = conn_details
         if ttw == 1:
             self.attempt_to_reconnect = False
-        settings_local = ["db_name", "user"]
-        settings_remote = ["db_name", "user", "password", "host", "port"]
-        if set(settings_remote).issubset(conn_details):
-            self.props = "dbname=%s user=%s password=%s host=%s port=%s" % (
-                conn_details["db_name"],
-                conn_details["user"],
-                conn_details["password"],
-                conn_details["host"],
-                conn_details["port"],
-            )
-        elif set(settings_local).issubset(conn_details):
-            self.props = "dbname=%s user=%s" % (
-                conn_details["db_name"],
-                conn_details["user"],
-            )
         try:
-            self.conn = psycopg2.connect(self.props)
+            self.conn = psycopg2.connect(self.conn_details)
             self.cur = self.conn.cursor()
             logger.info("[INIT_PG] Connected to Postgres.")
             self.ttw = 1

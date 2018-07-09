@@ -37,7 +37,7 @@ def start(settings, coll_config):
         logger.error("[CORE] No collections found. Check your collection names in the setup file.")
         return
 
-    pg = postgres.PgConnection(setup_pg)
+    pg = postgres.PgConnection(setup_pg["connection"])
     schema.create(pg, setup_pg["schema_name"])
 
     mongo = mongodb.MongoConnection(setup_mdb)
