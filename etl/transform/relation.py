@@ -109,7 +109,7 @@ class Relation():
     row.insert(self.db, self.schema, self.relation_name, attrs, values)
 
 
-  def insert_config_bulk(self, docs, attrs):
+  def insert_config_bulk(self, docs, attrs, include_extra_props = True):
     """
     Transforms document and inserts it into the corresponding table.
     Parameters
@@ -135,16 +135,17 @@ class Relation():
             attrs[key_doc]["value"] = value
         else:
           _extra_props.update({key_doc: value_doc})
+      if include_extra_props is True:
+        _extra_props = unnester.cast('jsonb', _extra_props)
+        attrs["extraProps"]["value"] = _extra_props
 
-      _extra_props = unnester.cast('jsonb', _extra_props)
-      attrs["extraProps"]["value"] = _extra_props
       if len(docs) > 1:
         attrs_pg = [v["name_conf"] for k, v in attrs.items()]
         values = [v["value"] for k, v in attrs.items()]
       else:
         attrs_pg = [v["name_conf"] for k, v in attrs.items() if k in doc.keys()]
         values = [v["value"] for k, v in attrs.items() if k in doc.keys()]
-        if len(doc.keys()) > len(attrs_pg):
+        if len(doc.keys()) > len(attrs_pg) and include_extra_props is True:
           attrs_pg.append('_extra_props')
           values.append(_extra_props)
       
