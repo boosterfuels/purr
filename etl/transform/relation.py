@@ -120,8 +120,6 @@ class Relation():
     CHECK if self.column_names and self.column_types are still the same, do not
     """
     # This is needed because sometimes there is no value for attributes (null)
-    # - in this case
-
     result = []
     for doc in docs:
       _extra_props = {}
@@ -140,16 +138,17 @@ class Relation():
 
       _extra_props = unnester.cast('jsonb', _extra_props)
       attrs["extraProps"]["value"] = _extra_props
-
       if len(docs) > 1:
         attrs_pg = [v["name_conf"] for k, v in attrs.items()]
         values = [v["value"] for k, v in attrs.items()]
       else:
         attrs_pg = [v["name_conf"] for k, v in attrs.items() if k in doc.keys()]
         values = [v["value"] for k, v in attrs.items() if k in doc.keys()]
+        if len(doc.keys()) > len(attrs_pg):
+          attrs_pg.append('_extra_props')
+          values.append(_extra_props)
       
       result.append(tuple(values))
-
     row.insert_bulk(self.db, self.schema, self.relation_name, attrs_pg, result)
 
   def update(self, doc):
