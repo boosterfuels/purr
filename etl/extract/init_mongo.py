@@ -1,5 +1,6 @@
 # access MongoDB
 import pymongo
+from etl.monitor import logger
 
 class MongoConnection():
   """
@@ -9,13 +10,11 @@ class MongoConnection():
   """
   def __init__(self, settings):
     db_name = settings['db_name']
-    connection_string = ''
     try:
-      connection_string = settings['connection']
-      self.client = pymongo.MongoClient(connection_string)
-    except KeyError:
-      self.client = pymongo.MongoClient()
+      self.client = pymongo.MongoClient(settings['connection'])
+    except Exception as ex:
+      logger.error("Could not initialize MongoDB client: %s" % ex)
     try:
       self.conn = self.client[db_name]
     except Exception as ex:
-      monitor.logging.error("Could not connect to MongoDB: %s" % ex)
+      logger.error("Could not create connection to MongoDB: %s" % ex)
