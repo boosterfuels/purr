@@ -22,6 +22,9 @@ Install purr: `python setup.py install`
 `-h, --help` show help message
 
 `-sf, --setup-file` 
+
+You can create a setup file to organize your settings.
+
 - path to YAML file which contains settings
   - settings for Postgres: 
     - `db_name`: name of database
@@ -41,6 +44,22 @@ Install purr: `python setup.py install`
       - `true`: let Purr decide the data type for each field
       - `false`: use a YAML file to describe collection types (`-cf`) 
   
+
+You can also set these variables using the command line.
+- `-sf or --setup-file`: path to the setup file if exists
+- `-cf or --collection-file`: path to the collection file if exists
+- `-td or --table-drop`: defaults to `false`
+- `-tt or --table-truncate`: defaults to `false`
+- `-sr or --schema-reset`: defaults to `false`
+- `-sn or --schema-name`: defaults to `public`
+- `-pg or --pg-connection`: connection string to PG database (*)
+- `-mdb or --mongo-connection`: connection string to Mongo database (*)
+- `-n or --mongo-db-name`: equivalent of `db_name` for MongoDB (*)
+- `-t or --tail`: equivalent of `tailing`; defaults to `false`
+- `-ta or --typecheck-auto`: defaults to `false`
+
+Variables followed by (*) are mandatory. 
+
 **Example setup.yml**
  
 ```
@@ -90,6 +109,11 @@ my_mongo_database:
       :extra_props: JSONB
 ```
 
-**Example: start Purr with collections described in collections.yml**
+**Example: start Purr using a setup file and collections described in collections.yml**
 
 `purr -sf setup.yml -cf collections.yml`
+
+
+**Example: start Purr without setup file (tailing mode)**
+
+`purr -cf collections.yml -pg postgres://127.0.0.1:5432/postgres -mdb mongodb://localhost:27017 -n db_name -t`
