@@ -133,8 +133,14 @@ class Extractor():
     nr_of_transferred = 1000
 
     # TODO insert function call here
-    r.columns_update(attrs_details)
-
+    type_update_failed = r.columns_update(attrs_details)
+    if type_update_failed is not None:
+      for tuf in type_update_failed:
+        name = tuf[0]
+        type_orig = tuf[1]
+        type_new = attrs_details[name]["type_conf"]
+        attrs_details[name]["type_conf"] = type_orig
+        logger.warn("[EXTRACTOR] Type conversion failed for column '%s'. Skipping conversion %s -> %s." % (name, type_orig.upper(), type_new))
     i = 0
     transferring = []
     for doc in docs:

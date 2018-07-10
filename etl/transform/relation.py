@@ -147,7 +147,7 @@ class Relation():
         if len(doc.keys()) > len(attrs_pg):
           attrs_pg.append('_extra_props')
           values.append(_extra_props)
-      
+
       result.append(tuple(values))
     row.insert_bulk(self.db, self.schema, self.relation_name, attrs_pg, result)
 
@@ -244,7 +244,7 @@ class Relation():
       column_info = table.get_column_names_and_types(self.db, self.schema, self.relation_name)
       if self.exists() is True and column_info is not None:
         attrs_types_pg = dict(column_info)
-        attrs_pg = [k for k,v in attrs_types_pg.items()]
+        attrs_pg = [k for k, v in attrs_types_pg.items()]
         types_pg = [v for k, v in attrs_types_pg.items()]
 
         attrs_conf = [v["name_conf"] for k,v in attrs_types_conf.items()]
@@ -256,8 +256,9 @@ class Relation():
         - check types
         - check check is one is castable to the other
         """
-        if(len(attrs_pg) != 0 and (set(attrs_conf) == set(attrs_pg))):
+        if(len(attrs_pg) != 0 and (set(attrs_conf) == set(attrs_pg)) and set(types_conf) == set(types_pg)):
           return
+        type_convert_fail = []
         if set(attrs_conf).issubset(set(attrs_pg)):
           # check types
           for i in range(len(attrs_pg)):
@@ -269,7 +270,11 @@ class Relation():
                 continue
               elif type_old != type_new:
                 if self.is_convertable(type_old, type_new):
-                  table.column_change_type(pg, schema_name, relation_name, attr_db, type_new)
+                  table.column_change_type(self.db, self.schema, self.relation_name, attrs_pg[i], type_new)
+                else:
+                  type_convert_fail.append((attrs_pg[i], type_old))
+                  continue
+          return type_convert_fail
         else:
           # check old attrs and new ones
           diff = list(set(attrs_conf) - set(attrs_pg))
@@ -298,7 +303,7 @@ class Relation():
       # it is possible to convert the old type into the new one. 
       # Anything can be converted to JSONB.
 
-  def is_convertable(type_old, type_new):
+  def is_convertable(self, type_old, type_new):
     if type_new == 'jsonb':
       return True
     return False
