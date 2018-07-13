@@ -61,7 +61,7 @@ class Extractor():
         if r.has_pk is False and doc['_id']:
           r.add_pk('_id')
 
-  def transfer_conf(self, coll_names):
+  def transfer_conf(self, coll_names_in_config):
     """
     Transfers documents or whole collections if the number of fields is less than 30 000 (batch_size).
     Types of attributes are determined using the collections.yml file.
@@ -75,8 +75,9 @@ class Extractor():
     """
     start_bulk = time.time()
 
-    coll_names = collection.check(self.mdb, coll_names)
+    coll_names = collection.check(self.mdb, coll_names_in_config)
     if len(coll_names) == 0:
+      logger.info('[EXTRACTOR] No collections.')
       return
 
     if self.drop:
