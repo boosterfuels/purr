@@ -73,7 +73,7 @@ def truncate(db, schema, tables):
   cmd = "TRUNCATE TABLE %s;" % (tables_cmd)
   
   try:
-    execute_cmd(cmd)   
+    db.execute_cmd(cmd)   
   except Exception as ex:
     logger.error('[TABLE] %s when executing command %s.' % (ex, cmd))
 
@@ -101,7 +101,7 @@ def drop(db, schema, tables):
   cmd = "DROP TABLE IF EXISTS %s" % (tables_cmd)
   
   try:
-    execute_cmd(cmd)   
+    db.execute_cmd(cmd)   
   except Exception as ex:
     logger.error('[TABLE] %s when executing command %s.' % (ex, cmd))
 
@@ -146,7 +146,7 @@ def add_multiple_columns(db, schema, table, attrs, types):
   cmd = "ALTER TABLE IF EXISTS %s.%s %s;" % (schema, table.lower(), statements_merged)
   logger.warn("[TABLE] Adding multiple columns to table %s %s;" % (table.lower(), statements_merged))
   try:
-    execute_cmd(cmd)   
+    db.execute_cmd(cmd)   
   except Exception as ex:
     logger.error('[TABLE] %s when executing command %s.' % (ex, cmd))
 
@@ -170,10 +170,11 @@ def column_change_type(db, schema, table, column_name, column_type):
     expression = 'CAST(%s as double precision)' % column_name
 
   cmd = "ALTER TABLE %s.%s ALTER COLUMN %s TYPE %s USING %s;" % (schema, table.lower(), column_name, column_type, expression)
+  print(cmd)
   logger.info('[TABLE] ALTER TABLE %s, adding %s %s' % (table.lower(), column_name, column_type))
 
   try:
-    execute_cmd(cmd)   
+    db.execute_cmd(cmd)   
 
   except Exception as ex:
     logger.error('[TABLE] %s when executing command %s.' % (ex, cmd))
@@ -182,7 +183,7 @@ def remove_column(db, table, column_name):
   cmd = "ALTER TABLE IF EXISTS %s DROP COLUMN IF EXISTS %s;" % (table.lower(), column_name)  
   logger.info('[TABLE] ALTER TABLE %s, removing column %s.' % (table.lower(), column_name))
   try:
-    execute_cmd(cmd)
+    db.execute_cmd(cmd)
   except Exception as ex:
     logger.error('[TABLE] %s when executing command %s.' % (ex, cmd))
 
@@ -241,5 +242,6 @@ def get_column_names_and_types(db, schema, table):
   cmd = "SELECT column_name, data_type FROM information_schema.columns WHERE table_schema='%s' AND table_name = '%s';" % (schema, table.lower())
   try:
     rows = db.execute_cmd_with_fetch(cmd)
+    return rows
   except Exception as ex:
     logger.error('[TABLE] %s when executing command %s.' % (ex, cmd))
