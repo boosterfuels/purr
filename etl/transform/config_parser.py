@@ -69,11 +69,15 @@ def config_collections(path):
     Example
     -------
     config_collections('path/to/file')
+    TODO
+    ----
+    Transfer data from multiple databases. 
   """
   try:
     with open(path, 'r') as stream:
       conf_file = yaml.load(stream)
-      colls = conf_file["booster"]
+      db_names = list(conf_file.keys())
+      colls = conf_file[db_names[0]]
       return colls
   except Exception as ex:
     monitor.logging.error("[CONFIG PARSER] Failed to open collection file: %s" % ex)
