@@ -111,9 +111,11 @@ def add_column(db, schema, table, column_name, column_type):
   Parameters
   ----------
   table : str
+        : name of table to alter
   column_name : str
+              : name of new column
   column_type : str
-
+              : type of new column 
   Example
   -------
   add_column(db, 'some_integer', 'integer')
@@ -121,7 +123,7 @@ def add_column(db, schema, table, column_name, column_type):
   cmd = "ALTER TABLE IF EXISTS %s.%s ADD COLUMN IF NOT EXISTS %s %s;" % (schema, table.lower(), column_name, column_type)  
   logger.warn("[TABLE] Adding new column to table: %s, column: %s, type: %s" % (table.lower(), column_name, column_type))
   try:
-    execute_cmd(cmd)   
+    db.execute_cmd(cmd)   
   except Exception as ex:
     logger.error('[TABLE] %s when executing command %s.' % (ex, cmd))
 
@@ -171,7 +173,7 @@ def column_change_type(db, schema, table, column_name, column_type):
 
   cmd = "ALTER TABLE %s.%s ALTER COLUMN %s TYPE %s USING %s;" % (schema, table.lower(), column_name, column_type, expression)
   print(cmd)
-  logger.info('[TABLE] ALTER TABLE %s, adding %s %s' % (table.lower(), column_name, column_type))
+  logger.warn('[TABLE] ALTER TABLE %s, adding %s %s' % (table.lower(), column_name, column_type))
 
   try:
     db.execute_cmd(cmd)   
@@ -181,7 +183,7 @@ def column_change_type(db, schema, table, column_name, column_type):
 
 def remove_column(db, table, column_name):
   cmd = "ALTER TABLE IF EXISTS %s DROP COLUMN IF EXISTS %s;" % (table.lower(), column_name)  
-  logger.info('[TABLE] ALTER TABLE %s, removing column %s.' % (table.lower(), column_name))
+  logger.warn("[TABLE] Removing column '%s' from table '%s' if exists." % (column_name, table.lower()))
   try:
     db.execute_cmd(cmd)
   except Exception as ex:
