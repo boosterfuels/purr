@@ -109,7 +109,7 @@ class Relation():
     row.insert(self.db, self.schema, self.relation_name, attrs, values)
 
 
-  def insert_config_bulk(self, docs, attrs):
+  def insert_config_bulk(self, docs, attrs, include_extra_props = True):
     """
     Transforms document and inserts it into the corresponding table.
     Parameters
@@ -135,18 +135,53 @@ class Relation():
             attrs[key_doc]["value"] = value
         else:
           _extra_props.update({key_doc: value_doc})
+      if include_extra_props is True:
+        _extra_props = unnester.cast('jsonb', _extra_props)
+        attrs["extraProps"]["value"] = _extra_props
 
-      _extra_props = unnester.cast('jsonb', _extra_props)
-      attrs["extraProps"]["value"] = _extra_props
       if len(docs) > 1:
         attrs_pg = [v["name_conf"] for k, v in attrs.items()]
         values = [v["value"] for k, v in attrs.items()]
       else:
         attrs_pg = [v["name_conf"] for k, v in attrs.items() if k in doc.keys()]
         values = [v["value"] for k, v in attrs.items() if k in doc.keys()]
-        if len(doc.keys()) > len(attrs_pg):
+        if len(doc.keys()) > len(attrs_pg) and include_extra_props is True:
           attrs_pg.append('_extra_props')
           values.append(_extra_props)
+
+      result.append(tuple(values))
+    row.insert_bulk(self.db, self.schema, self.relation_name, attrs_pg, result)
+
+
+
+  def insert_config_bulk_no_extra_props(self, docs, attrs, include_extra_props = True):
+    """
+    Transforms document and inserts it into the corresponding table.
+    Parameters
+    ----------
+    doc : dict
+          the document we want to insert
+    TODO 
+    CHECK if self.column_names and self.column_types are still the same, do not
+    """
+    # This is needed because sometimes there is no value for attributes (null)
+    result = []
+    for doc in docs:
+      for k, v in attrs.items():
+        attrs[k]["value"] = None
+      for key_doc, value_doc in doc.items():
+        keys_conf = list(attrs.keys())
+        if key_doc in keys_conf:
+          value = unnester.cast(attrs[key_doc]["type_conf"], value_doc)
+          if value != 'undefined':
+            attrs[key_doc]["value"] = value
+
+      if len(docs) > 1:
+        attrs_pg = [v["name_conf"] for k, v in attrs.items()]
+        values = [v["value"] for k, v in attrs.items()]
+      else:
+        attrs_pg = [v["name_conf"] for k, v in attrs.items() if k in doc.keys()]
+        values = [v["value"] for k, v in attrs.items() if k in doc.keys()]
 
       result.append(tuple(values))
     row.insert_bulk(self.db, self.schema, self.relation_name, attrs_pg, result)
@@ -259,13 +294,24 @@ class Relation():
         if(len(attrs_pg) != 0 and (set(attrs_conf) == set(attrs_pg)) and set(types_conf) == set(types_pg)):
           return
         type_convert_fail = []
+
         if set(attrs_conf).issubset(set(attrs_pg)):
+          if len(attrs_conf) < len(attrs_pg):
+            # remove extra columns from PG
+            diff = list(set(attrs_pg) - set(attrs_conf))
+            for attr in diff:
+              table.remove_column(self.db, self.relation_name, attr)
+              idx = attrs_pg.index(attr)
+              del attrs_pg[idx]
+              del types_pg[idx]
+
           # check types
           for i in range(len(attrs_pg)):
             if attrs_pg[i] in attrs_conf:
               # type from the db and type from the config file 
               type_old = types_pg[i].lower()
               type_new = types_conf[i].lower()
+
               if type_old == 'timestamp without time zone' and type_new == 'timestamp':
                 continue
               elif type_old != type_new:

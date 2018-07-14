@@ -30,6 +30,7 @@ def main():
     parser.add_argument('-n', '--mongo-db-name', type=str, dest='mongo_db_name', default='', help='')
     parser.add_argument('-t', '--tail', action='store_true', dest='tail', default=False, help='')
     parser.add_argument('-ta', '--typecheck-auto', action='store_true', dest='typecheck_auto', default=False, help='')
+    parser.add_argument('-ex', '--include-extra-properties', action='store_true', dest='include_extra_props', default=False, help='')
     args = parser.parse_args()
 
     if len(sys.argv) <= 1:
@@ -50,13 +51,14 @@ def main():
                 'table_truncate': args.table_truncate, 
                 'table_drop': args.table_drop
             }, 
-            'mongo': 
+            'mongo':
             {
                 'connection': args.mongo_connection,
                 'db_name': args.mongo_db_name
             }, 
             'tailing': args.tail, 
-            'typecheck_auto': args.typecheck_auto
+            'typecheck_auto': args.typecheck_auto,
+            'include_extra_props': args.include_extra_props
         }
         etl.core.start(setup, coll_file)
 

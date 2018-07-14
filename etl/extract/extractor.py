@@ -17,15 +17,20 @@ class Extractor():
   This is a class for extracting data from collections.
   """
 
-  def __init__(self, pg, mdb, setup_pg, settings, coll_settings):
+  def __init__(self, pg, mdb, settings_pg, settings_general, coll_settings):
     """Constructor for Extractor"""
 
     self.pg = pg
     self.mdb = mdb
-    self.schema_name = setup_pg["schema_name"]
-    self.typecheck_auto = settings['typecheck_auto']
-    self.truncate = setup_pg['table_truncate']
-    self.drop = setup_pg['table_drop']
+    self.typecheck_auto = settings_general['typecheck_auto']
+    self.include_extra_props = settings_general['include_extra_props']
+    try: 
+      self.include_extra_props = settings_general['include_extra_props']
+    except KeyError:
+      self.include_extra_props = False
+    self.schema_name = settings_pg["schema_name"]
+    self.truncate = settings_pg['table_truncate']
+    self.drop = settings_pg['table_drop']
     self.coll_settings = coll_settings
     
   def transfer_auto(self, coll_names):
@@ -101,21 +106,27 @@ class Extractor():
     coll : string
          : name of collection which is going to be transferred
     '''
-    (attrs_new, attrs_original, types, relation_name, extra_props_type) = cp.config_fields(self.coll_settings, coll)
-    if (attrs_new, attrs_original, types, relation_name, extra_props_type) == ([],[],[],[],[]):
+    (attrs_new, attrs_original, types, relation_name, type_extra_props) = cp.config_fields(self.coll_settings, coll)
+    if (attrs_new, attrs_original, types, relation_name, type_extra_props) == ([],[],[],[],[]):
       return
     r = relation.Relation(self.pg, self.schema_name, relation_name)
-    extra_props_pg = "_extra_props"
-    extra_props_mdb = "extraProps"
     attrs_mdb = attrs_original
     attrs_conf = attrs_new
     types_conf = types
     attrs_details = {}
-
-    attrs_conf.append(extra_props_pg)
-    types_conf.append(extra_props_type)
-    attrs_mdb.append(extra_props_mdb)
-
+    
+    name_extra_props_pg = "_extra_props"
+    name_extra_props_mdb = "extraProps"
+    if self.include_extra_props is True:
+      if r.exists() is True:
+        table.add_column(self.pg, self.schema_name, r.relation_name, name_extra_props_pg, type_extra_props)
+      
+      attrs_conf.append(name_extra_props_pg)
+      types_conf.append(type_extra_props)
+      attrs_mdb.append(name_extra_props_mdb)
+    else:
+      if r.exists():
+        table.remove_column(self.pg, r.relation_name, name_extra_props_pg)
     nr_of_attrs = len(attrs_mdb)
 
     for i in range(nr_of_attrs):
@@ -126,37 +137,50 @@ class Extractor():
       attrs_details[attrs_mdb[i]] = details
 
     start = time.time()
-    docs = collection.get_by_name(self.mdb, coll)
-
+    if self.include_extra_props is True:
+      docs = collection.get_by_name(self.mdb, coll)
+    else:
+      docs = collection.get_by_name_reduced(self.mdb, coll, attrs_mdb)
     timer_start_docs = start
     nr_of_docs = docs.count()
     transferring = []
     nr_of_transferred = 1000
 
     # TODO insert function call here
+    # Check if changing type was unsuccessful.
     type_update_failed = r.columns_update(attrs_details)
     if type_update_failed is not None:
       for tuf in type_update_failed:
-        name = tuf[0]
+        name_pg = tuf[0]
+        name_mdb = [attr for attr in attrs_details if attrs_details[attr]["name_conf"]==name_pg][0]
         type_orig = tuf[1]
-        type_new = attrs_details[name]["type_conf"]
-        attrs_details[name]["type_conf"] = type_orig
-        logger.warn("[EXTRACTOR] Type conversion failed for column '%s'. Skipping conversion %s -> %s." % (name, type_orig.upper(), type_new))
+        type_new = attrs_details[name_mdb]["type_conf"]
+        attrs_details[name_mdb]["type_conf"] = type_orig
+        print(attrs_details[name_mdb])
+        logger.warn("[EXTRACTOR] Type conversion failed for column '%s'. Skipping conversion %s -> %s." % (name_pg, type_orig.upper(), type_new))
+    
+    # Start transferring docs
     i = 0
     transferring = []
     for doc in docs:
       transferring.append(doc)  
       try:
         if (i+1)%nr_of_transferred==0 and i+1>=nr_of_transferred:
-          r.insert_config_bulk(transferring, attrs_details)
+          if self.include_extra_props is True:
+            r.insert_config_bulk(transferring, attrs_details, self.include_extra_props)
+          else:
+            r.insert_config_bulk_no_extra_props(transferring, attrs_details, self.include_extra_props)
           transferring = []
         if i + 1 == nr_of_docs and (i + 1) % nr_of_transferred != 0:
           if table.exists(self.pg, self.schema_name, relation_name):
-            r.insert_config_bulk(transferring, attrs_details)
+            if self.include_extra_props is True:
+              r.insert_config_bulk(transferring, attrs_details, self.include_extra_props)
+            else:
+              r.insert_config_bulk_no_extra_props(transferring, attrs_details, self.include_extra_props)
             logger.info('[EXTRACTOR] Successfully transferred collection %s (%d documents).' % (coll, i + 1))
             transferring = []
           else:
-            logger.error('[EXTRACTOR] Table does %s might be deleted.' % relation_name)
+            logger.error('[EXTRACTOR] Table %s might be deleted.' % relation_name)
             return
       except Exception as ex:
         logger.error('[EXTRACTOR] Transfer unsuccessful. %s' % ex)
@@ -165,9 +189,6 @@ class Extractor():
   def transfer_doc(self, doc, r, coll):
     '''
     Transfers single document.
-    Returns
-    -------
-    -
     Parameters
     ----------
     doc : dict
@@ -176,24 +197,36 @@ class Extractor():
         relation in PG
     coll : string
          : collection name
+    Returns
+    -------
+    -
+
+    Raises
+    ------
+    Example
+    -------
     '''
-    (attrs_new, attrs_original, types, relation_name, extra_props_type) = cp.config_fields(self.coll_settings, coll)
-    if (attrs_new, attrs_original, types, relation_name, extra_props_type) == ([],[],[],[],[]):
+    (attrs_new, attrs_original, types, relation_name, type_extra_props_pg) = cp.config_fields(self.coll_settings, coll)
+    if (attrs_new, attrs_original, types, relation_name, type_extra_props_pg) == ([],[],[],[],[]):
       return
-    # Adding _extra_props to inserted/updated row is necessary 
+    # Adding extra properties to inserted/updated row is necessary 
     # because this attribute is not part of the original document and anything
     # that is not defined in the collection.yml file will be pushed in this value.
     # This function will also create a dictionary which will contain all the information
     # about the attribute before and after the conversion.
-    attrs_details = self.append_extra_props(attrs_new, attrs_original, types, extra_props_type)
-    
+
+    if self.include_extra_props is True:
+      attrs_details = self.prepare_attr_details(attrs_new, attrs_original, types, type_extra_props_pg)
+    else:
+      attrs_details = self.prepare_attr_details(attrs_new, attrs_original, types)
+
     try:
       r.columns_update(attrs_details)
-      r.insert_config_bulk([doc], attrs_details)
+      r.insert_config_bulk([doc], attrs_details, self.include_extra_props)
     except Exception as ex:
       logger.error('[EXTRACTOR] Transferring item was unsuccessful. %s' % ex)
 
-  def append_extra_props(self, attrs_conf, attrs_mdb, types_conf, extra_props_type):
+  def prepare_attr_details(self, attrs_conf, attrs_mdb, types_conf, type_extra_props_pg = None):
     '''
     Adds extra properties field.
     This field needs to be added like this because it is not part of the original document.
@@ -221,12 +254,13 @@ class Extractor():
     extra_props_type = 'jsonb'
     res = append_extra_props(attrs_new, attrs_original, types, extra_props_type)
     '''
-    extra_props_pg = "_extra_props"
-    extra_props_mdb = "extraProps"
+    if self.include_extra_props is True:
+      name_extra_props_pg = "_extra_props"
+      name_extra_props_mdb = "extraProps"
 
-    attrs_conf.append(extra_props_pg)
-    attrs_mdb.append(extra_props_mdb)
-    types_conf.append(extra_props_type)
+      attrs_conf.append(name_extra_props_pg)
+      attrs_mdb.append(name_extra_props_mdb)
+      types_conf.append(type_extra_props_pg)
 
     attrs_details = {}
     
