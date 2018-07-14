@@ -80,3 +80,46 @@ def get_by_name(db, name):
   except Exception as ex:
     logger.error('[COLLECTION] Loading data from collection %s failed.' % name)
   return docs
+
+def get_by_name_reduced(db, name, fields):
+  """
+  Gets data from collection limited by batch size containing only specific fields.
+  
+  Parameters
+  ----------
+  db : pymongo.database.Database
+    Database connection and name
+  name : string
+    Name of collection.
+  fields : list
+    Names of fields to include in the query.
+
+  Returns
+  -------
+  docs : pymongo.cursor.Cursor
+
+  Raises
+  ------
+
+  Example
+  -------
+  get_by_name(db, 'Car', ['_id', 'type', 'nfOfSeats'])
+
+  TODO
+  ----
+  - let the user decide batch size
+  """
+  size = 30000
+  docs = []
+  try:
+    logger.info('[COLLECTION] Loading data from collection %s...' % name)
+    c = db[name]
+    # create the document given to a query that specifies which fields MongoDB returns in the result set
+    projection = {}
+    for field in fields:
+      projection[field] = 1
+    bz = c.find({}, projection)
+    docs = bz.batch_size(size)
+  except Exception as ex:
+    logger.error('[COLLECTION] Loading data from collection %s failed.' % name)
+  return docs
