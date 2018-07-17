@@ -21,7 +21,7 @@ PostgreSQL 9.6.8
 ## Quickstart:
 1. Install requirements and [Purr](#setup)
 2. Create a YAML file which contains the [collection map](#collection-map).
-3. Make sure you started Mongo (as a [replica set](https://docs.mongodb.com/manual/replication/){:target="_blank"}) and PG
+3. Make sure you started Mongo (as a [replica set](https://docs.mongodb.com/manual/replication/)) and PG
 4. On the command line type:
 `purr -cf path/to/collections.yml -pg postgres://127.0.0.1:5432/postgres -mdb mongodb://localhost:27017 -n db_name -t`
 
@@ -30,7 +30,6 @@ After transfering all collections to your public schema, Purr starts tailing the
 
 
 ## Usage
-`purr -sf path/to/setup.yml -cf path/to/collections.yml`
 
 `-h, --help` show help message
 `-sf, --setup-file` 
@@ -72,6 +71,10 @@ You can also set these variables using the command line.
 - `-ex or --typecheck-auto`: defaults to `false`
 
 Variables followed by (*) are mandatory. 
+
+Start Purr using a setup file:
+`purr -sf path/to/setup.yml -cf path/to/collections.yml`
+
 
 **Example setup.yml**
  
