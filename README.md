@@ -31,10 +31,13 @@ After transfering all collections to your public schema, Purr starts tailing the
 
 ## Usage
 
+You can start Purr using command line options or you can use a setup file to organize your settings.
+
+### Setup file
 `-h, --help` show help message
 `-sf, --setup-file` 
 
-You can create a setup file to organize your settings.
+Your setup has to be in a YAML file which must have the following form:
 
 - path to YAML file which contains settings
   - settings for Postgres: 
@@ -54,9 +57,15 @@ You can create a setup file to organize your settings.
     - `typecheck_auto`: 
       - `true`: let Purr decide the data type for each field
       - `false`: use a YAML file to describe collection types (`-cf`) 
-  
+    - `include_extra_props`: include properties which are not described
 
-You can also set these variables using the command line.
+You can start Purr using a setup file like this:
+`purr -sf path/to/setup.yml -cf path/to/collections.yml`
+
+### Command line options
+
+You can set all the variables from the previous section using the command line. Passing connection strings to MongoDB and Postgres is mandatory.
+
 - `-sf or --setup-file`: path to the setup file if exists
 - `-cf or --collection-file`: path to the collection file if exists
 - `-td or --table-drop`: defaults to `false`
@@ -68,13 +77,12 @@ You can also set these variables using the command line.
 - `-n or --mongo-db-name`: equivalent of `db_name` for MongoDB (*)
 - `-t or --tail`: equivalent of `tailing`; defaults to `false`
 - `-ta or --typecheck-auto`: defaults to `false`
-- `-ex or --typecheck-auto`: defaults to `false`
+- `-ex or --include-extra-properties`: defaults to `false`
+
+You can start Purr using a setup file like this:
+`purr -cf path/to/collections.yml -pg postgres://127.0.0.1:5432/postgres -mdb mongodb://localhost:27017 -n mongo_db_name -t`
 
 Variables followed by (*) are mandatory. 
-
-Start Purr using a setup file:
-`purr -sf path/to/setup.yml -cf path/to/collections.yml`
-
 
 **Example setup.yml**
  
@@ -98,7 +106,9 @@ include_extra_props: true
 
 `-cf, --collection-file` 
 
-The collection map is a YAML file which contains information about the database and the collections you want to transfer. Only the collections that are described here will be transfered to your Postgres database. A collection map should have the following structure:
+The collection map is a YAML file which contains information about the database and the collections you want to transfer. Only the collections that are described here will be transfered to your Postgres database.
+
+A collection map should have the following structure:
 
 **Example collections.yml**
 
@@ -131,16 +141,16 @@ my_mongo_database:
 When connecting to the Mongo instance, Purr looks for the database name in the collection map (`my_mongo_database`).
 Collection `Company` will be transferred to table `company` (described under `meta` -> `table`). This table will have 6 columns with the following types:
 ```
-id: text, 
-name: text, 
-active: boolean, 
-domains: jsonb, 
-created_at: text,
+id: text
+name: text
+active: boolean
+domains: jsonb
+created_at: text
 extra_props: jsonb
 ```
 
 ### Data types
-Purr defines 5 different data types:
+Purr uses 5 different data types when creating rows for a table:
 - boolean
 - double precision
 - text
@@ -157,7 +167,7 @@ Leaving out extra properties from the collection map will make `extra_props` typ
 In case that you want to include extra properties you have to start Purr with option `-ex`. 
 
 If you already have an extra_props column but you restarted Purr without this option, all columns named `extra_props` one by one.
-- drop column `extra_props` for `Coll1`
+- drop column `extra_props` for `Collection1`
 - drop columns that are not in the collection map
 - start transfer
 ... and so on for the other collections
@@ -172,18 +182,42 @@ Starting Purr without extra properties can be significantly faster.
 **Example: start Purr without setup file (tailing mode)**
 
 `purr -cf collections.yml -pg postgres://127.0.0.1:5432/postgres -mdb mongodb://localhost:27017 -n db_name -t`
+If `-t` is set, Purr starts tailing the `oplog` after transferring all the collections described in the collection map. The oplog is a capped collection that records all write operations that happened in your Mongo instance. Tailing is started from the timestamp Purr saved in the beginning (before it created `purr_info`). Tailing has to happen after all the tables were created since there may be write operations on a collection that was not yet transferred and therefore it's corresponding relation does not yet exist.Start Mongo as a replicaset.
+
+## Restarting Purr with different collection map
+
+Sooner or later you will need to change your collection map. Restarting Purr will do the following if you did not delete your tables previously:
+Adding a new attribute will make Purr update your entire collection.
+Removing a attribute drops the entire column.
+Changing a column name will drop the old column and create the new one. 
+Changing a column type will result with an attempt to ALTER the column. If the attempt was unsuccessful, Purr will try to convert your data to JSONB.
 
 ## Tailing
-If `-t` was set, Purr starts tailing the `oplog` after transferring all the collections described in the collection map. The oplog is a capped collection that records all write operation that happened in your Mongo instance. Tailing is started from the timestamp Purr saved in the beginning (before it created `purr_info`). Tailing has to happen after all the tables were created since there may be write operations on a collection that was not yet transferred and therefore it's corresponding relation does not yet exist.
+
+You can start tailing from a specific timestamp by passing `-ts` when starting Purr which skips collection transfer.
+If no value is added, Purr will do the following:
+- `purr_info` will be created if it does not exist
+    - the current timestamp will be inserted 
+- if `purr_info` exists, it will read the latest timestamp and check if the oplog has any new entries
+  - if the timestamp is "too old", Purr transfers all collections
+
+If timestamp is added, Purr will do the following:
+- `purr_info` will be created if it does not exist
+    - the given timestamp will be inserted 
+- if `purr_info` exists, the latest timestamp will be compared to the given timestamp and the oldest wins
 
 ## Output
 
 Purr will log a warning if it could not transfer a document.
 
 ## Connectivity issues
-In the begging, Purr creates a table called `purr_info` which contains the timestamp which is refreshed every x minutes if there was a successful transfer. If Purr is disconnected from the database it waits a couple of seconds before attempting to reconnect. If succeeded, Purr first checks `purr_info` for the latest timestamp it managed to save and continues tailing from there.
+In the begging, Purr creates a table called `purr_info`. This table contains a timestamp which is refreshed every x minutes in case of a successful transfer. If Purr is disconnected from the database, it waits a couple of seconds before attempting to reconnect. If succeeded, Purr first checks `purr_info` for the latest timestamp it managed to save and continues tailing from there.
 
 ## Contribute
-Purr was built using Python3. If you would like to contribute, check out our guidelines
+Purr is an open-source project that was built using Python3. If you would like to contribute, check out our [guidelines](##guidelines)
 
-## Guidelines
+### Guidelines
+Contributing to Purr is a great way to learn more about 
+- MongoDB
+- PostgreSQL
+- Python3
