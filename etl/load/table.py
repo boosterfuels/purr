@@ -168,16 +168,19 @@ def column_change_type(db, schema, table, column_name, column_type):
   expression = ''
   if column_type == 'jsonb':
     expression = 'to_json(%s)' % column_name
-  if column_type == 'double precision':
+  elif column_type == 'double precision':
     expression = 'CAST(%s as double precision)' % column_name
 
-  cmd = "ALTER TABLE %s.%s ALTER COLUMN %s TYPE %s USING %s;" % (schema, table.lower(), column_name, column_type, expression)
-  print(cmd)
-  logger.warn('[TABLE] ALTER TABLE %s, adding %s %s' % (table.lower(), column_name, column_type))
+  if len(expression) == 0:
+    cmd = "ALTER TABLE %s.%s ALTER COLUMN %s TYPE %s;" % (schema, table.lower(), column_name, column_type)
+  else:
+    cmd = "ALTER TABLE %s.%s ALTER COLUMN %s TYPE %s USING %s;" % (schema, table.lower(), column_name, column_type, expression)
+  logger.warn("[TABLE] ALTER TABLE %s, changing type of column '%s' to '%s'" % (table.lower(), column_name, column_type))
 
   try:
     db.execute_cmd(cmd)   
-
+  except psycopg2.ProgrammingError as ex:
+    logger.error('[TABLE] ProgrammingError: %s when executing command %s.' % (ex, cmd))
   except Exception as ex:
     logger.error('[TABLE] %s when executing command %s.' % (ex, cmd))
 

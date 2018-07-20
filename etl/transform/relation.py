@@ -265,46 +265,66 @@ class Relation():
     constraint.add_pk(self.db, self.schema, self.relation_name, attr)
     self.has_pk = True
 
-  def columns_update(self, attrs_types_conf):
+  def udpate_types(self, attrs_types_conf):
       """
       Checks if there were any changes in the schema and adds/changes attributes if needed. 
       If relation is already created in the database then we need to get the 
       existing attributes and types and compare them to our new attributes and types
       from the config file.
+      
+      - find what's different in attributes from pg and conf
+      - check existing attribute names
+      - check types
+      - check check is one is castable to the other
       """
+      
       attrs_conf = []
       types_conf = []
       attrs_pg = []
       types_pg = []
       column_info = table.get_column_names_and_types(self.db, self.schema, self.relation_name)
       if self.exists() is True and column_info is not None:
-        attrs_types_pg = dict(column_info)
-        attrs_pg = [k for k, v in attrs_types_pg.items()]
-        types_pg = [v for k, v in attrs_types_pg.items()]
 
-        attrs_conf = [v["name_conf"] for k,v in attrs_types_conf.items()]
-        types_conf = [v["type_conf"] for k, v in attrs_types_conf.items()]
-        
-        """
-        - find what's different in attributes from pg and conf
-        - check existing attribute names
-        - check types
-        - check check is one is castable to the other
-        """
+
+        # Every attribute from pg and conf has to have the same order. We are sorting by pg column names.
+        attrs_types_pg = dict(column_info)
+        attrs_pg = [k for k in sorted(attrs_types_pg.keys())]
+        types_pg = [attrs_types_pg[k] for k in sorted(attrs_types_pg.keys())]
+
+        attrs_conf = [attrs_types_conf[k]["name_conf"] for k in attrs_types_conf.keys()]
+        types_conf = [attrs_types_conf[k]["type_conf"] for k in attrs_types_conf.keys()]
+
+        # if attributes from PG and the collection map are the same, do nothing
         if(len(attrs_pg) != 0 and (set(attrs_conf) == set(attrs_pg)) and set(types_conf) == set(types_pg)):
           return
+
+        temp_attrs_conf = []
+        temp_types_conf = []
+        
+        for i in range(0, len(attrs_pg)):
+          try:
+            # check if attributes in PG are part of the collection map)
+            idx = attrs_conf.index(attrs_pg[i])
+          except ValueError:
+            table.remove_column(self.db, self.relation_name, attrs_pg[i])
+            attrs_pg[i] = None
+            types_pg[i] = None
+            continue
+          temp_attrs_conf.append(attrs_conf[idx])
+          temp_types_conf.append(types_conf[idx])
+          del attrs_conf[idx]
+          del types_conf[idx]
+
+        # remove extra columns from PG (because they are no longer part of the collection map)
+        attrs_pg = [x for x in attrs_pg if x is not None]
+        types_pg = [x for x in types_pg if x is not None]
+
+        attrs_conf = temp_attrs_conf + (attrs_conf)
+        types_conf = temp_types_conf + (types_conf)
+
         type_convert_fail = []
 
         if set(attrs_conf).issubset(set(attrs_pg)):
-          if len(attrs_conf) < len(attrs_pg):
-            # remove extra columns from PG
-            diff = list(set(attrs_pg) - set(attrs_conf))
-            for attr in diff:
-              table.remove_column(self.db, self.relation_name, attr)
-              idx = attrs_pg.index(attr)
-              del attrs_pg[idx]
-              del types_pg[idx]
-
           # check types
           for i in range(len(attrs_pg)):
             if attrs_pg[i] in attrs_conf:
@@ -350,6 +370,25 @@ class Relation():
       # Anything can be converted to JSONB.
 
   def is_convertable(self, type_old, type_new):
-    if type_new == 'jsonb':
+    """
+    Returns True if type old can be converted to type new
+    
+    convertables: list of tuples
+                : contains convertable types (type_old, type_new) 
+    """ 
+    convertables = [
+      ('boolean', 'jsonb'),
+      ('double precision', 'jsonb'),
+      ('text', 'jsonb'),
+      ('timestamp', 'jsonb'),
+      ('jsonb', 'jsonb'),
+
+      ('boolean', 'text'),
+      ('double precision', 'text'),
+      ('text', 'text'),
+      ('timestamp', 'text'),
+      ('jsonb', 'text'),
+    ]
+    if (type_old, type_new) in convertables:
       return True
     return False

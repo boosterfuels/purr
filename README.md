@@ -30,14 +30,13 @@ After transfering all collections to your public schema, Purr starts tailing the
 
 
 ## Usage
-
-You can start Purr using command line options or you can use a setup file to organize your settings.
+After installing Purr, you will need a [collection map](#collection-map) to describe your schema. Without the collection map you can not start Purr. Once you created your collection map, you should have a running MongoDB instance as a source and Postgres as a target database. You can start Purr using command line options or you can create another YAML file to organize your settings. The collection map and the setup file should not be mixed. 
 
 ### Setup file
 `-h, --help` show help message
 `-sf, --setup-file` 
 
-Your setup has to be in a YAML file which must have the following form:
+Your setup file must have the following form:
 
 - path to YAML file which contains settings
   - settings for Postgres: 
@@ -57,9 +56,9 @@ Your setup has to be in a YAML file which must have the following form:
     - `typecheck_auto`: 
       - `true`: let Purr decide the data type for each field
       - `false`: use a YAML file to describe collection types (`-cf`) 
-    - `include_extra_props`: include properties which are not described
+    - `include_extra_props`: include properties which are not described in the collection map
 
-You can start Purr using a setup file like this:
+Starting Purr without using a setup file:
 `purr -sf path/to/setup.yml -cf path/to/collections.yml`
 
 ### Command line options
@@ -79,7 +78,7 @@ You can set all the variables from the previous section using the command line. 
 - `-ta or --typecheck-auto`: defaults to `false`
 - `-ex or --include-extra-properties`: defaults to `false`
 
-You can start Purr using a setup file like this:
+Starting Purr without using a setup file:
 `purr -cf path/to/collections.yml -pg postgres://127.0.0.1:5432/postgres -mdb mongodb://localhost:27017 -n mongo_db_name -t`
 
 Variables followed by (*) are mandatory. 
@@ -106,15 +105,41 @@ include_extra_props: true
 
 `-cf, --collection-file` 
 
-The collection map is a YAML file which contains information about the database and the collections you want to transfer. Only the collections that are described here will be transfered to your Postgres database.
+The collection map is a YAML file which contains information about the database and the collections you want to transfer. Only the collections that are described here will be loaded to your Postgres database, other collections will be ignored.
 
-A collection map should have the following structure:
+The collection map should have the following structure:
+```
+mongo_database_name:
+  Collection1:
+    :columns:
+      - column1:
+        :source: field1
+        :type: TEXT
+      - column2:
+        :source: field2
+        :type: TEXT
+    :meta:
+      :table: collection1
+      :extra_props: JSONB
+  Collection2:
+    :columns:
+      - column3:
+        :source: field3
+        :type: TEXT
+      - column4:
+        :source: field4
+        :type: TEXT
+      - ...
+    :meta:
+      :table: collection2
+      :extra_props: JSONB
+```
 
 **Example collections.yml**
 
 ```
 my_mongo_database:
-  Company:
+  Cat:
     :columns:
       - id:
         :source: _id
@@ -125,21 +150,21 @@ my_mongo_database:
       - active:
         :source: active
         :type: BOOLEAN
-      - domains:
-        :source: domains
-        :type: JSONB
+      - number_of_legs:
+        :source: numberOfLegs
+        :type: DOUBLE PRECISION
       - created_at:
         :source: createdAt
         :type: TIMESTAMP
     :meta:
-      :table: company
+      :table: cat
       :extra_props: JSONB
 ```
 
 *Explanation:*
 
 When connecting to the Mongo instance, Purr looks for the database name in the collection map (`my_mongo_database`).
-Collection `Company` will be transferred to table `company` (described under `meta` -> `table`). This table will have 6 columns with the following types:
+Collection `Cat` will be transferred to table `cat` (described under `meta` -> `table`). This table will have 6 columns with the following types:
 ```
 id: text
 name: text
@@ -157,9 +182,32 @@ Purr uses 5 different data types when creating rows for a table:
 - timestamp
 - jsonb
 
+### Conversion
+When you already have a schema and decide to re-run Purr with a changed schema, you will have to keep some things in mind.
+The next table shows what happens when your schema changes
+rows = A
+columns = B
+converting A to B 
+
+|                  | BOOLEAN  | DOUBLE PRECISION  | TEXT  |  TIMESTAMP | JSONB  |
+|:----------------:|:--------:|:-----------------:|:-----:|:----------:|:------:|
+| BOOLEAN          |     ✔    |                   |   ✔   |            |    ✔   |
+| DOUBLE PRECISION |          |         ✔         |   ✔   |            |    ✔   |
+| TEXT             |          |                   |   ✔   |            |    ✔   |
+| TIMESTAMP        |          |                   |   ✔   |      ✔     |    ✔   | 
+| JSONB            |          |                   |   ✔   |            |    ✔   |
+
+When you have consistent data in your datatbase, data conversion can easily be made by Postgres.
+When your data is inconsistent, Purr has to handle that situation on its own.
+Purr will rename your inconsistent column to column_old and create a new one with the new data type so you will not lose any data. Purr will restart collection transfer for that specific collection and will try to cast your values so they fit into your new column. If casting cannot be done, you will have `NULL`s instead of a value. 
+
+Keeping the old version of your column gives you more control over your data: you decide what to do with the values which could not be casted and inserted into the new column.
+When you re-run Purr again, your old column will be deleted since it's not part of the collection map.
+Feel free to drop the old column at any moment (if you are sure that you don't need it).
+
 ### Extra properties
 
-Extra properties are properties of a document in MongoDB which do not have their own defined name, source and type in the collection map.
+Extra properties are properties of a document in MongoDB which do not have their name, source and type in the collection map.
 Having extra properties means that values which are not defined in the collection map will be part of a column named `extra_props` with type defined based on 
 the collection map.
 Leaving out extra properties from the collection map will make `extra_props` type default to `JSONB`.
@@ -184,13 +232,21 @@ Starting Purr without extra properties can be significantly faster.
 `purr -cf collections.yml -pg postgres://127.0.0.1:5432/postgres -mdb mongodb://localhost:27017 -n db_name -t`
 If `-t` is set, Purr starts tailing the `oplog` after transferring all the collections described in the collection map. The oplog is a capped collection that records all write operations that happened in your Mongo instance. Tailing is started from the timestamp Purr saved in the beginning (before it created `purr_info`). Tailing has to happen after all the tables were created since there may be write operations on a collection that was not yet transferred and therefore it's corresponding relation does not yet exist.Start Mongo as a replicaset.
 
-## Restarting Purr with different collection map
+## Restarting Purr with a different collection map
 
-Sooner or later you will need to change your collection map. Restarting Purr will do the following if you did not delete your tables previously:
-Adding a new attribute will make Purr update your entire collection.
-Removing a attribute drops the entire column.
-Changing a column name will drop the old column and create the new one. 
-Changing a column type will result with an attempt to ALTER the column. If the attempt was unsuccessful, Purr will try to convert your data to JSONB.
+Sooner or later you will need to change your collection map. If you restart Purr and keep your existing schema, your tables' fields in PG will be compared to the ones in your collection map.
+- Adding a new attribute will make Purr update your entire collection.
+- Removing an attribute drops the column.
+- Changing a column name will drop the old column, create the new one and update your entire collection. 
+- Changing a column type will result with an attempt to ALTER the column. If the attempt was unsuccessful, Purr will try to convert your data to JSONB.
+
+What about the tables in my Postgres database that were in the schema before using Purr?
+
+If you have any existing tables in your schema that you want to be left alone, make sure that you 
+- **don't include** those tables in your collection map as a target (`:meta: :table: cat`)
+- set `schema_reset` to `false`
+- set `table_drop` to `false`
+- set `table_truncate` to `false`
 
 ## Tailing
 
