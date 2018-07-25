@@ -1,5 +1,6 @@
 import argparse
 import sys
+import time
 from datetime import datetime
 
 import etl.core
@@ -9,7 +10,9 @@ setup = {}
 
 def valid_date(s):
     try:
-        return datetime.strptime(s, "%d-%m-%yT%H:%M:%S")
+        t = datetime.strptime(s, "%d-%m-%yT%H:%M:%S")
+        epoch_time = int(time.mktime(t.timetuple()))
+        return epoch_time
     except ValueError:
         msg = "Not a valid date: '{0}'.".format(s)
         raise argparse.ArgumentTypeError(msg)
@@ -29,8 +32,15 @@ def main():
     parser.add_argument('-mdb', '--mongo-connection', type=str, dest='mongo_connection', default='', help='')
     parser.add_argument('-n', '--mongo-db-name', type=str, dest='mongo_db_name', default='', help='')
     parser.add_argument('-t', '--tail', action='store_true', dest='tail', default=False, help='')
+    parser.add_argument("-s",
+                        "--start",
+                        dest="timestamp",
+                        help="Start tailing from specific timestamp; \nuse in combination with --tail in order to tail the oplog from a specific date and time - format DD-MM-YYThh:mm:ss. Example 25-07-18T16:30:00",
+                        type=valid_date)
     parser.add_argument('-ta', '--typecheck-auto', action='store_true', dest='typecheck_auto', default=False, help='')
     parser.add_argument('-ex', '--include-extra-properties', action='store_true', dest='include_extra_props', default=False, help='')
+    
+    
     args = parser.parse_args()
 
     if len(sys.argv) <= 1:
@@ -40,7 +50,6 @@ def main():
     coll_file = {}
     if args.path_collection_file:
         coll_file = config_parser.config_collections(args.path_collection_file)
-        
     if args.pg_connection and args.mongo_connection and args.mongo_db_name:
         setup = {
             'postgres': 
@@ -56,7 +65,8 @@ def main():
                 'connection': args.mongo_connection,
                 'db_name': args.mongo_db_name
             }, 
-            'tailing': args.tail, 
+            'tailing': args.tail,
+            'tailing_from': args.timestamp,
             'typecheck_auto': args.typecheck_auto,
             'include_extra_props': args.include_extra_props
         }

@@ -35,6 +35,7 @@ class Extractor():
     self.truncate = settings_pg['table_truncate']
     self.drop = settings_pg['table_drop']
     self.coll_settings = coll_settings
+    self.tailing_from = settings_general['tailing_from']
     
   def transfer_auto(self, coll_names):
     """
@@ -106,8 +107,10 @@ class Extractor():
          : name of collection which is going to be transferred
     '''
     
-    nr_of_transferred = 1000
     (r, attrs_details) = self.adjust_columns(coll)
+    
+    if self.tailing_from is not None:
+      return
 
     if self.include_extra_props is True:
       docs = collection.get_by_name(self.mdb, coll)
@@ -115,9 +118,9 @@ class Extractor():
       attr_source = [k for k, v in attrs_details.items()]
       docs = collection.get_by_name_reduced(self.mdb, coll, attr_source)
 
-    nr_of_docs = docs.count()
-    
     # Start transferring docs
+    nr_of_docs = docs.count()
+    nr_of_transferred = 1000
     i = 0
     transferring = []
     for doc in docs:

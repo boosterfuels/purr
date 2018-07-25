@@ -183,7 +183,7 @@ Purr uses 5 different data types when creating rows for a table:
 - jsonb
 
 ### Conversion
-When you already have a schema and decide to re-run Purr with a changed schema, you will have to keep some things in mind.
+When you already have a schema and decide to re-run Purr with a changed collection map, you will have to keep a couple of things in mind.
 The next table shows what happens when your schema changes
 rows = A
 columns = B
@@ -197,13 +197,15 @@ converting A to B
 | TIMESTAMP        |          |                   |   ✔   |      ✔     |    ✔   | 
 | JSONB            |          |                   |   ✔   |            |    ✔   |
 
-When you have consistent data in your datatbase, data conversion can easily be made by Postgres.
-When your data is inconsistent, Purr has to handle that situation on its own.
-Purr will rename your inconsistent column to column_old and create a new one with the new data type so you will not lose any data. Purr will restart collection transfer for that specific collection and will try to cast your values so they fit into your new column. If casting cannot be done, you will have `NULL`s instead of a value. 
+Conversions that have `✔`, can be easily handled by Postgres.
+When you assign a new type and your data is not castable to your new type, Purr will have to handle that situation on its own.
+Purr will rename your inconsistent column to `column_name_old` and create a new one with the new data type under `column_name`. This way we can make sure that you will not lose any data and you can continue working on your new column. Purr will restart collection transfer for that specific collection and will try to cast your values so they fit into your new column. If casting cannot be done, you will have `NULL`s instead of a value. 
 
 Keeping the old version of your column gives you more control over your data: you decide what to do with the values which could not be casted and inserted into the new column.
 When you re-run Purr again, your old column will be deleted since it's not part of the collection map.
 Feel free to drop the old column at any moment (if you are sure that you don't need it).
+
+When you are tailing and a type change happens in your Mongo database, Purr will try to cast your data to the current column's type. If not succeeded, Purr will log a warning and continue tailing.
 
 ### Extra properties
 

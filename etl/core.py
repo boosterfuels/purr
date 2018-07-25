@@ -60,6 +60,9 @@ def start(settings, coll_config):
 
     if settings["tailing"] is True:
         t = tailer.Tailer(pg, mongo, setup_pg, settings, coll_config)
-        t.start(start_date_time)
+        if settings["tailing_from"] is not None:
+            t.start(settings["tailing_from"])
+        else:
+            t.start(start_date_time)
     else:
         pg.__del__()
