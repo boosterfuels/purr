@@ -36,6 +36,7 @@ class Extractor():
     self.drop = settings_pg['table_drop']
     self.coll_settings = coll_settings
     self.tailing_from = settings_general['tailing_from']
+    self.tailing_from_db = settings_general['tailing_from_db']
     
   def transfer_auto(self, coll_names):
     """
@@ -109,7 +110,7 @@ class Extractor():
     
     (r, attrs_details) = self.adjust_columns(coll)
     
-    if self.tailing_from is not None:
+    if self.tailing_from is not None or self.tailing_from_db is True:
       return
 
     if self.include_extra_props is True:

@@ -27,7 +27,10 @@ def create_stat_table(db, schema):
     values = [int(time.time())]
     try:
         table.create(db, schema, table_name, attrs, types)
-        row.insert_bulk(db, schema, table_name, attrs, values)
+        ts = get_latest_successful_ts(db, 'public')
+        if len(ts) == 0:
+            row.insert(db, schema, table_name, attrs, values)
+        
         logger.info("[TRANSFER INFO] Created table %s." % (table_name))
     except Exception as ex:
         logger.error("[TRANSFER_INFO] Failed to create table purr_info: %s" % (ex))

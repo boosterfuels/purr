@@ -166,9 +166,8 @@ class Tailer(extractor.Extractor):
                                 temp = doc["o"]
                                 try:
                                     self.transform_and_load(doc)
-                                    # every minute update the timestamp because
-                                    # we need to start tailing from somewhere 
-                                    # in case of disconnecting from the PGDB
+                                    # every 5 minutes update the timestamp because we need to continue 
+                                    # tailing in case of disconnecting from the PGDB
                                     diff = datetime.utcnow() - updated
                                     minutes_between_update = (diff.seconds//60)%60
                                     if minutes_between_update > 5:
@@ -183,7 +182,7 @@ class Tailer(extractor.Extractor):
                                         % (temp, ex)
                                     )
                         if disconnected is True:
-                            logger.info("[TAILER] Started tailing from %s." % str(dt))
+                            logger.info("[TAILER] Disconnected. Started tailing from %s." % str(dt))
                             disconnected = False
                         time.sleep(1)
                     except Exception as ex:
