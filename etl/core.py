@@ -62,6 +62,10 @@ def start(settings, coll_config):
         t = tailer.Tailer(pg, mongo, setup_pg, settings, coll_config)
         if settings["tailing_from"] is not None:
             t.start(settings["tailing_from"])
+        elif settings["tailing_from_db"] is not None:
+            ts = transfer_info.get_latest_successful_ts(pg, 'public')
+            latest_ts = int((list(ts)[0])[0])
+            t.start(latest_ts)
         else:
             t.start(start_date_time)
     else:
