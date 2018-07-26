@@ -183,7 +183,10 @@ class Extractor():
       attrs_details = self.prepare_attr_details(attrs_new, attrs_original, types)
     try:
       r.udpate_types(attrs_details)
-      r.insert_config_bulk([doc], attrs_details, self.include_extra_props)
+      if self.include_extra_props is True:
+        r.insert_config_bulk([doc], attrs_details, self.include_extra_props)
+      else:
+        r.insert_config_bulk_no_extra_props([doc], attrs_details, self.include_extra_props)
     except Exception as ex:
       logger.error('[EXTRACTOR] Transferring item was unsuccessful. %s' % ex)
 

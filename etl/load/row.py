@@ -73,6 +73,8 @@ def insert_bulk(db, schema, table, attrs, values):
   for a in attrs:
     temp.append('%s')      
 
+  if(len(values)==1):
+    values = values[0]
   temp = ', '.join(temp)
   # needed for upsert
   excluded = [('EXCLUDED.%s' % a) for a in attrs]
