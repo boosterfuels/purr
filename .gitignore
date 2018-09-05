@@ -13,4 +13,4 @@ node_modules
 src
 tmp
 dist
-gulpfile.js
+.publish
