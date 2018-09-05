@@ -9,3 +9,5 @@ README.md
 *.egg-info
 *.rst
 *.txt
+node_modules
+dist
