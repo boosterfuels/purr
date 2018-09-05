@@ -21,7 +21,8 @@
   },
   "homepage": "https://github.com/boosterfuels/purr#readme",
   "devDependencies": {
-    "gulp": "^3.9.1",
-    "gulp-gh-pages": "^0.5.4"
+    "del": "3.0.0",
+    "gulp": "3.9.1",
+    "gulp-gh-pages": "0.5.4"
   }
 }

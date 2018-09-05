@@ -10,4 +10,6 @@ README.md
 *.rst
 *.txt
 node_modules
+src
+tmp
 dist
