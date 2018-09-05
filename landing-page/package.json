@@ -1,0 +1,34 @@
+{
+  "name": "purr",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "doc": "doc",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/boosterfuels/purr.git"
+  },
+  "author": "Anett Balazsics",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/boosterfuels/purr/issues"
+  },
+  "homepage": "https://github.com/boosterfuels/purr#readme",
+  "devDependencies": {
+    "del": "3.0.0",
+    "gulp": "3.9.1",
+    "gulp-clean-css": "3.10.0",
+    "gulp-concat": "2.6.1",
+    "gulp-gh-pages": "0.5.4",
+    "gulp-htmlclean": "2.7.22",
+    "gulp-inject": "4.3.2",
+    "gulp-uglify": "3.0.1",
+    "gulp-webserver": "0.9.1"
+  }
+}
