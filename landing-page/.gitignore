@@ -15,4 +15,4 @@ tmp
 dist
 .publish
 purr*
-*.py
+build
