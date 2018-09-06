@@ -1,8 +1,26 @@
 body {
-  background-color: white;
-  padding: 0 10%;
-}
+  background: white; }
 
-.content-body>.title-main>h1 {
-  text-align: center;
-}
+.content {
+  max-width: 600px;
+  margin: auto; }
+  .content .row {
+    margin: 0;
+    padding: 2%; }
+  .content .row-dark {
+    background-color: purple;
+    color: whitesmoke; }
+
+.home {
+  border: 1px solid purple;
+  text-align: center; }
+
+.button-center {
+  margin: 0 auto;
+  text-align: center; }
+  .button-center .button-light {
+    background: orange;
+    color: white;
+    border-radius: 5px;
+    padding: 10px;
+    display: inline-block; }
