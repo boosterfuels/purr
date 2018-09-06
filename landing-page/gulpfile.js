@@ -5,6 +5,7 @@ var inject = require('gulp-inject')
 var webserver = require('gulp-webserver')
 var htmlclean = require('gulp-htmlclean')
 var cleanCSS = require('gulp-clean-css')
+var sass = require('gulp-sass')
 // var concat = require('gulp-concat')
 // var uglify = require('gulp-uglify')
 
@@ -23,9 +24,14 @@ var paths = {
 gulp.task('default', ['watch'])
 
 // checking for changes
-gulp.task('watch', ['serve'], function() {
+gulp.task('watch', ['serve', 'sass'], function() {
   gulp.watch(paths.src, ['inject'])
+  gulp.watch('./src/scss/**/*.scss', ['sass'])
 })
+
+// gulp.task('sass:watch', function () {
+//   gulp.watch('./src/scss/**/*.scss', ['sass']);
+// });
 
 gulp.task('serve', ['inject'], function() {
   return gulp.src(paths.dist).pipe(
@@ -71,11 +77,8 @@ gulp.task('js', function() {
 // combine tasks
 gulp.task('copy', ['html', 'css', 'js'])
 
-
-
 // build tasks
 gulp.task('build', ['inject:dist'])
-
 
 gulp.task('inject:dist', ['copy:dist'], function() {
   var css = gulp.src(paths.distCSS)
@@ -94,23 +97,40 @@ gulp.task('html:dist', function() {
     .pipe(gulp.dest(paths.dist))
 })
 gulp.task('css:dist', function() {
-  return gulp
-    .src(paths.srcCSS)
-    // .pipe(concat('style.min.css'))
-    .pipe(cleanCSS())
-    .pipe(gulp.dest(paths.dist))
+  return (
+    gulp
+      .src(paths.srcCSS)
+      // .pipe(concat('style.min.css'))
+      .pipe(cleanCSS())
+      .pipe(gulp.dest(paths.dist))
+  )
 })
 gulp.task('js:dist', function() {
-  return gulp
-    .src(paths.srcJS)
-    // .pipe(concat('script.min.js'))
-    // .pipe(uglify())
-    .pipe(gulp.dest(paths.dist))
+  return (
+    gulp
+      .src(paths.srcJS)
+      // .pipe(concat('script.min.js'))
+      // .pipe(uglify())
+      .pipe(gulp.dest(paths.dist))
+  )
 })
 
 gulp.task('copy:dist', ['html:dist', 'css:dist', 'js:dist'])
 
+gulp.task('clean', function() {
+  del([paths.dist])
+})
 
-gulp.task('clean', function () {
-  del([paths.dist]);
-});
+// compile the Sass files
+gulp.task('sass', function() {
+  return gulp
+    .src('./src/scss/**/*.scss')
+    .pipe(sass().on('error', sass.logError))
+    .pipe(gulp.dest('./src/css'))
+    .pipe(gulp.dest('./dist/css'))
+})
+
+// // checking for changes
+// gulp.task('watch', ['sass'], function() {
+//   gulp.watch('./src/scss/**/*.scss', ['sass']);
+// })
