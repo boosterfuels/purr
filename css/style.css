@@ -2,14 +2,34 @@ body {
   background: white; }
 
 .content {
-  max-width: 600px;
-  margin: auto; }
+  width: 100%;
+  margin: 0 auto; }
   .content .row {
     margin: 0;
     padding: 2%; }
   .content .row-dark {
     background-color: purple;
     color: whitesmoke; }
+    .content .row-dark .image-center {
+      margin: 2% auto;
+      width: 100px;
+      height: 100px;
+      opacity: 0.5;
+      border: 1px solid lightgrey;
+      background: white; }
+  .content .row-light {
+    background-color: white;
+    color: dimgrey; }
+    .content .row-light .image-center {
+      margin: 2% auto;
+      width: 100px;
+      height: 100px;
+      opacity: 0.5;
+      border: 1px solid lightgrey;
+      background: grey; }
+  .content .content-body {
+    max-width: 768px;
+    margin: 0 auto; }
 
 .home {
   border: 1px solid purple;
@@ -19,7 +39,15 @@ body {
   margin: 0 auto;
   text-align: center; }
   .button-center .button-light {
+    border: 1px solid darkorange;
     background: orange;
+    color: white;
+    border-radius: 5px;
+    padding: 10px;
+    display: inline-block; }
+  .button-center .button-dark {
+    border: 1px solid darkmagenta;
+    background: purple;
     color: white;
     border-radius: 5px;
     padding: 10px;

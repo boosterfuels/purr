@@ -53,7 +53,9 @@
             <span> data from MongoDB</span> fit into your
             <span>PostgreSQL database</span>.
           </h1>
-          <img src="images/cat2.png" alt="">
+          <div class="image-center">
+            <img src="images/cat2.png" alt="">
+          </div>
         </div>
         <!-- <div>
           <a data-scroll="" href="#get_started" class="try-purr">Try Purr</a>
@@ -76,28 +78,34 @@
             <p>
               <span class="link">
                 <a href="https://www.trybooster.com/">Booster</a>
-              </span> is a company that has been making people’s lives easier and more convenient in the past 4 years. The idea is
-              simple: you order a boost via the mobile app and you get high-quality gas at your parking spot while you are
+              </span> is a company that has been making people’s lives easier and more convenient in the past 4 years.
+              The idea is
+              simple: you order a boost via the mobile app and you get high-quality gas at your parking spot while you
+              are
               away. </p>
           </div>
           <div class="col-3 align-self-center ">
-            <img src="images/hero.png" alt="">
+            <img class="image" src="images/hero.png" alt="">
           </div>
         </div>
 
         <div>
           <div class="row">
             <div class="col-3 align-self-center align-items-center logo-pg">
-              <img src="images/mongo.png" alt="">
+              <img class="image" src="images/mongo.png" alt="">
             </div>
             <div class="col-9">
-              <p>In the beginning, we had to make a choice about the DBMS around which we would build Booster: we needed flexibility,
-                high availability and easy development. All of these were offered by MongoDB for free. To make our loyal
-                users happy, we constantly improve our applications which sometimes causes changes in our data structures.
+              <p>In the beginning, we had to make a choice about the DBMS around which we would build Booster: we
+                needed flexibility,
+                high availability and easy development. All of these were offered by MongoDB for free. To make our
+                loyal
+                users happy, we constantly improve our applications which sometimes causes changes in our data
+                structures.
                 MongoDB handles these situations well and lets us focus on different problems.
               </p>
               <p>
-                Booster quickly became part of people’s everyday lives in Silicon Valley, resulting with rapid growth which has not stopped
+                Booster quickly became part of people’s everyday lives in Silicon Valley, resulting with rapid growth
+                which has not stopped
                 since then.
               </p>
             </div>
@@ -112,25 +120,29 @@
                 Need for PostgreSQL
               </h5>
               <p>
-                Just like many other companies, we recognized the importance of data analysis as we grew. It helps us increase our productivity
-                and make better decisions for the future. Today, SQL is a must and almost every developer knows how to write
+                Just like many other companies, we recognized the importance of data analysis as we grew. It helps us
+                increase our productivity
+                and make better decisions for the future. Today, SQL is a must and almost every developer knows how to
+                write
                 basic SQL queries.
               </p>
               <p>
-                Choosing the right RDBMS is also a tough task but we chose Postgres because it offered the most important things we were
-                looking for: it is object-relational, fast and it has support for various data types. Postgres is flexible:
+                Choosing the right RDBMS is also a tough task but we chose Postgres because it offered the most
+                important things we were
+                looking for: it is object-relational, fast and it has support for various data types. Postgres is
+                flexible:
                 the JSON support lets us go schema-less whenever we want to.
               </p>
             </div>
             <div class="col-3 align-self-center align-items-center logo-pg">
-              <img src="images/postgres.png" alt="">
+              <img class="image" src="images/postgres.png" alt="">
             </div>
           </div>
         </div>
         <div>
           <div class="row">
             <div class="col-3 align-self-center">
-              <img src="images/etl2.png" alt="">
+              <img class="image" src="images/etl2.png" alt="">
             </div>
             <div class="col-9">
               <h5>
@@ -140,12 +152,18 @@
                 We used an ETL tool called
                 <span class="link">
                   <a href="https://github.com/stripe/mosql">MoSQL</a>
-                </span> to transfer our data from MongoDB to Postgres. MoSQL is open-source and easy to use: it transfers all of
-                the collections defined in a collection map and syncs with MongoDB for changes. We loved MoSQL but it is
-                no longer maintained and lately some issues appeared more and more frequently: MoSQL crashed when there were
-                schema changes and connectivity issues. This resulted with reimporting millions of documents from the beginning.
-                Before the reimporting has been started, all of the tables were dropped by MoSQL, making us unable to generate
-                reports and plan the next day(s) or week(s). A full reimport took more than 5 hours. As time passed, we were
+                </span> to transfer our data from MongoDB to Postgres. MoSQL is open-source and easy to use: it
+                transfers all of
+                the collections defined in a collection map and syncs with MongoDB for changes. We loved MoSQL but it
+                is
+                no longer maintained and lately some issues appeared more and more frequently: MoSQL crashed when there
+                were
+                schema changes and connectivity issues. This resulted with reimporting millions of documents from the
+                beginning.
+                Before the reimporting has been started, all of the tables were dropped by MoSQL, making us unable to
+                generate
+                reports and plan the next day(s) or week(s). A full reimport took more than 5 hours. As time passed, we
+                were
                 more and more sure that we need to take things into our own hands.
               </p>
             </div>
@@ -157,32 +175,39 @@
             <h5>A Real Solution</h5>
             <div class="">
               <p>
-                We created Purr to do what MoSQL did right and handle the issues MoSQL could not handle anymore. Since we relied on MoSQL
-                and did not want to make drastic changes in our app logic, we made Purr except very similar input we already
-                had and provide a MoSQL-like output. We also needed to keep performance in mind and connectivity issues MoSQL
-                could not always handle. Purr has many features that MoSQL doesn't: you can set it to transfer to a custom
-                schema, in case of reimport you can tell it to keep your schema, drop your tables or specific columns, etc.
-                In case of connectivity issues from both MongoDB and Postgres, Purr waits for a while, attempts to reconnect
-                and starts tailing the oplog again. Extra properties: You can include and exclude extra properties that are
+                We created Purr to do what MoSQL did right and handle the issues MoSQL could not handle anymore. Since
+                we relied on MoSQL
+                and did not want to make drastic changes in our app logic, we made Purr except very similar input we
+                already
+                had and provide a MoSQL-like output. We also needed to keep performance in mind and connectivity issues
+                MoSQL
+                could not always handle. Purr has many features that MoSQL doesn't: you can set it to transfer to a
+                custom
+                schema, in case of reimport you can tell it to keep your schema, drop your tables or specific columns,
+                etc.
+                In case of connectivity issues from both MongoDB and Postgres, Purr waits for a while, attempts to
+                reconnect
+                and starts tailing the oplog again. Extra properties: You can include and exclude extra properties that
+                are
                 not defined in your collection map. Leaving only the necessary information decreases transfer time.
               </p>
 
               <div class=" align-self-center row etl-logos">
                 <div class="col-2"></div>
                 <div class="col-2 align-self-center">
-                  <img src="images/mongo.png" alt="">
+                  <img class="image" src="images/mongo.png" alt="">
                 </div>
                 <div class="col-1 align-self-center arrow">
-                  <img src="images/arrow.png" alt="">
+                  <img class="image" src="images/arrow.png" alt="">
                 </div>
                 <div class="col-2 align-self-center">
-                  <img src="images/python.png" alt="">
+                  <img class="image" src="images/python.png" alt="">
                 </div>
                 <div class="col-1 align-self-center arrow">
-                  <img src="images/arrow.png" alt="">
+                  <img class="image" src="images/arrow.png" alt="">
                 </div>
                 <div class="col-2 align-self-center">
-                  <img src="images/postgres.png" alt="">
+                  <img class="image" src="images/postgres.png" alt="">
                 </div>
                 <div class="col-2"></div>
               </div>
@@ -205,7 +230,7 @@
             <div class="card-body">
               <h5 class="card-title">Quickstart</h5>
               <p class="card-text">Follow the instructions to get started quickly.</p>
-              <img src="images/rocket.png" alt="">
+              <img class="image" src="images/rocket.png" alt="">
               <div class="footer button-center">
                 <a class="btn btn-primary button-light" href="#">Go!</a>
               </div>
@@ -214,8 +239,9 @@
           <div class="card">
             <div class="card-body">
               <h5 class="card-title">Docker</h5>
-              <p class="card-text">We are trying to make everything as easy as possible so you can find Purr on docker hub.</p>
-              <img src="images/docker.png" alt="">
+              <p class="card-text">We are trying to make everything as easy as possible so you can find Purr on docker
+                hub.</p>
+              <img class="image" src="images/docker.png" alt="">
               <div class="footer button-center">
                 <a class="btn btn-primary button-light" href="#">Go!</a>
               </div>
@@ -225,7 +251,7 @@
             <div class="card-body">
               <h5 class="card-title">Docs</h5>
               <p class="card-text">Want to find out more about Purr? Check out our docs!</p>
-              <img src="images/otherbooks.png" alt="">
+              <img class="image" src="images/otherbooks.png" alt="">
               <div class="footer button-center">
                 <a class="btn btn-primary button-light" href="#">Go!</a>
               </div>
@@ -247,8 +273,10 @@
                 Want to contribute?
               </h5>
               <p>
-                Contributing to an open-source project is a great opportunity to help the community and increase your knowledge. Purr is
-                open-source and free and we would like to keep it that way. You implemented a new feature? Fixed an issue
+                Contributing to an open-source project is a great opportunity to help the community and increase your
+                knowledge. Purr is
+                open-source and free and we would like to keep it that way. You implemented a new feature? Fixed an
+                issue
                 or just a typo? We would be happy to see your pull request on
                 <a href="#">Github</a>, but first, check out our
                 <span class="link">
@@ -265,7 +293,8 @@
             <div class="row-contribute issues">
               <h5>Found any issues?</h5>
               <p> Purr is actively maintained by Booster. Head over to
-                <a href="#">Github</a> and help yourself and the community by opening an issue. We will try to fix it ASAP.
+                <a href="#">Github</a> and help yourself and the community by opening an issue. We will try to fix it
+                ASAP.
               </p>
             </div>
             <div class="row-contribute ideas">
@@ -277,7 +306,9 @@
             </div>
           </div>
           <div class="col-2 align-self-center">
-            <img src="images/octocat.png" alt="">
+            <div class="image-center">
+              <img src="images/octocat.png" alt="">
+            </div>
           </div>
 
         </div>
