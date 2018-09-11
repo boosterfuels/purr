@@ -14,11 +14,13 @@ var paths = {
   srcHTML: 'src/**/*.html',
   srcCSS: 'src/**/*.css',
   srcJS: 'src/**/*.js',
+  srcIMG: 'src/**/*.png',
 
   dist: 'dist',
   distIndex: 'dist/index.html',
   distCSS: 'dist/**/*.css',
-  distJS: 'dist/**/*.js'
+  distJS: 'dist/**/*.js',
+  distIMG: 'dist/images/'
 }
 
 gulp.task('default', ['watch'])
@@ -28,10 +30,6 @@ gulp.task('watch', ['serve', 'sass'], function() {
   gulp.watch(paths.src, ['inject'])
   gulp.watch('./src/scss/**/*.scss', ['sass'])
 })
-
-// gulp.task('sass:watch', function () {
-//   gulp.watch('./src/scss/**/*.scss', ['sass']);
-// });
 
 gulp.task('serve', ['inject'], function() {
   return gulp.src(paths.dist).pipe(
@@ -64,7 +62,7 @@ gulp.task('html', function() {
   return gulp.src(paths.srcHTML).pipe(gulp.dest(paths.dist))
 })
 
-// copy all CSS files from the src directory to the dist directory
+// copy all CSS files from the src directory dto the dist directory
 gulp.task('css', function() {
   return gulp.src(paths.srcCSS).pipe(gulp.dest(paths.dist))
 })
@@ -73,9 +71,13 @@ gulp.task('css', function() {
 gulp.task('js', function() {
   return gulp.src(paths.srcJS).pipe(gulp.dest(paths.dist))
 })
+// copy all image files from the src directory to the dist directory
+gulp.task('img', function() {
+  return gulp.src(paths.srcIMG).pipe(gulp.dest(paths.dist))
+})
 
 // combine tasks
-gulp.task('copy', ['html', 'css', 'js'])
+gulp.task('copy', ['html', 'css', 'js', 'img'])
 
 // build tasks
 gulp.task('build', ['inject:dist'])
@@ -129,8 +131,3 @@ gulp.task('sass', function() {
     .pipe(gulp.dest('./src/css'))
     .pipe(gulp.dest('./dist/css'))
 })
-
-// // checking for changes
-// gulp.task('watch', ['sass'], function() {
-//   gulp.watch('./src/scss/**/*.scss', ['sass']);
-// })
