@@ -1,6 +1,20 @@
 body {
   background: white; }
 
+ul li a {
+  color: dimgrey;
+  margin: 5px; }
+
+.content .row-dark .image-center, .content .row-light .image-center {
+  width: 150px;
+  height: 150px;
+  padding: 10px; }
+  .content .row-dark .image-center img, .content .row-light .image-center img {
+    height: 95%;
+    width: 95%;
+    display: block;
+    margin: 0 auto; }
+
 .content {
   width: 100%;
   margin: 0 auto; }
@@ -11,44 +25,92 @@ body {
     background-color: purple;
     color: whitesmoke; }
     .content .row-dark .image-center {
-      margin: 2% auto;
-      width: 100px;
-      height: 100px;
-      opacity: 0.5;
-      border: 1px solid lightgrey;
-      background: white; }
+      margin: 2% auto; }
   .content .row-light {
-    background-color: white;
     color: dimgrey; }
     .content .row-light .image-center {
-      margin: 2% auto;
-      width: 100px;
-      height: 100px;
-      opacity: 0.5;
-      border: 1px solid lightgrey;
-      background: grey; }
+      margin: 2% auto; }
   .content .content-body {
     max-width: 768px;
     margin: 0 auto; }
 
+.button-center {
+  margin: 0 auto;
+  text-align: center;
+  width: 100%; }
+  @media (min-width: 768px) {
+    .button-center {
+      width: 150px; } }
+
+.button-right {
+  text-align: right; }
+
+.button-light {
+  border: 1px solid darkorange;
+  background: orange;
+  color: white;
+  border-radius: 5px;
+  padding: 10px;
+  display: inline-block; }
+
+.button-dark {
+  border: 1px solid darkmagenta;
+  background: purple;
+  color: white;
+  border-radius: 5px;
+  padding: 10px;
+  display: inline-block; }
+
 .home {
   border: 1px solid purple;
   text-align: center; }
+  .home .text-intro span {
+    color: #ffa500c7; }
 
-.button-center {
-  margin: 0 auto;
-  text-align: center; }
-  .button-center .button-light {
-    border: 1px solid darkorange;
-    background: orange;
-    color: white;
+.about .booster-truck {
+  height: 100% !important; }
+
+.contribute h2 {
+  margin-bottom: 30px; }
+
+.get-started-now .card-deck {
+  display: block;
+  width: 70%;
+  margin: 30px auto; }
+  @media (min-width: 768px) {
+    .get-started-now .card-deck {
+      display: flex;
+      width: 100%; } }
+  .get-started-now .card-deck .card {
+    width: 100%;
+    background: white;
     border-radius: 5px;
-    padding: 10px;
-    display: inline-block; }
-  .button-center .button-dark {
-    border: 1px solid darkmagenta;
-    background: purple;
-    color: white;
-    border-radius: 5px;
-    padding: 10px;
-    display: inline-block; }
+    color: grey;
+    padding: 15px;
+    flex: 1;
+    box-shadow: orange 1px 1px 5px 0px;
+    margin: 10px auto; }
+    @media (min-width: 768px) {
+      .get-started-now .card-deck .card {
+        margin: 10px; } }
+    .get-started-now .card-deck .card .card-body .card-title {
+      text-align: center;
+      color: orange; }
+    .get-started-now .card-deck .card .card-body .card-text {
+      height: 50px;
+      text-align: center; }
+    .get-started-now .card-deck .card .card-body .image-center {
+      position: relative;
+      margin: 0 auto;
+      border: none; }
+      .get-started-now .card-deck .card .card-body .image-center .image-shrink {
+        height: 60% !important;
+        width: 60% !important;
+        max-height: 80%;
+        max-width: 80%;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: auto; }
