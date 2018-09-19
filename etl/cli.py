@@ -38,7 +38,7 @@ def main():
                         nargs='?',
                         help="Start tailing from specific timestamp; \nuse in combination with --tail in order to tail the oplog from a specific date and time - format DD-MM-YYThh:mm:ss. Example 25-07-18T16:30:00",
                         type=valid_date)
-    parser.add_argument('-tsdb', '--start-from-tsdb', action='store_true', dest='timestamp_db', default=False, help='')
+    parser.add_argument('-tsdb', '--start-from-tsdb', action='store_true', dest='timestamp_db', default=False, help='Start tailing from latest saved timestamp. Looks for the value saved in table purr_info.')
 
     parser.add_argument('-ta', '--typecheck-auto', action='store_true', dest='typecheck_auto', default=False, help='')
     parser.add_argument('-ex', '--include-extra-properties', action='store_true', dest='include_extra_props', default=False, help='')
@@ -74,6 +74,10 @@ def main():
             'typecheck_auto': args.typecheck_auto,
             'include_extra_props': args.include_extra_props
         }
+        
+        if (setup["tailing"] and (setup["tailing_from"] or setup["tailing_from_db"]) or (setup["tailing_from"] and setup["tailing_from_db"])):
+            print("\nOnly one tailing option is allowed.")
+            raise SystemExit 
         etl.core.start(setup, coll_file)
 
 

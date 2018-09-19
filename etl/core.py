@@ -52,21 +52,26 @@ def start(settings, coll_config):
         schema.reset(pg, setup_pg["schema_name"])
 
     transfer_info.create_stat_table(pg, setup_pg["schema_name"])
-
-    if ex.typecheck_auto is True:
-        ex.transfer_auto(collections)
-    else:
-        ex.transfer_conf(collections)
+    
+    # Skip collection transfer if started in tailing mode.
+    if settings["tailing_from_db"] is False and settings["tailing_from"] is None:
+        if ex.typecheck_auto is True:
+            ex.transfer_auto(collections)
+        else:
+            ex.transfer_conf(collections)
 
     if settings["tailing"] is True:
         t = tailer.Tailer(pg, mongo, setup_pg, settings, coll_config)
-        if settings["tailing_from"] is not None:
-            t.start(settings["tailing_from"])
-        elif settings["tailing_from_db"] is True:
-            ts = transfer_info.get_latest_successful_ts(pg, 'public')
-            latest_ts = int((list(ts)[0])[0])
-            t.start(latest_ts)
-        else:
-            t.start(start_date_time)
+        t.start(start_date_time)
+        
+    elif settings["tailing_from"] is not None:
+        t = tailer.Tailer(pg, mongo, setup_pg, settings, coll_config)
+        t.start(settings["tailing_from"])
+
+    elif settings["tailing_from_db"] is True:
+        t = tailer.Tailer(pg, mongo, setup_pg, settings, coll_config)
+        ts = transfer_info.get_latest_successful_ts(pg, 'public')
+        latest_ts = int((list(ts)[0])[0])
+        t.start(latest_ts)
     else:
         pg.__del__()
