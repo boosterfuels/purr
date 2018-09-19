@@ -62,13 +62,16 @@ def start(settings, coll_config):
 
     if settings["tailing"] is True:
         t = tailer.Tailer(pg, mongo, setup_pg, settings, coll_config)
+        logger.info("Starting standard tailing.")
         t.start(start_date_time)
         
     elif settings["tailing_from"] is not None:
+        logger.info("Starting tailing from provided timestamp.")
         t = tailer.Tailer(pg, mongo, setup_pg, settings, coll_config)
         t.start(settings["tailing_from"])
 
     elif settings["tailing_from_db"] is True:
+        logger.info("Starting tailing from timestamp found in purr_info.")
         t = tailer.Tailer(pg, mongo, setup_pg, settings, coll_config)
         ts = transfer_info.get_latest_successful_ts(pg, 'public')
         latest_ts = int((list(ts)[0])[0])
