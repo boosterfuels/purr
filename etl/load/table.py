@@ -141,12 +141,15 @@ def add_multiple_columns(db, schema, table, attrs, types):
   add_multiple_columns(db, ['nyanya', some_integer'], ['text', integer'])
   """
   statements_add = []
-  for i, j in zip(attrs, types):
+  attrs_types = zip(attrs, types)
+  for i, j in attrs_types:
     statements_add.append(' '.join(['ADD COLUMN IF NOT EXISTS', i, j]))
   statements_merged = ', '.join(statements_add) 
-  
+
   cmd = "ALTER TABLE IF EXISTS %s.%s %s;" % (schema, table.lower(), statements_merged)
-  logger.warn("[TABLE] Adding multiple columns to table %s %s;" % (table.lower(), statements_merged))
+
+  for i, j in zip(attrs, types):
+    logger.warn("Adding column %s (%s) to company %s." % (i, j, table.lower()))
   try:
     db.execute_cmd(cmd)   
   except Exception as ex:
