@@ -286,7 +286,7 @@ class Relation():
       attrs_pg = []
       types_pg = []
       column_info = table.get_column_names_and_types(self.db, self.schema, self.relation_name)
-      if column_info is not None:
+      if self.exists() is True and column_info is not None:
         # Every attribute from pg and conf has to have the same order. We are sorting by pg column names.
         attrs_types_pg = dict(column_info)
         attrs_pg = [k for k in sorted(attrs_types_pg.keys())]
@@ -357,7 +357,8 @@ class Relation():
       else:
         attrs_conf = [v["name_conf"] for k,v in attrs_types_conf.items()]
         types_conf = [v["type_conf"] for k,v in attrs_types_conf.items()]
-        self.create_with_columns(attrs_conf, types_conf)
+        if self.exists() is False:
+          self.create_with_columns(attrs_conf, types_conf)
         return
       # TODO if table was dropped or schema was reset then there is no need to have fun
       # with the type checking.
