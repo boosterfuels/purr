@@ -180,8 +180,8 @@ class Relation():
         attrs_pg = [v["name_conf"] for k, v in attrs.items()]
         values = [v["value"] for k, v in attrs.items()]
       else:
-        attrs_pg = [v["name_conf"] for k, v in attrs.items() if k in doc.keys()]
-        values = [v["value"] for k, v in attrs.items() if k in doc.keys()]
+        attrs_pg = [v["name_conf"] for k, v in attrs.items() if (k in doc.keys() or k in attrs.keys())]
+        values = [v["value"] for k, v in attrs.items() if (k in doc.keys() or k in attrs.keys())]
 
       result.append(tuple(values))
     if len(docs) > 1:

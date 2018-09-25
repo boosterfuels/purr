@@ -95,6 +95,7 @@ def insert_bulk(db, schema, table, attrs, values):
     db.conn.commit()
   except Exception as ex:
     logger.error("[ROW] Bulk insert failed: %s" % ex)
+    logger.error("CMD: %s" % cmd)
 
 def update(db, schema, table_name, attrs, values):
   """
