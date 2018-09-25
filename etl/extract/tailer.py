@@ -1,7 +1,6 @@
 # here comes everything with the oplog
 import pymongo
 import time
-import pprint
 from datetime import datetime, timedelta
 from bson import Timestamp
 
@@ -84,7 +83,7 @@ class Tailer(extractor.Extractor):
             except Exception as ex:
                 logger.error(
                     "[TAILER] Insert into %s failed:\n Document: %s\n %s"
-                    % (table_name_pg, pprint.pprint(doc_useful), ex)
+                    % (table_name_pg, doc_useful, ex)
                 )
 
         elif oper == UPDATE:
@@ -102,16 +101,16 @@ class Tailer(extractor.Extractor):
             except Exception as ex:
                 logger.error(
                     "[TAILER] Update of %s failed:\n Document: %s\n %s"
-                    % (table_name_pg, pprint.pprint(doc_useful), ex)
+                    % (table_name_pg, doc_useful, ex)
                 )
-                
+
         elif oper == DELETE:
             try:
                 r.delete(doc_useful)
             except Exception as ex:
                 logger.error(
                     "[TAILER] Delete from %s failed: \n Document: %s\n %s"
-                    % (table_name_pg, pprint.pprint(doc_useful), ex)
+                    % (table_name_pg, doc_useful, ex)
                 )
 
     def start(self, dt=None):

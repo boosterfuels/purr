@@ -12,8 +12,6 @@ from bson import Timestamp
 import json
 from bson.json_util import default
 
-import pprint
-
 name_extra_props_pg = "_extra_props"
 name_extra_props_mdb = "extraProps"
 
@@ -184,7 +182,7 @@ class Extractor():
         r.insert_config_bulk_no_extra_props([doc], attrs_details, self.include_extra_props)
     except Exception as ex:
       logger.error('[EXTRACTOR] Transferring to %s was unsuccessful. Exception: %s' % (r.relation_name, ex))
-      logger.error('%s\n', (pprint.pprint([doc])))
+      logger.error('%s\n', ([doc]))
 
   def prepare_attr_details(self, attrs_conf, attrs_mdb, types_conf, type_extra_props_pg = None):
     '''
