@@ -180,8 +180,8 @@ class Relation():
         attrs_pg = [v["name_conf"] for k, v in attrs.items()]
         values = [v["value"] for k, v in attrs.items()]
       else:
-        attrs_pg = [v["name_conf"] for k, v in attrs.items() if k in doc.keys()]
-        values = [v["value"] for k, v in attrs.items() if k in doc.keys()]
+        attrs_pg = [v["name_conf"] for k, v in attrs.items() if (k in doc.keys() or k in attrs.keys())]
+        values = [v["value"] for k, v in attrs.items() if (k in doc.keys() or k in attrs.keys())]
 
       result.append(tuple(values))
     if len(docs) > 1:
@@ -287,8 +287,6 @@ class Relation():
       types_pg = []
       column_info = table.get_column_names_and_types(self.db, self.schema, self.relation_name)
       if self.exists() is True and column_info is not None:
-
-
         # Every attribute from pg and conf has to have the same order. We are sorting by pg column names.
         attrs_types_pg = dict(column_info)
         attrs_pg = [k for k in sorted(attrs_types_pg.keys())]
@@ -356,7 +354,6 @@ class Relation():
             idx = attrs_conf.index(d)
             types_to_add.append(types_conf[idx])
           table.add_multiple_columns(self.db, self.schema, self.relation_name, attrs_to_add, types_to_add)
-        
       else:
         attrs_conf = [v["name_conf"] for k,v in attrs_types_conf.items()]
         types_conf = [v["type_conf"] for k,v in attrs_types_conf.items()]

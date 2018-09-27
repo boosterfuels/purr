@@ -4,7 +4,7 @@ with open('requirements.txt') as f:
     requirements = f.read().splitlines()
 
 setup(name='purr',
-      version='0.0.1',
+      version='0.1.0',
       author='Anett Balázsics',
       email='anett.balazsics@digihey.com',
       url='https://github.com/boosterfuels/purr',

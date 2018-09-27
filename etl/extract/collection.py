@@ -39,7 +39,7 @@ def check(db, colls_requested):
         colls_name.index(coll)
         colls_existing.append(coll)
       except ValueError:
-        logger.error("[COLLECTION] '%s' is not in the database." % coll)
+        logger.error("[COLLECTION] '%s' is not in the Mongo database." % coll)
   except Exception as ex:
     logger.error("[COLLECTION] Checking collection names failed: %s" % ex)
   return colls_existing

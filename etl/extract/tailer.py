@@ -32,6 +32,9 @@ class Tailer(extractor.Extractor):
         self.tailing = False
         self.pg = pg
         self.schema = setup_pg["schema_name"]
+        self.settings = settings
+        self.coll_settings = coll_settings
+        self.setup_pg = setup_pg
 
     def transform_and_load(self, doc):
         """
@@ -51,9 +54,6 @@ class Tailer(extractor.Extractor):
         fullname = doc["ns"]
         table_name_mdb = fullname.split(".")[1]
 
-        oper = doc["op"]
-        doc_useful = {}
-        doc_useful = doc["o"]
 
         '''
         Get table name from collections.yml. 
@@ -64,14 +64,16 @@ class Tailer(extractor.Extractor):
         except Exception as ex:
             return
 
+        oper = doc["op"]
+        doc_useful = {}
+        doc_useful = doc["o"]
         '''
         Check if relation exists in the PG database. 
         Skip the document if the trelation does not exist.
         '''
-        r = relation.Relation(self.pg, self.schema_name, table_name_pg)
-        if r.exists() is False:
-            return
 
+        r = relation.Relation(self.pg, self.schema_name, table_name_pg)
+        
         if oper == INSERT:
             try:
                 if self.typecheck_auto is False:
@@ -101,6 +103,7 @@ class Tailer(extractor.Extractor):
                     "[TAILER] Update of %s failed:\n Document: %s\n %s"
                     % (table_name_pg, doc_useful, ex)
                 )
+
         elif oper == DELETE:
             try:
                 r.delete(doc_useful)

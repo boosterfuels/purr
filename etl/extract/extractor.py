@@ -134,16 +134,12 @@ class Extractor():
             r.insert_config_bulk_no_extra_props(transferring, attrs_details, self.include_extra_props)
           transferring = []
         if i + 1 == nr_of_docs and (i + 1) % nr_of_transferred != 0:
-          if table.exists(self.pg, self.schema_name, r.relation_name):
-            if self.include_extra_props is True:
-              r.insert_config_bulk(transferring, attrs_details, self.include_extra_props)
-            else:
-              r.insert_config_bulk_no_extra_props(transferring, attrs_details, self.include_extra_props)
+          if self.include_extra_props is True:
+            r.insert_config_bulk(transferring, attrs_details, self.include_extra_props)
+          else:
+            r.insert_config_bulk_no_extra_props(transferring, attrs_details, self.include_extra_props)
             logger.info('[EXTRACTOR] Successfully transferred collection %s (%d documents).' % (coll, i + 1))
             transferring = []
-          else:
-            logger.error('[EXTRACTOR] Table %s might be deleted.' % r.relation_name)
-            return
       except Exception as ex:
         logger.error('[EXTRACTOR] Transfer unsuccessful. %s' % ex)
       i += 1
@@ -177,10 +173,7 @@ class Extractor():
     # This function will also create a dictionary which will contain all the information
     # about the attribute before and after the conversion.
 
-    if self.include_extra_props is True:
-      attrs_details = self.prepare_attr_details(attrs_new, attrs_original, types, type_extra_props_pg)
-    else:
-      attrs_details = self.prepare_attr_details(attrs_new, attrs_original, types)
+    attrs_details = self.prepare_attr_details(attrs_new, attrs_original, types, type_extra_props_pg)
     try:
       r.udpate_types(attrs_details)
       if self.include_extra_props is True:
@@ -188,7 +181,8 @@ class Extractor():
       else:
         r.insert_config_bulk_no_extra_props([doc], attrs_details, self.include_extra_props)
     except Exception as ex:
-      logger.error('[EXTRACTOR] Transferring item was unsuccessful. %s' % ex)
+      logger.error('[EXTRACTOR] Transferring to %s was unsuccessful. Exception: %s' % (r.relation_name, ex))
+      logger.error('%s\n', ([doc]))
 
   def prepare_attr_details(self, attrs_conf, attrs_mdb, types_conf, type_extra_props_pg = None):
     '''
@@ -257,12 +251,10 @@ class Extractor():
       attrs_mdb.append(name_extra_props_mdb)
       
       # Add column extra_props to table if it does not exist
-      if r.exists() is True:
-        table.add_column(self.pg, self.schema_name, r.relation_name, name_extra_props_pg, type_extra_props)
+      table.add_column(self.pg, self.schema_name, r.relation_name, name_extra_props_pg, type_extra_props)
     else:
-      if r.exists():
-        # Remove column extra_props from table if it exists
-        table.remove_column(self.pg, r.relation_name, name_extra_props_pg)
+      # Remove column extra_props from table if it exists
+      table.remove_column(self.pg, r.relation_name, name_extra_props_pg)
     
     for i in range(len(attrs_mdb)):
       details = {}

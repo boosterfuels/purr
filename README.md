@@ -75,6 +75,8 @@ You can set all the variables from the previous section using the command line. 
 - `-mdb or --mongo-connection`: connection string to Mongo database (*)
 - `-n or --mongo-db-name`: equivalent of `db_name` for MongoDB (*)
 - `-t or --tail`: equivalent of `tailing`; defaults to `false`
+- `-s or --start`: equivalent of `tailing_from`; type should be date, defaults to `None`
+- `-tsdb or --start-from-tsdb`: equivalent of `tailing_from_db`; defaults to `false`
 - `-ta or --typecheck-auto`: defaults to `false`
 - `-ex or --include-extra-properties`: defaults to `false`
 
@@ -252,17 +254,20 @@ If you have any existing tables in your schema that you want to be left alone, m
 
 ## Tailing
 
-You can start tailing from a specific timestamp by passing `-ts` when starting Purr which skips collection transfer.
-If no value is added, Purr will do the following:
-- `purr_info` will be created if it does not exist
-    - the current timestamp will be inserted 
-- if `purr_info` exists, it will read the latest timestamp and check if the oplog has any new entries
-  - if the timestamp is "too old", Purr transfers all collections
+There are two types of tailing:
+- tailing which is preceded by collection transfer
+- tailing from specific timestamp (only if collections exist)
+
+Tailing without collection transfer must have a starting point defined by the user. This starting point can be a timestamp which can be passed using `-ts datetime`. 
+Purr creates a table called `purr_info` where it saves the current Unix epoch time. This timestamp is updated every _x_ minutes. The update happens only if the current document is successfully transfered. When an error occurs, you can be sure that Purr saved the latest successful timestamp to `purr_info` and can continue tailing the oplog from `-tsdb`.
+`purr_info` is always created when you first start Purr.
+If you do not add any timestamps to `-s`:
+  - the current timestamp will be inserted
+  - it will read the latest timestamp and check if the oplog has any new entries
+  - if the timestamp is "too old", Purr updates all collections
 
 If timestamp is added, Purr will do the following:
-- `purr_info` will be created if it does not exist
-    - the given timestamp will be inserted 
-- if `purr_info` exists, the latest timestamp will be compared to the given timestamp and the oldest wins
+  - the latest timestamp will be inserted into `purr_info`
 
 ## Output
 
