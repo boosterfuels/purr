@@ -129,7 +129,7 @@ def config_fields(colls, name):
   if name in colls.keys():
     collection = colls[name]
   else:
-    monitor.logging.warn("[CONFIG PARSER] Failed to find description of %s in collections.yml. Skipping collection." % name)
+    monitor.logging.warning("[CONFIG PARSER] Failed to find description of %s in collections.yml. Skipping collection." % name)
     return ([],[],[],[],[])
   relation_name = collection[":meta"][":table"]
   extra_props_type = collection[":meta"][":extra_props"]

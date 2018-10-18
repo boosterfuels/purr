@@ -24,7 +24,6 @@ class Extractor():
 
   def __init__(self, pg, mdb, settings_pg, settings_general, coll_settings):
     """Constructor for Extractor"""
-
     self.pg = pg
     self.mdb = mdb
     self.typecheck_auto = settings_general['typecheck_auto']
@@ -33,7 +32,7 @@ class Extractor():
       self.include_extra_props = settings_general['include_extra_props']
     except KeyError:
       self.include_extra_props = False
-    self.schema_name = settings_pg["schema_name"]
+    self.schema_name = settings_pg["schema_name"] or 'public'
     self.truncate = settings_pg['table_truncate']
     self.drop = settings_pg['table_drop']
     self.coll_settings = coll_settings
@@ -282,6 +281,6 @@ class Extractor():
         type_orig = tuf[1].lower()
         type_new = attrs_details[name_mdb]["type_conf"].lower()
         attrs_details[name_mdb]["type_conf"] = type_orig
-        logger.warn("[EXTRACTOR] Type conversion failed for column '%s'. Skipping conversion %s -> %s." % (name_pg, type_orig, type_new))
+        logger.warning("[EXTRACTOR] Type conversion failed for column '%s'. Skipping conversion %s -> %s." % (name_pg, type_orig, type_new))
 
     return r, attrs_details

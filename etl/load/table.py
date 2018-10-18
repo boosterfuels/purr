@@ -121,7 +121,7 @@ def add_column(db, schema, table, column_name, column_type):
   add_column(db, 'some_integer', 'integer')
   """
   cmd = "ALTER TABLE IF EXISTS %s.%s ADD COLUMN IF NOT EXISTS %s %s;" % (schema, table.lower(), column_name, column_type)  
-  logger.warn("[TABLE] Adding new column to table: %s, column: %s, type: %s" % (table.lower(), column_name, column_type))
+  logger.warning("[TABLE] Adding new column to table: %s, column: %s, type: %s" % (table.lower(), column_name, column_type))
   try:
     db.execute_cmd(cmd)   
   except Exception as ex:
@@ -149,7 +149,7 @@ def add_multiple_columns(db, schema, table, attrs, types):
   cmd = "ALTER TABLE IF EXISTS %s.%s %s;" % (schema, table.lower(), statements_merged)
 
   for i, j in zip(attrs, types):
-    logger.warn("Adding column %s (%s) to company %s." % (i, j, table.lower()))
+    logger.warninging("Adding column %s (%s) to company %s." % (i, j, table.lower()))
   try:
     db.execute_cmd(cmd)   
   except Exception as ex:
@@ -178,7 +178,7 @@ def column_change_type(db, schema, table, column_name, column_type):
     cmd = "ALTER TABLE %s.%s ALTER COLUMN %s TYPE %s;" % (schema, table.lower(), column_name, column_type)
   else:
     cmd = "ALTER TABLE %s.%s ALTER COLUMN %s TYPE %s USING %s;" % (schema, table.lower(), column_name, column_type, expression)
-  logger.warn("[TABLE] ALTER TABLE %s, changing type of column '%s' to '%s'" % (table.lower(), column_name, column_type))
+  logger.warning("[TABLE] ALTER TABLE %s, changing type of column '%s' to '%s'" % (table.lower(), column_name, column_type))
 
   try:
     db.execute_cmd(cmd)   
@@ -189,7 +189,7 @@ def column_change_type(db, schema, table, column_name, column_type):
 
 def remove_column(db, table, column_name):
   cmd = "ALTER TABLE IF EXISTS %s DROP COLUMN IF EXISTS %s;" % (table.lower(), column_name)  
-  logger.warn("[TABLE] Removing column '%s' from table '%s' if exists." % (column_name, table.lower()))
+  logger.warning("[TABLE] Removing column '%s' from table '%s' if exists." % (column_name, table.lower()))
   try:
     db.execute_cmd(cmd)
   except Exception as ex:

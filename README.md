@@ -284,3 +284,18 @@ Contributing to Purr is a great way to learn more about
 - MongoDB
 - PostgreSQL
 - Python3
+
+
+# Testing
+You will connect to your local database so you should first install Postgres and Mongo on your machine.
+
+Start the mongo instance as a replicaset:
+`mongod --replSet NameOfYourReplicaSet`
+
+You will also need to install PostgreSQL on your machine if you have not done it already. You will need to create a test database named `test_purr`. The data you transfer from MongoDB will be loaded in this database.
+
+Open your favorite client (mine is psql) and create the test database:
+`CREATE DATABASE test_purr;`
+
+
+`pytest`
