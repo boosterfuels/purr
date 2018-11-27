@@ -171,14 +171,15 @@ class Relation():
 
     result = []
     for doc in docs:
+      # initialize all values from doc to 'None'
       for k, v in attrs.items():
         attrs[k]["value"] = None
+      # cast the values based on the collection map
       for key_doc, value_doc in doc.items():
         keys_conf = list(attrs.keys())
         if key_doc in keys_conf:
-          value = unnester.cast(attrs[key_doc]["type_conf"], value_doc)
-          if value != 'undefined':
-            attrs[key_doc]["value"] = value
+          value = unnester.cast(attrs[key_doc]["type_conf"], value_doc, key_doc)
+          attrs[key_doc]["value"] = value
 
       if len(docs) > 1:
         attrs_pg = [v["name_conf"] for k, v in attrs.items()]
@@ -187,6 +188,7 @@ class Relation():
         attrs_pg = [v["name_conf"] for k, v in attrs.items() if k in doc.keys()]
         values = [v["value"] for k, v in attrs.items() if k in doc.keys()]
 
+      # if there are any fields that were unset, make the corresponding values 'None'
       for u in unset:
         attrs_pg.append(attrs[u]["name_conf"])
         values.append(None)
