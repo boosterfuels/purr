@@ -144,7 +144,7 @@ class Extractor():
         logger.error('[EXTRACTOR] Transfer unsuccessful. %s' % ex)
       i += 1
 
-  def transfer_doc(self, doc, r, coll):
+  def transfer_doc(self, doc, r, coll, unset=[]):
     '''
     Transfers single document.
     Parameters
@@ -177,9 +177,9 @@ class Extractor():
     try:
       r.udpate_types(attrs_details)
       if self.include_extra_props is True:
-        r.insert_config_bulk([doc], attrs_details, self.include_extra_props)
+        r.insert_config_bulk([doc], attrs_details, self.include_extra_props, unset)
       else:
-        r.insert_config_bulk_no_extra_props([doc], attrs_details, self.include_extra_props)
+        r.insert_config_bulk_no_extra_props([doc], attrs_details, self.include_extra_props, unset)
     except Exception as ex:
       logger.error('[EXTRACTOR] Transferring to %s was unsuccessful. Exception: %s' % (r.relation_name, ex))
       logger.error('%s\n', ([doc]))

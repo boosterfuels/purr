@@ -24,11 +24,12 @@ class Tailer(extractor.Extractor):
         ----------
         pg : postgres connection
         mdb : mongo connection
-        setup_pg : postgres specific settings from setup.yml 
+        setup_pg : postgres specific settings from setup.yml
         settings : settings from setup.yml
         coll_settings : settings for each collection from collections.yml
         """
-        extractor.Extractor.__init__(self, pg, mdb, setup_pg, settings, coll_settings)
+        extractor.Extractor.__init__(
+            self, pg, mdb, setup_pg, settings, coll_settings)
         self.tailing = False
         self.pg = pg
         self.schema = setup_pg["schema_name"]
@@ -38,7 +39,7 @@ class Tailer(extractor.Extractor):
 
     def transform_and_load(self, doc):
         """
-        Gets the document and passes it to the corresponding function in order to exeucte command INSERT/UPDATE/DELETE 
+        Gets the document and passes it to the corresponding function in order to exeucte command INSERT/UPDATE/DELETE
         Parameters
         ----------
         doc :   dict
@@ -54,9 +55,8 @@ class Tailer(extractor.Extractor):
         fullname = doc["ns"]
         table_name_mdb = fullname.split(".")[1]
 
-
         '''
-        Get table name from collections.yml. 
+        Get table name from collections.yml.
         Skip the document if the table name does not exist.
         '''
         try:
@@ -68,12 +68,12 @@ class Tailer(extractor.Extractor):
         doc_useful = {}
         doc_useful = doc["o"]
         '''
-        Check if relation exists in the PG database. 
+        Check if relation exists in the PG database.
         Skip the document if the trelation does not exist.
         '''
 
         r = relation.Relation(self.pg, self.schema_name, table_name_pg)
-        
+
         if oper == INSERT:
             try:
                 if self.typecheck_auto is False:
@@ -87,17 +87,21 @@ class Tailer(extractor.Extractor):
                 )
 
         elif oper == UPDATE:
+            unset = []
             if "$set" in doc_useful.keys():
                 doc_useful = doc_useful["$set"]
+            if "$unset" in doc_useful.keys():
+                for k, v in doc_useful["$unset"].items():
+                    unset.append(k)
 
             if "o2" in doc.keys():
                 if "_id" in doc["o2"].keys():
                     doc_useful["_id"] = doc["o2"]["_id"]
             try:
                 if self.typecheck_auto is False:
-                    super().transfer_doc(doc_useful, r, table_name_mdb)
+                    super().transfer_doc(doc_useful, r, table_name_mdb, unset)
                 else:
-                    r.update(doc_useful)
+                    r.update(doc_useful, unset)
             except Exception as ex:
                 logger.error(
                     "[TAILER] Update of %s failed:\n Document: %s\n %s"
