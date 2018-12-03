@@ -58,7 +58,7 @@ def start(settings, coll_config):
         if ex.typecheck_auto is True:
             ex.transfer_auto(collections)
         else:
-            ex.transfer_conf(collections)
+            ex.prepare_transfer_conf(collections)
 
     if settings["tailing"] is True:
         t = tailer.Tailer(pg, mongo, setup_pg, settings, coll_config)
