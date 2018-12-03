@@ -178,7 +178,7 @@ class Relation():
       for key_doc, value_doc in doc.items():
         keys_conf = list(attrs.keys())
         if key_doc in keys_conf:
-          value = unnester.cast(attrs[key_doc]["type_conf"], value_doc, key_doc)
+          value = unnester.cast(attrs[key_doc]["type_conf"], value_doc)
           attrs[key_doc]["value"] = value
 
       if len(docs) > 1:
