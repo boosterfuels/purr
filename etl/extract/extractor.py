@@ -60,7 +60,7 @@ class Extractor():
       nr_of_docs = docs.count()
       for i in range(nr_of_docs):
         doc = docs[i]
-        if (i+1)%20000==0 and i+1>=20000:
+        if (i+1)%10000==0 and i+1>=10000:
           logger.info('[EXTRACTOR] Transferred %d documents from collection %s. (%s s)' % (i + 1, coll))
         if i+1 == nr_of_docs:
           logger.info('[EXTRACTOR] Successfully transferred collection %s (%d documents).' % (coll, i+1))
@@ -121,7 +121,7 @@ class Extractor():
 
     # Start transferring docs
     nr_of_docs = docs.count()
-    nr_of_transferred = 20000
+    nr_of_transferred = 1000
     i = 0
     transferring = []
     for doc in docs:
@@ -131,12 +131,14 @@ class Extractor():
           if self.include_extra_props is True:
             r.insert_config_bulk(transferring, attrs_details, self.include_extra_props)
           else:
+            print("nr_of_tr", i+1)
             r.insert_config_bulk_no_extra_props(transferring, attrs_details, self.include_extra_props)
           transferring = []
         if i + 1 == nr_of_docs and (i + 1) % nr_of_transferred != 0:
           if self.include_extra_props is True:
             r.insert_config_bulk(transferring, attrs_details, self.include_extra_props)
           else:
+            print("nr_of_tr", i+1)
             r.insert_config_bulk_no_extra_props(transferring, attrs_details, self.include_extra_props)
             logger.info('[EXTRACTOR] Successfully transferred collection %s (%d documents).' % (coll, i + 1))
             transferring = []
@@ -251,10 +253,10 @@ class Extractor():
       attrs_mdb.append(name_extra_props_mdb)
       
       # Add column extra_props to table if it does not exist
-      table.add_column(self.pg, self.schema_name, r.relation_name, name_extra_props_pg, type_extra_props)
-    else:
-      # Remove column extra_props from table if it exists
-      table.remove_column(self.pg, r.relation_name, name_extra_props_pg)
+      # table.add_column(self.pg, self.schema_name, r.relation_name, name_extra_props_pg, type_extra_props)
+    # else:
+    #   # Remove column extra_props from table if it exists
+    #   table.remove_column(self.pg, r.relation_name, name_extra_props_pg)
     
     for i in range(len(attrs_mdb)):
       details = {}
