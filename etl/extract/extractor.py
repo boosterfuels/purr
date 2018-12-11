@@ -60,7 +60,7 @@ class Extractor():
       nr_of_docs = docs.count()
       for i in range(nr_of_docs):
         doc = docs[i]
-        if (i+1)%1000==0 and i+1>=1000:
+        if (i+1)%10000==0 and i+1>=10000:
           logger.info('[EXTRACTOR] Transferred %d documents from collection %s. (%s s)' % (i + 1, coll))
         if i+1 == nr_of_docs:
           logger.info('[EXTRACTOR] Successfully transferred collection %s (%d documents).' % (coll, i+1))
@@ -121,7 +121,7 @@ class Extractor():
 
     # Start transferring docs
     nr_of_docs = docs.count()
-    nr_of_transferred = 1000
+    nr_of_transferred = 10000
     i = 0
     transferring = []
     for doc in docs:

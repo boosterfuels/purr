@@ -70,7 +70,7 @@ def get_by_name(db, name):
   ----
   - let the user decide batch size
   """
-  size = 30000
+  size = 60000
   docs = []
   try:
     logger.info('[COLLECTION] Loading data from collection %s...' % name)
@@ -109,7 +109,7 @@ def get_by_name_reduced(db, name, fields):
   ----
   - let the user decide batch size
   """
-  size = 30000
+  size = 60000
   docs = []
   try:
     logger.info('[COLLECTION] Loading data from collection %s...' % name)
