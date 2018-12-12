@@ -131,19 +131,19 @@ class Extractor():
           if self.include_extra_props is True:
             r.insert_config_bulk(transferring, attrs_details, self.include_extra_props)
           else:
-            print("nr_of_tr", i+1)
             r.insert_config_bulk_no_extra_props(transferring, attrs_details, self.include_extra_props)
           transferring = []
         if i + 1 == nr_of_docs and (i + 1) % nr_of_transferred != 0:
           if self.include_extra_props is True:
             r.insert_config_bulk(transferring, attrs_details, self.include_extra_props)
           else:
-            print("nr_of_tr", i+1)
             r.insert_config_bulk_no_extra_props(transferring, attrs_details, self.include_extra_props)
             logger.info('[EXTRACTOR] Successfully transferred collection %s (%d documents).' % (coll, i + 1))
             transferring = []
       except Exception as ex:
         logger.error('[EXTRACTOR] Transfer unsuccessful. %s' % ex)
+      if (i+1)%(nr_of_transferred*10) == 0:
+        logger.info("[EXTRACTOR] Transferred %d from collection %s" % (i+1, coll))
       i += 1
 
   def transfer_doc(self, doc, r, coll):
@@ -177,7 +177,7 @@ class Extractor():
 
     attrs_details = self.prepare_attr_details(attrs_new, attrs_original, types, type_extra_props_pg)
     try:
-      r.udpate_types(attrs_details)
+      # r.udpate_types(attrs_details)
       if self.include_extra_props is True:
         r.insert_config_bulk([doc], attrs_details, self.include_extra_props)
       else:
