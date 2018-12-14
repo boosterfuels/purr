@@ -146,7 +146,20 @@ class Tailer(extractor.Extractor):
         temp = {}
         try:
             updated = datetime.utcnow()
+            loop = False
             while True:
+                logger.info("[TAILER] In loop %s" % loop)
+                if loop is True:
+                    time.sleep(5)
+                    # maybe reconnect
+                    res = transfer_info.get_latest_successful_ts(self.pg, self.schema)
+                    latest_ts = int((list(res)[0])[0])
+                    dt = latest_ts
+                    logger.info("[TAILER] Get timestamp from purr_info... tailing from %s." % (dt))
+                    continue
+                else:
+                    loop = True
+                
                 # if there was a reconnect attempt then start tailing from specific timestamp from the db
                 if self.pg.attempt_to_reconnect is True or disconnected is True:
                     res = transfer_info.get_latest_successful_ts(self.pg, self.schema)
@@ -161,6 +174,7 @@ class Tailer(extractor.Extractor):
                 )
                 if disconnected is False:
                     logger.info("[TAILER] Started tailing from %s." % str(dt))
+                    logger.info("[TAILER] Timestamp: %s" % datetime.utcnow())
 
                 while cursor.alive and self.pg.attempt_to_reconnect is False:
                     try:
