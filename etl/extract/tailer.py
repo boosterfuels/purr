@@ -28,8 +28,8 @@ class Tailer(extractor.Extractor):
         settings : settings from setup.yml
         coll_settings : settings for each collection from collections.yml
         """
-        extractor.Extractor.__init__(self, pg, mdb, setup_pg, settings, coll_settings)
-        self.tailing = False
+        extractor.Extractor.__init__(
+            self, pg, mdb, setup_pg, settings, coll_settings)
         self.pg = pg
         self.schema = setup_pg["schema_name"]
         self.settings = settings
@@ -54,7 +54,6 @@ class Tailer(extractor.Extractor):
         fullname = doc["ns"]
         table_name_mdb = fullname.split(".")[1]
 
-
         '''
         Get table name from collections.yml. 
         Skip the document if the table name does not exist.
@@ -73,7 +72,10 @@ class Tailer(extractor.Extractor):
         '''
 
         r = relation.Relation(self.pg, self.schema_name, table_name_pg)
-        
+        logger.info("[TAILER] [%s]: [%s]" % (
+            oper, doc_useful
+        ))
+
         if oper == INSERT:
             try:
                 if self.typecheck_auto is False:
@@ -124,7 +126,7 @@ class Tailer(extractor.Extractor):
         -------
         (1)
         start()
-        
+
         (2)
         start(dt)
         """
@@ -135,8 +137,7 @@ class Tailer(extractor.Extractor):
             )
         else:
             now = dt
-        self.tailing = True
-        
+
         disconnected = False
 
         client = self.mdb.client
@@ -148,25 +149,33 @@ class Tailer(extractor.Extractor):
             updated = datetime.utcnow()
             loop = False
             while True:
-                logger.info("[TAILER] In loop %s" % loop)
+                logger.info("""[TAILER] Details: \n
+                In loop: %s \n
+                Client: %s\n, 
+                Oplog: %s\n, 
+                Timestamp (dt): %s\n""" % (
+                    loop, client, oplog, str(dt)))
                 if loop is True:
-                    time.sleep(5)
                     # maybe reconnect
-                    res = transfer_info.get_latest_successful_ts(self.pg, self.schema)
+                    res = transfer_info.get_latest_successful_ts(
+                        self.pg, self.schema)
                     latest_ts = int((list(res)[0])[0])
                     dt = latest_ts
-                    logger.info("[TAILER] Get timestamp from purr_info... tailing from %s." % (dt))
+                    logger.info(
+                        "[TAILER] Get timestamp from purr_info... tailing from %s." % (dt))
+                    time.sleep(10)
                     continue
                 else:
                     loop = True
-                
+
                 # if there was a reconnect attempt then start tailing from specific timestamp from the db
                 if self.pg.attempt_to_reconnect is True or disconnected is True:
-                    res = transfer_info.get_latest_successful_ts(self.pg, self.schema)
+                    res = transfer_info.get_latest_successful_ts(
+                        self.pg, self.schema)
                     latest_ts = int((list(res)[0])[0])
                     dt = latest_ts
                     self.pg.attempt_to_reconnect = False
-                
+
                 cursor = oplog.find(
                     {"ts": {"$gt": Timestamp(dt, 1)}},
                     cursor_type=pymongo.CursorType.TAILABLE_AWAIT,
@@ -183,14 +192,18 @@ class Tailer(extractor.Extractor):
                                 temp = doc["o"]
                                 try:
                                     self.transform_and_load(doc)
-                                    # every 5 minutes update the timestamp because we need to continue 
+                                    # every 5 minutes update the timestamp because we need to continue
                                     # tailing in case of disconnecting from the PGDB
                                     diff = datetime.utcnow() - updated
-                                    minutes_between_update = (diff.seconds//60)%60
+                                    minutes_between_update = (
+                                        diff.seconds//60) % 60
                                     if minutes_between_update > 5:
+                                        t = int(time.time())
                                         transfer_info.update_latest_successful_ts(
-                                            self.pg, self.schema, int(time.time())
+                                            self.pg, self.schema, t
                                         )
+                                        logger.info(
+                                            "[TAILER] Updated latest_successful_ts: %d" % t)
                                         updated = datetime.utcnow()
 
                                 except Exception as ex:
@@ -199,12 +212,14 @@ class Tailer(extractor.Extractor):
                                         % (temp, ex)
                                     )
                         if disconnected is True:
-                            logger.info("[TAILER] Disconnected. Started tailing from %s." % str(dt))
+                            logger.info(
+                                "[TAILER] Disconnected. Started tailing from %s." % str(dt))
                             disconnected = False
                         time.sleep(1)
                     except Exception as ex:
                         disconnected = True
-                        logger.error("[TAILER] Disconnected from MongoDB. Reconnecting...") 
+                        logger.error(
+                            "[TAILER] Disconnected from MongoDB. Reconnecting...")
                 cursor.close()
                 continue
 
