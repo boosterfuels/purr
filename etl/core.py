@@ -1,7 +1,7 @@
 import time
 import sys
 from datetime import datetime
-
+import os
 from etl.extract import collection, extractor, tailer, init_mongo as mongodb, transfer_info
 from etl.load import schema, init_pg as postgres
 from etl.monitor import logger
@@ -27,7 +27,7 @@ def start(settings, coll_config):
     - create table with attributes and types
     """
     logger.info("Starting Purr v0.1.3 ...")
-
+    logger.info("PID=%s" % os.getpid())
     setup_pg = settings["postgres"]
     setup_mdb = settings["mongo"]
     # collections which will be transferred
