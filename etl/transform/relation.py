@@ -150,7 +150,14 @@ class Relation():
           values.append(_extra_props)
 
       result.append(tuple(values))
-    row.insert_bulk(self.db, self.schema, self.relation_name, attrs_pg, result)
+      
+    if type(result) is not list:
+      result = list(result)
+
+    if self.created is True:
+      row.upsert_bulk(self.db, self.schema, self.relation_name, attrs_pg, result)
+    else:
+      row.insert_bulk(self.db, self.schema, self.relation_name, attrs_pg, result)
 
 
 
@@ -184,10 +191,14 @@ class Relation():
         values = [v["value"] for k, v in attrs.items() if k in doc.keys()]
 
       result.append(tuple(values))
-    if len(docs) > 1:
+
+    if type(result) is not list:
+      result = list(result)
+
+    if self.created is True:
+      row.upsert_bulk(self.db, self.schema, self.relation_name, attrs_pg, result)
+    else:
       row.insert_bulk(self.db, self.schema, self.relation_name, attrs_pg, result)
-    else: 
-      row.insert_bulk(self.db, self.schema, self.relation_name, attrs_pg, [result])
 
   def update(self, doc):
     attributes = list(doc.keys())
