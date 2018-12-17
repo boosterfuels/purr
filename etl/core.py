@@ -26,7 +26,7 @@ def start(settings, coll_config):
     ----
     - create table with attributes and types
     """
-    logger.info("Starting Purr v0.1.3 ...")
+    logger.info("Starting Purr v0.1.4 ...")
     logger.info("PID=%s" % os.getpid())
     setup_pg = settings["postgres"]
     setup_mdb = settings["mongo"]
