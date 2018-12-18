@@ -192,11 +192,12 @@ class Relation():
       else:
         attrs_pg = [v["name_conf"] for k, v in attrs.items() if k in doc.keys()]
         values = [v["value"] for k, v in attrs.items() if k in doc.keys()]
+      result.append(tuple(values))
 
     for u in unset:
       attrs_pg.append(attrs[u]["name_conf"])
       values.append(None)
-    result.append(tuple(values))
+      result.append(tuple(values))
 
     if self.created is True or len(docs) == 1:
       row.upsert_bulk(self.db, self.schema, self.relation_name, attrs_pg, result)

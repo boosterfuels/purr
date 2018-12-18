@@ -125,19 +125,19 @@ class Extractor():
     i = 0
     transferring = []
     for doc in docs:
-      transferring.append(doc)  
+      transferring.append(doc)
       try:
         if (i+1)%nr_of_transferred==0 and i+1>=nr_of_transferred:
           if self.include_extra_props is True:
-            r.insert_config_bulk(transferring, attrs_details, self.include_extra_props, unset)
+            r.insert_config_bulk(transferring, attrs_details, self.include_extra_props)
           else:
-            r.insert_config_bulk_no_extra_props(transferring, attrs_details, self.include_extra_props, unset)
+            r.insert_config_bulk_no_extra_props(transferring, attrs_details, self.include_extra_props)
           transferring = []
         if i + 1 == nr_of_docs and (i + 1) % nr_of_transferred != 0:
           if self.include_extra_props is True:
-            r.insert_config_bulk(transferring, attrs_details, self.include_extra_props, unset)
+            r.insert_config_bulk(transferring, attrs_details, self.include_extra_props)
           else:
-            r.insert_config_bulk_no_extra_props(transferring, attrs_details, self.include_extra_props, unset)
+            r.insert_config_bulk_no_extra_props(transferring, attrs_details, self.include_extra_props)
             logger.info('[EXTRACTOR] Successfully transferred collection %s (%d documents).' % (coll, i + 1))
             transferring = []
       except Exception as ex:
