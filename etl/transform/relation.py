@@ -81,7 +81,7 @@ class Relation():
 
       result.append(values)
     attributes_all.sort()
-    row.insert_bulk(self.db, self.schema, self.relation_name, attributes_all, result)
+    row.insert_bulk(self.db, self.schema, self.relation_name, attributes_all, result, unset)
 
   def insert_config(self, doc, attrs, attrs_and_types):
     """
@@ -109,18 +109,20 @@ class Relation():
     row.insert(self.db, self.schema, self.relation_name, attrs, values)
 
 
-  def insert_config_bulk(self, docs, attrs, include_extra_props = True):
+  def insert_config_bulk(self, docs, attrs, include_extra_props = True, unset = []):
     """
     Transforms document and inserts it into the corresponding table.
     Parameters
     ----------
     doc : dict
           the document we want to insert
-    TODO 
+    TODO add unset
     CHECK if self.column_names and self.column_types are still the same, do not
     """
     # This is needed because sometimes there is no value for attributes (null)
     result = []
+    if type(docs) is not list:
+      docs = [docs]
     for doc in docs:
       _extra_props = {}
       for k, v in attrs.items():
@@ -150,9 +152,6 @@ class Relation():
           values.append(_extra_props)
 
       result.append(tuple(values))
-      
-    if type(result) is not list:
-      result = list(result)
 
     if self.created is True:
       row.upsert_bulk(self.db, self.schema, self.relation_name, attrs_pg, result)
@@ -161,18 +160,22 @@ class Relation():
 
 
 
-  def insert_config_bulk_no_extra_props(self, docs, attrs, include_extra_props = True):
+  def insert_config_bulk_no_extra_props(self, docs, attrs, include_extra_props = True, unset = []):
     """
     Transforms document and inserts it into the corresponding table.
     Parameters
     ----------
-    doc : dict
-          the document we want to insert
+    docs : dict
+          the documents we want to insert
+     unset: string[]
+          list of fields to unset
     TODO 
-    CHECK if self.column_names and self.column_types are still the same, do not
+    CHECK if self.column_names and self.column_types are still the same
     """
     # This is needed because sometimes there is no value for attributes (null)
     result = []
+    if type(docs) is not list:
+      docs = [docs]
     for doc in docs:
       for k, v in attrs.items():
         attrs[k]["value"] = None
@@ -190,12 +193,12 @@ class Relation():
         attrs_pg = [v["name_conf"] for k, v in attrs.items() if k in doc.keys()]
         values = [v["value"] for k, v in attrs.items() if k in doc.keys()]
 
-      result.append(tuple(values))
+    for u in unset:
+      attrs_pg.append(attrs[u]["name_conf"])
+      values.append(None)
+    result.append(tuple(values))
 
-    if type(result) is not list:
-      result = list(result)
-
-    if self.created is True:
+    if self.created is True or len(docs) == 1:
       row.upsert_bulk(self.db, self.schema, self.relation_name, attrs_pg, result)
     else:
       row.insert_bulk(self.db, self.schema, self.relation_name, attrs_pg, result)

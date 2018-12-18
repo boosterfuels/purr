@@ -129,15 +129,15 @@ class Extractor():
       try:
         if (i+1)%nr_of_transferred==0 and i+1>=nr_of_transferred:
           if self.include_extra_props is True:
-            r.insert_config_bulk(transferring, attrs_details, self.include_extra_props)
+            r.insert_config_bulk(transferring, attrs_details, self.include_extra_props, unset)
           else:
-            r.insert_config_bulk_no_extra_props(transferring, attrs_details, self.include_extra_props)
+            r.insert_config_bulk_no_extra_props(transferring, attrs_details, self.include_extra_props, unset)
           transferring = []
         if i + 1 == nr_of_docs and (i + 1) % nr_of_transferred != 0:
           if self.include_extra_props is True:
-            r.insert_config_bulk(transferring, attrs_details, self.include_extra_props)
+            r.insert_config_bulk(transferring, attrs_details, self.include_extra_props, unset)
           else:
-            r.insert_config_bulk_no_extra_props(transferring, attrs_details, self.include_extra_props)
+            r.insert_config_bulk_no_extra_props(transferring, attrs_details, self.include_extra_props, unset)
             logger.info('[EXTRACTOR] Successfully transferred collection %s (%d documents).' % (coll, i + 1))
             transferring = []
       except Exception as ex:
@@ -146,7 +146,7 @@ class Extractor():
         logger.info("[EXTRACTOR] Transferred %d from collection %s" % (i+1, coll))
       i += 1
 
-  def transfer_doc(self, doc, r, coll):
+  def transfer_doc(self, doc, r, coll, unset=[]):
     '''
     Transfers single document.
     Parameters
@@ -176,15 +176,16 @@ class Extractor():
     # about the attribute before and after the conversion.
 
     attrs_details = self.prepare_attr_details(attrs_new, attrs_original, types, type_extra_props_pg)
+    # TODO remove this stuff with the extra props. makes this code really ugly
     try:
       # r.udpate_types(attrs_details)
       if self.include_extra_props is True:
-        r.insert_config_bulk([doc], attrs_details, self.include_extra_props)
+        r.insert_config_bulk(doc, attrs_details, self.include_extra_props, unset)
       else:
-        r.insert_config_bulk_no_extra_props([doc], attrs_details, self.include_extra_props)
+        r.insert_config_bulk_no_extra_props(doc, attrs_details, self.include_extra_props, unset)
     except Exception as ex:
       logger.error('[EXTRACTOR] Transferring to %s was unsuccessful. Exception: %s' % (r.relation_name, ex))
-      logger.error('%s\n', ([doc]))
+      logger.error('%s\n' % doc)
 
   def prepare_attr_details(self, attrs_conf, attrs_mdb, types_conf, type_extra_props_pg = None):
     '''

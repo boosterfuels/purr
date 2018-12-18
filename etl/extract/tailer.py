@@ -89,17 +89,21 @@ class Tailer(extractor.Extractor):
                 )
 
         elif oper == UPDATE:
+            unset = []
             if "$set" in doc_useful.keys():
                 doc_useful = doc_useful["$set"]
-
+            if "$unset" in doc_useful.keys():
+                for k, v in doc_useful["$unset"].items():
+                    unset.append(k)
+            
             if "o2" in doc.keys():
                 if "_id" in doc["o2"].keys():
                     doc_useful["_id"] = doc["o2"]["_id"]
             try:
                 if self.typecheck_auto is False:
-                    super().transfer_doc(doc_useful, r, table_name_mdb)
+                    super().transfer_doc(doc_useful, r, table_name_mdb, unset)
                 else:
-                    r.update(doc_useful)
+                    r.update(doc_useful, unset)
             except Exception as ex:
                 logger.error(
                     "[TAILER] Update of %s failed:\n Document: %s\n %s"
@@ -149,11 +153,11 @@ class Tailer(extractor.Extractor):
             updated = datetime.utcnow()
             loop = False
             while True:
-                logger.info("""[TAILER] Details: \n
-                In loop: %s \n
-                Client: %s\n, 
-                Oplog: %s\n, 
-                Timestamp (dt): %s\n""" % (
+                logger.info("""[TAILER] Details:
+                In loop: %s
+                Client: %s
+                Oplog: %s
+                Timestamp (dt): %s""" % (
                     loop, client, oplog, str(dt)))
                 if loop is True:
                     # maybe reconnect
