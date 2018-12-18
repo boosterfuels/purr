@@ -11,7 +11,7 @@ from psycopg2.extras import execute_values
 
 def insert(db, schema, table, attrs, values):
     """
-    Inserts a row defined by attributes and values into a specific 
+    Inserts a row defined by attributes and values into a specific
     table of the PG database.
 
     Parameters
@@ -56,7 +56,7 @@ def insert(db, schema, table, attrs, values):
 
 def insert_bulk(db, schema, table, attrs, values):
     """
-    Inserts a row defined by attributes and values into a specific 
+    Inserts a row defined by attributes and values into a specific
     table of the PG database.
 
     Parameters
@@ -77,8 +77,6 @@ def insert_bulk(db, schema, table, attrs, values):
     for a in attrs:
         temp.append('%s')
 
-    if(len(values) == 1):
-        values = values[0]
     temp = ', '.join(temp)
     # prepare attributes for insert
     attrs_reduced = ', '.join([('"%s"' % a) for a in attrs])
@@ -92,14 +90,15 @@ def insert_bulk(db, schema, table, attrs, values):
         execute_values(db.cur, cmd, values)
         db.conn.commit()
     except Exception as ex:
-        logger.error("[ROW] Bulk insert failed: %s" % ex)
-        logger.error("CMD: %s" % cmd)
+        logger.error("[ROW] INSERT failed: %s" % ex)
+        logger.error("[ROW] CMD: %s" % cmd)
+        logger.error("[ROW] VALUES: %s" % values)
         raise SystemExit
 
 
 def upsert_bulk(db, schema, table, attrs, values):
     """
-    Inserts a row defined by attributes and values into a specific 
+    Inserts a row defined by attributes and values into a specific
     table of the PG database.
 
     Parameters
@@ -120,8 +119,6 @@ def upsert_bulk(db, schema, table, attrs, values):
     for a in attrs:
         temp.append('%s')
 
-    if(len(values) == 1):
-        values = values[0]
     temp = ', '.join(temp)
     # needed for upsert
     excluded = [('EXCLUDED.%s' % a) for a in attrs]
@@ -130,7 +127,6 @@ def upsert_bulk(db, schema, table, attrs, values):
     attrs = [('"%s"' % a) for a in attrs]
     attrs = ', '.join(attrs)
     excluded = ', '.join(excluded)
-
     # default primary key in Postgres is name_of_table_pkey
     constraint = '%s_pkey' % table
     cmd = "INSERT INTO %s.%s (%s) VALUES %s ON CONFLICT ON CONSTRAINT %s DO UPDATE SET (%s) = (%s);" % (
@@ -139,8 +135,9 @@ def upsert_bulk(db, schema, table, attrs, values):
         execute_values(db.cur, cmd, values)
         db.conn.commit()
     except Exception as ex:
-        logger.error("[ROW] Bulk upsert failed: %s" % ex)
-        logger.error("CMD: %s" % cmd)
+        logger.error("[ROW] UPSERT failed: %s" % ex)
+        logger.error("[ROW] CMD: %s" % cmd)
+        logger.error("[ROW] VALUES: %s" % values)
         raise SystemExit
 
 
