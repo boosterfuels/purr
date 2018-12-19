@@ -36,6 +36,21 @@ class Tailer(extractor.Extractor):
         self.coll_settings = coll_settings
         self.setup_pg = setup_pg
 
+    def coll_in_map(self, name):
+        '''
+        name: string; 
+            name of collection as 'name_db.name_coll', e.g. 'cat_db.Breeds'
+        Checks if a collection exists in collections.yml.
+        '''
+        coll = name.split(".")[1]
+        try:
+            if coll in self.coll_settings.keys():
+                return True
+            else:
+                return False
+        except Exception as ex:
+            return False
+
     def transform_and_load(self, doc):
         """
         Gets the document and passes it to the corresponding function in order to exeucte command INSERT/UPDATE/DELETE 
@@ -53,15 +68,7 @@ class Tailer(extractor.Extractor):
 
         fullname = doc["ns"]
         table_name_mdb = fullname.split(".")[1]
-
-        '''
-        Get table name from collections.yml. 
-        Skip the document if the table name does not exist.
-        '''
-        try:
-            table_name_pg = self.coll_settings[table_name_mdb][":meta"][":table"]
-        except Exception as ex:
-            return
+        table_name_pg = self.coll_settings[table_name_mdb][":meta"][":table"]
 
         oper = doc["op"]
         doc_useful = {}
@@ -95,10 +102,11 @@ class Tailer(extractor.Extractor):
             if "$unset" in doc_useful.keys():
                 for k, v in doc_useful["$unset"].items():
                     unset.append(k)
-            
+
             if "o2" in doc.keys():
                 if "_id" in doc["o2"].keys():
                     doc_useful["_id"] = doc["o2"]["_id"]
+                    logger.info("[TAILER] [%s]: [%s]" % (oper, doc_useful))
             try:
                 if self.typecheck_auto is False:
                     super().transfer_doc(doc_useful, r, table_name_mdb, unset)
@@ -160,15 +168,12 @@ class Tailer(extractor.Extractor):
                 Timestamp (dt): %s""" % (
                     loop, client, oplog, str(dt)))
                 if loop is True:
-                    # maybe reconnect
                     res = transfer_info.get_latest_successful_ts(
                         self.pg, self.schema)
                     latest_ts = int((list(res)[0])[0])
                     dt = latest_ts
-                    logger.info(
-                        "[TAILER] Get timestamp from purr_info... tailing from %s." % (dt))
-                    time.sleep(10)
-                    continue
+                    logger.info("[TAILER] Next time, bring more cookies.")
+                    break
                 else:
                     loop = True
 
@@ -192,7 +197,7 @@ class Tailer(extractor.Extractor):
                 while cursor.alive and self.pg.attempt_to_reconnect is False:
                     try:
                         for doc in cursor:
-                            if doc["op"] != "n":
+                            if doc["op"] != "n" and self.coll_in_map(doc["ns"]) is True:
                                 temp = doc["o"]
                                 try:
                                     self.transform_and_load(doc)
@@ -223,7 +228,7 @@ class Tailer(extractor.Extractor):
                     except Exception as ex:
                         disconnected = True
                         logger.error(
-                            "[TAILER] Disconnected from MongoDB. Reconnecting...")
+                            "[TAILER] Disconnected from MongoDB. Reconnecting... %s" % ex)
                 cursor.close()
                 continue
 
