@@ -3,8 +3,9 @@ from etl.monitor import logger
 
 with open('requirements.txt') as f:
     requirements = f.read().splitlines()
+version = '0.1.7'
 setup(name='purr',
-      version='0.1.7',
+      version=version,
       author='Anett Balázsics',
       email='anett.balazsics@digihey.com',
       url='https://github.com/boosterfuels/purr',
@@ -17,4 +18,4 @@ setup(name='purr',
       }
       )
 
-logger.info("Starting Purr v0.1.7 ...")
+logger.info("Starting Purr v%s ..." % version)
