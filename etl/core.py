@@ -7,6 +7,7 @@ from etl.load import schema, init_pg as postgres
 from etl.monitor import logger
 from etl.transform import config_parser as cp
 
+
 def start(settings, coll_config):
     """
     Starts Purr.
@@ -26,15 +27,15 @@ def start(settings, coll_config):
     ----
     - create table with attributes and types
     """
-    logger.info("Starting Purr v0.1.6 ...")
     logger.info("PID=%s" % os.getpid())
     setup_pg = settings["postgres"]
     setup_mdb = settings["mongo"]
     # collections which will be transferred
     collections = cp.config_collection_names(coll_config)
-    
+
     if collections is None:
-        logger.error("[CORE] No collections found. Check your collection names in the setup file.")
+        logger.error(
+            "[CORE] No collections found. Check your collection names in the setup file.")
         return
 
     pg = postgres.PgConnection(setup_pg["connection"])
@@ -52,7 +53,7 @@ def start(settings, coll_config):
         schema.reset(pg, setup_pg["schema_name"])
 
     transfer_info.create_stat_table(pg, setup_pg["schema_name"])
-    
+
     # Skip collection transfer if started in tailing mode.
     if settings["tailing_from_db"] is False and settings["tailing_from"] is None:
         if ex.typecheck_auto is True:
@@ -64,7 +65,7 @@ def start(settings, coll_config):
         t = tailer.Tailer(pg, mongo, setup_pg, settings, coll_config)
         logger.info("Starting standard tailing.")
         t.start(start_date_time)
-        
+
     elif settings["tailing_from"] is not None:
         logger.info("Starting tailing from provided timestamp.")
         t = tailer.Tailer(pg, mongo, setup_pg, settings, coll_config)

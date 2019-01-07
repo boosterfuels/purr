@@ -1,10 +1,10 @@
 from setuptools import setup, find_packages
+from etl.monitor import logger
 
 with open('requirements.txt') as f:
     requirements = f.read().splitlines()
-
 setup(name='purr',
-      version='0.1.6',
+      version='0.1.7',
       author='Anett Balázsics',
       email='anett.balazsics@digihey.com',
       url='https://github.com/boosterfuels/purr',
@@ -15,4 +15,6 @@ setup(name='purr',
               'purr = etl.__main__:main'
           ]
       }
-)
+      )
+
+logger.info("Starting Purr v0.1.7 ...")
