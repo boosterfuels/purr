@@ -79,8 +79,8 @@ class Tailer(extractor.Extractor):
         '''
 
         r = relation.Relation(self.pg, self.schema_name, table_name_pg)
-        logger.info("[TAILER] [%s]: [%s]" % (
-            oper, doc_useful
+        logger.info("[TAILER] [%s] [%s]: [%s]" % (
+            table_name_mdb, oper, doc_useful
         ))
 
         if oper == INSERT:
