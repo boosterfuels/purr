@@ -82,50 +82,38 @@ class Tailer(extractor.Extractor):
         logger.info("[TAILER] [%s] [%s]: [%s]" % (
             table_name_mdb, oper, doc_useful
         ))
-
-        if oper == INSERT:
-            try:
+        try:
+            if oper == INSERT:
                 if self.typecheck_auto is False:
                     super().transfer_doc(doc_useful, r, table_name_mdb)
                 else:
                     r.insert(doc_useful)
-            except Exception as ex:
-                logger.error(
-                    "[TAILER] Insert into %s failed:\n Document: %s\n %s"
-                    % (table_name_pg, doc_useful, ex)
-                )
 
-        elif oper == UPDATE:
-            unset = []
-            if "$set" in doc_useful.keys():
-                doc_useful = doc_useful["$set"]
-            if "$unset" in doc_useful.keys():
-                for k, v in doc_useful["$unset"].items():
-                    unset.append(k)
+            elif oper == UPDATE:
+                unset = []
+                if "$set" in doc_useful.keys():
+                    doc_useful = doc_useful["$set"]
+                if "$unset" in doc_useful.keys():
+                    for k, v in doc_useful["$unset"].items():
+                        unset.append(k)
 
-            if "o2" in doc.keys():
-                if "_id" in doc["o2"].keys():
-                    doc_useful["_id"] = doc["o2"]["_id"]
-                    logger.info("[TAILER] [%s]: [%s]" % (oper, doc_useful))
-            try:
-                if self.typecheck_auto is False:
-                    super().transfer_doc(doc_useful, r, table_name_mdb, unset)
-                else:
-                    r.update(doc_useful, unset)
-            except Exception as ex:
-                logger.error(
-                    "[TAILER] Update of %s failed:\n Document: %s\n %s"
-                    % (table_name_pg, doc_useful, ex)
-                )
+                if "o2" in doc.keys():
+                    if "_id" in doc["o2"].keys():
+                        doc_useful["_id"] = doc["o2"]["_id"]
+                        logger.info("[TAILER] [%s]: [%s]" % (oper, doc_useful))
 
-        elif oper == DELETE:
-            try:
+                    if self.typecheck_auto is False:
+                        super().transfer_doc(doc_useful, r, table_name_mdb, unset)
+                    else:
+                        r.update(doc_useful, unset)
+            elif oper == DELETE:
                 r.delete(doc_useful)
-            except Exception as ex:
-                logger.error(
-                    "[TAILER] Delete from %s failed: \n Document: %s\n %s"
-                    % (table_name_pg, doc_useful, ex)
-                )
+
+        except Exception as ex:
+            logger.error(
+                "[TAILER] %s - %s\n Document: %s\n %s"
+                % (oper, table_name_pg, doc_useful, ex)
+            )
 
     def start(self, dt=None):
         """
@@ -173,7 +161,8 @@ class Tailer(extractor.Extractor):
                     latest_ts = int((list(res)[0])[0])
                     dt = latest_ts
                     logger.info("[TAILER] Next time, bring more cookies.")
-                    break
+                    self.start(dt)
+                    # break
                 else:
                     loop = True
 
@@ -201,6 +190,7 @@ class Tailer(extractor.Extractor):
                                 temp = doc["o"]
                                 try:
                                     self.transform_and_load(doc)
+
                                     # every 5 minutes update the timestamp because we need to continue
                                     # tailing in case of disconnecting from the PGDB
                                     diff = datetime.utcnow() - updated
@@ -225,6 +215,7 @@ class Tailer(extractor.Extractor):
                                 "[TAILER] Disconnected. Started tailing from %s." % str(dt))
                             disconnected = False
                         time.sleep(1)
+                        print("sleepy")
                     except Exception as ex:
                         disconnected = True
                         logger.error(
