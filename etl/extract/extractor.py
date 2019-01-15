@@ -146,7 +146,7 @@ class Extractor():
         logger.info("[EXTRACTOR] Transferred %d from collection %s" % (i+1, coll))
       i += 1
 
-  def transfer_doc(self, doc, r, coll, unset=[]):
+  def transfer_one(self, doc, r, coll, unset=[]):
     '''
     Transfers single document.
     Parameters
