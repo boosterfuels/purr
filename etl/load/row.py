@@ -191,7 +191,7 @@ def update(db, schema, table_name, attrs, values):
         logger.error('[ROW] Update failed: %s' % ex)
 
 
-def delete(db, schema, table_name, oid):
+def delete(db, schema, table_name, ids):
     """
     Deletes a row in a specific table of the PG database.
 
@@ -210,8 +210,10 @@ def delete(db, schema, table_name, oid):
     delete(db, schema, 'Audience', ObjectId("5acf593eed101e0c1266e32b"))
 
     """
-    cmd = "DELETE FROM %s.%s WHERE id='%s';" % (
-        schema, table_name.lower(), oid)
+    oids = "','".join(ids)
+    cmd = "DELETE FROM %s.%s WHERE id IN ('%s');" % (
+        schema, table_name.lower(), oids)
+    logger.info("[ROW] %s" % cmd)
     try:
         db.execute_cmd(cmd)
     except Exception as ex:
