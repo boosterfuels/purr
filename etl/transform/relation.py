@@ -10,13 +10,13 @@ class Relation():
   """
   This is the main parents class for transforming data.
   """
-  def __init__(self, pg, schema, collection_name):
+  def __init__(self, pg, schema, relation, created=False):
     """Constructor for Relation"""
-    self.relation_name = collection_name
+    self.relation_name = relation
     self.column_names = []
     self.column_types = []
     self.has_pk = False
-    self.created = False
+    self.created = created
     self.db = pg
     self.schema = schema
     
@@ -207,9 +207,15 @@ class Relation():
     (reduced_attributes, values) = self.get_attrs_and_vals(attributes, doc)
     row.update(self.db, self.schema, self.relation_name, reduced_attributes, values)
 
-  def delete(self, doc):
-    attributes = list(doc.keys())
-    row.delete(self.db, self.schema, self.relation_name, str(doc["_id"]))
+  def delete(self, docs):
+    ids = []
+    if type(docs) is list:
+      for doc in docs:
+        ids.append(str(doc["_id"]))
+    else:
+      ids.append(str(docs["_id"]))
+
+    row.delete(self.db, self.schema, self.relation_name, ids)
 
   def get_attrs_and_vals(self, attributes, doc):
     """
