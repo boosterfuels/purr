@@ -4,6 +4,8 @@ from etl.monitor import logger
 with open('requirements.txt') as f:
     requirements = f.read().splitlines()
 version = '0.1.8'
+logger.info("Starting Purr v%s ..." % version)
+
 setup(name='purr',
       version=version,
       author='Anett Balázsics',
@@ -18,4 +20,3 @@ setup(name='purr',
       }
       )
 
-logger.info("Starting Purr v%s ..." % version)
