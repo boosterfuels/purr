@@ -129,7 +129,7 @@ class Tailer(extractor.Extractor):
             # TODO: add functionality which includes extra props
             for doc in docs:
                 docs_useful.append(doc["o"])
-            super().transfer_multiple(docs_useful, r, docs[0]["coll_name"])
+            super().insert_multiple(docs_useful, r, docs[0]["coll_name"])
 
         elif oper == UPDATE:
             logger.info("Updating %s documents" % (len(docs)))
@@ -154,8 +154,8 @@ class Tailer(extractor.Extractor):
                     doc_useful.update(temp["$set"])
                 if "$unset" in temp.keys():
                     for k, v in temp["$unset"].items():
-                        unset[k] = None
-                doc_useful.update(unset)
+                        unset[k] = 'unset'
+                    doc_useful.update(unset)
                 # merging values with the same ID because there cannot be
                 # multiple updates of the same row in one statement
                 if already_updating is True:
@@ -165,7 +165,7 @@ class Tailer(extractor.Extractor):
                             break
                 else:
                     docs_useful.append(doc_useful)
-            super().transfer_multiple(docs_useful, r, docs[0]["coll_name"])
+            super().update_multiple(docs_useful, r, docs[0]["coll_name"])
 
         elif oper == DELETE:
             logger.info("Deleting %s documents" % (len(docs)))
@@ -328,9 +328,12 @@ class Tailer(extractor.Extractor):
                             if doc["op"] != "n" and self.coll_in_map(doc["ns"]) is True:
                                 # updated_at = self.handle_one(doc, updated_at)
                                 docs.append(doc)
+                            if doc["op"] == "u":
+                                logger.info("[TAILER] Hasta la vista.")
+                                raise SystemExit 
                         time.sleep(1)
                         seconds = datetime.utcnow().second
-                        if (seconds > SECONDS_BETWEEN_FLUSHES and len(docs) > 0):
+                        if (seconds > SECONDS_BETWEEN_FLUSHES/3 and len(docs) > 0):
                             logger.info("Flushing after %s seconds. Number of documents: %s" % (
                                 seconds, len(docs)))
                             self.handle_multiple(docs)

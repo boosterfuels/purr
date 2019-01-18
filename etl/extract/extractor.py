@@ -187,7 +187,54 @@ class Extractor():
       logger.error('[EXTRACTOR] Transferring to %s was unsuccessful. Exception: %s' % (r.relation_name, ex))
       logger.error('%s\n' % doc)
 
-  def transfer_multiple(self, docs, r, coll, unset=[]):
+  def insert_multiple(self, docs, r, coll, unset=[]):
+    '''
+    Transfers multiple documents with different fields (not whole collections).
+    Parameters
+    ----------
+    doc : dict
+        : document 
+    r : Relation
+        relation in PG
+    coll : string
+         : collection name
+    Returns
+    -------
+    -
+
+    Raises
+    ------
+    Example
+    -------
+    '''
+    (attrs_new, attrs_original, types, relation_name, type_extra_props_pg) = cp.config_fields(self.coll_settings, coll)
+    if (attrs_new, attrs_original, types, relation_name, type_extra_props_pg) == ([],[],[],[],[]):
+      return
+    # Adding extra properties to inserted/updated row is necessary 
+    # because this attribute is not part of the original document and anything
+    # that is not defined in the collection.yml file will be pushed in this value.
+    # This function will also create a dictionary which will contain all the information
+    # about the attribute before and after the conversion.
+    import pprint
+    print("DPCS:\n")
+    pprint.pprint(attrs_new)
+    pprint.pprint(attrs_original)
+    pprint.pprint(types)
+    pprint.pprint(relation_name)
+    pprint.pprint(type_extra_props_pg)
+
+    attrs_details = self.prepare_attr_details(attrs_new, attrs_original, types, type_extra_props_pg)
+    # TODO remove this stuff with the extra props. makes this code really ugly
+    try:
+      if self.include_extra_props is True:
+        r.insert_config_bulk(docs, attrs_details, self.include_extra_props, unset)
+      else:
+        r.insert_config_bulk_no_extra_props_tailed(docs, attrs_details, self.include_extra_props, unset)
+    except Exception as ex:
+      logger.error('[EXTRACTOR] Transferring to %s was unsuccessful. Exception: %s' % (r.relation_name, ex))
+      logger.error('%s\n' % docs)
+
+  def update_multiple(self, docs, r, coll, unset=[]):
     '''
     Transfers multiple documents with different fields (not whole collections).
     Parameters
@@ -222,7 +269,7 @@ class Extractor():
       if self.include_extra_props is True:
         r.insert_config_bulk(docs, attrs_details, self.include_extra_props, unset)
       else:
-        r.insert_config_bulk_no_extra_props(docs, attrs_details, self.include_extra_props, unset)
+        r.insert_config_bulk_no_extra_props_tailed(docs, attrs_details, self.include_extra_props, unset)
     except Exception as ex:
       logger.error('[EXTRACTOR] Transferring to %s was unsuccessful. Exception: %s' % (r.relation_name, ex))
       logger.error('%s\n' % docs)

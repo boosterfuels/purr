@@ -202,6 +202,53 @@ class Relation():
     else:
       row.insert_bulk(self.db, self.schema, self.relation_name, attrs_pg, result)
 
+
+  def insert_config_bulk_no_extra_props_tailed(self, docs, attrs, include_extra_props = True, unset = []):
+    """
+    Transforms document and inserts it into the corresponding table.
+    Parameters
+    ----------
+    docs : dict
+          the documents we want to insert
+     unset: string[]
+          list of fields to unset
+    TODO 
+    CHECK if self.column_names and self.column_types are still the same
+    """
+    # This is needed because sometimes there is no value for attributes (null)
+    result = []
+    if type(docs) is not list:
+      docs = [docs]
+    for doc in docs:
+      for k, v in attrs.items():
+        attrs[k]["value"] = None
+      for key_doc, value_doc in doc.items():
+        keys_conf = list(attrs.keys())
+        if key_doc in keys_conf:
+          value = unnester.cast(attrs[key_doc]["type_conf"], value_doc)
+          if value != 'undefined':
+            attrs[key_doc]["value"] = value
+
+      if len(docs) > 1:
+        attrs_pg = [v["name_conf"] for k, v in attrs.items()]
+        values = [v["value"] for k, v in attrs.items()]
+      else:
+        attrs_pg = [v["name_conf"] for k, v in attrs.items() if k in doc.keys()]
+        values = [v["value"] for k, v in attrs.items() if k in doc.keys()]
+        for u in unset:
+          attrs_pg.append(attrs[u]["name_conf"])
+          values.append(None)
+      result.append(tuple(values))
+
+    import pprint
+    if len(docs) == 3:
+      pprint.pprint(result)
+      
+    if self.created is True or len(docs) == 1:
+      row.upsert_bulk_tail(self.db, self.schema, self.relation_name, attrs_pg, result)
+    else:
+      row.insert_bulk(self.db, self.schema, self.relation_name, attrs_pg, result)
+
   def update(self, doc):
     attributes = list(doc.keys())
     (reduced_attributes, values) = self.get_attrs_and_vals(attributes, doc)

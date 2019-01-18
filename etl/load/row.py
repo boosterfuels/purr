@@ -141,6 +141,47 @@ def upsert_bulk(db, schema, table, attrs, values):
         raise SystemExit
 
 
+def upsert_bulk_tail(db, schema, table, attrs, rows):
+    """
+    Inserts a row defined by attributes and values into a specific
+    table of the PG database.
+
+    Parameters
+    ----------
+    table_name : string
+    attrs :     string[]
+    values :    string[]
+
+    Returns
+    -------
+    -
+
+    Example
+    -------
+    insert('Audience', [attributes], [values])
+    """
+    temp = []
+    for a in attrs:
+        temp.append('%s')
+
+    temp = ', '.join(temp)
+
+    for i in range(0, len(rows)):
+        row = rows[i]
+        for j in range(0, len(attrs)):
+            print(attrs[j], row[j])
+
+    cmd = ""
+    try:
+        # cmd = "UPDATE %s.%s SET " % (schema, table.lower())
+        execute_values(db.cur, cmd)
+        db.conn.commit()
+    except Exception as ex:
+        logger.error("[ROW] UPSERT failed: %s" % ex)
+        logger.error("[ROW] CMD: %s" % cmd)
+        logger.error("[ROW] VALUES: %s" % values)
+        raise SystemExit
+
 def update(db, schema, table_name, attrs, values):
     """
     Updates a row in a specific table of the PG database.
