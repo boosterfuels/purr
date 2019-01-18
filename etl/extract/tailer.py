@@ -300,8 +300,8 @@ class Tailer(extractor.Extractor):
                     latest_ts = int((list(res)[0])[0])
                     dt = latest_ts
                     logger.info("[TAILER] Next time, bring more cookies.")
-                    self.start(dt)
-                    # break
+                    #self.start(dt)
+                    break
                 else:
                     loop = True
 
