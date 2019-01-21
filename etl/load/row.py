@@ -166,16 +166,20 @@ def upsert_bulk_tail(db, schema, table, attrs, rows):
 
     temp = ', '.join(temp)
 
-    for i in range(0, len(rows)):
-        row = rows[i]
-        for j in range(0, len(attrs)):
-            print(attrs[j], row[j])
-
-    cmd = ""
     try:
-        # cmd = "UPDATE %s.%s SET " % (schema, table.lower())
-        execute_values(db.cur, cmd)
+        for i in range(0, len(rows)):
+            row = rows[i]
+            values = []
+            for j in range(0, len(attrs)):
+                print(attrs[j], row[j])
+                if row[j] == 'unset':
+                    values.append(None)
+                elif row[j] is not None:
+                    values.append(row[j])
+            print("VALUES", values)
+            update(db, schema, table, attrs, values)
         db.conn.commit()
+
     except Exception as ex:
         logger.error("[ROW] UPSERT failed: %s" % ex)
         logger.error("[ROW] CMD: %s" % cmd)
@@ -222,7 +226,7 @@ def update(db, schema, table_name, attrs, values):
         attr_val_pairs.append(pair)
 
     pairs = ", ".join(attr_val_pairs)
-    cmd = "UPDATE %s.%s SET %s WHERE _id = %s;" % (
+    cmd = "UPDATE %s.%s SET %s WHERE id = %s;" % (
         schema, table_name.lower(), pairs, oid)
     logger.info("[ROW] Updated record from table %s: [id = %s]." %
                 (table_name.lower(), oid))
