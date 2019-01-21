@@ -6,6 +6,7 @@ from etl.extract import collection, extractor, tailer, init_mongo as mongodb, tr
 from etl.load import schema, init_pg as postgres
 from etl.monitor import logger
 from etl.transform import config_parser as cp
+import pkg_resources
 
 
 def start(settings, coll_config):
@@ -27,6 +28,9 @@ def start(settings, coll_config):
     ----
     - create table with attributes and types
     """
+    logger.info("Starting Purr v%s ..." %
+                pkg_resources.require("purr")[0].version)
+
     logger.info("PID=%s" % os.getpid())
     setup_pg = settings["postgres"]
     setup_mdb = settings["mongo"]
