@@ -328,9 +328,9 @@ class Tailer(extractor.Extractor):
                             if doc["op"] != "n" and self.coll_in_map(doc["ns"]) is True:
                                 # updated_at = self.handle_one(doc, updated_at)
                                 docs.append(doc)
-                            # if doc["op"] == "u":
-                            #     logger.info("[TAILER] Hasta la vista.")
-                            #     # raise SystemExit 
+                            if doc["op"] == "u":
+                                logger.info("[TAILER] Hasta la vista.")
+                                raise SystemExit 
                         time.sleep(1)
                         seconds = datetime.utcnow().second
                         if (seconds > SECONDS_BETWEEN_FLUSHES/3 and len(docs) > 0):
