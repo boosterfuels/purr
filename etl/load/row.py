@@ -3,7 +3,7 @@ from bson.json_util import loads, dumps
 
 from etl.load import init_pg as pg, table
 from etl.monitor import logger
-
+import datetime
 from psycopg2.extras import execute_values
 
 # Open a cursor to perform database operations
@@ -160,31 +160,26 @@ def upsert_bulk_tail(db, schema, table, attrs, rows):
     -------
     insert('Audience', [attributes], [values])
     """
-    temp = []
-    for a in attrs:
-        temp.append('%s')
-
-    temp = ', '.join(temp)
-
     try:
         for i in range(0, len(rows)):
             row = rows[i]
             values = []
+            attrs_reduced = []
             for j in range(0, len(attrs)):
-                print(attrs[j], row[j])
                 if row[j] == 'unset':
                     values.append(None)
+                    attrs_reduced.append(attrs[j])
                 elif row[j] is not None:
                     values.append(row[j])
-            print("VALUES", values)
-            update(db, schema, table, attrs, values)
+                    attrs_reduced.append(attrs[j])
+            update(db, schema, table, attrs_reduced, values)
         db.conn.commit()
 
     except Exception as ex:
         logger.error("[ROW] UPSERT failed: %s" % ex)
-        logger.error("[ROW] CMD: %s" % cmd)
         logger.error("[ROW] VALUES: %s" % values)
         raise SystemExit
+
 
 def update(db, schema, table_name, attrs, values):
     """
@@ -217,7 +212,12 @@ def update(db, schema, table_name, attrs, values):
         if attrs[i] == "id":
             oid = "'%s'" % str(values[i])
             continue
-        if type(values[i]) is str:
+        logger.info("\n\tVALUE -> %s \n\tTYPE -> %s" % (values[i], type(values[i])))
+        if values[i] is None:
+            pair = "%s = null" % (attrs[i])
+        elif type(values[i]) is datetime.datetime:
+            pair = "%s = '%s'" % (attrs[i], values[i])
+        elif type(values[i]) is str:
             if values[i].startswith("{") is True:
                 pair = "%s = '%s'" % (attrs[i], values[i])
             pair = "%s = '%s'" % (attrs[i], values[i])
@@ -228,8 +228,7 @@ def update(db, schema, table_name, attrs, values):
     pairs = ", ".join(attr_val_pairs)
     cmd = "UPDATE %s.%s SET %s WHERE id = %s;" % (
         schema, table_name.lower(), pairs, oid)
-    logger.info("[ROW] Updated record from table %s: [id = %s]." %
-                (table_name.lower(), oid))
+    logger.info("[ROW] %s" % cmd)
     try:
         db.execute_cmd(cmd)
     except Exception as ex:

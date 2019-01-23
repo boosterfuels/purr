@@ -215,13 +215,6 @@ class Extractor():
     # that is not defined in the collection.yml file will be pushed in this value.
     # This function will also create a dictionary which will contain all the information
     # about the attribute before and after the conversion.
-    import pprint
-    print("DPCS:\n")
-    pprint.pprint(attrs_new)
-    pprint.pprint(attrs_original)
-    pprint.pprint(types)
-    pprint.pprint(relation_name)
-    pprint.pprint(type_extra_props_pg)
 
     attrs_details = self.prepare_attr_details(attrs_new, attrs_original, types, type_extra_props_pg)
     # TODO remove this stuff with the extra props. makes this code really ugly
