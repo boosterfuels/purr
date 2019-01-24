@@ -167,7 +167,7 @@ def upsert_bulk_tail(db, schema, table, attrs, rows):
                 elif row[j] is not None:
                     values.append(row[j])
                     attrs_reduced.append(attrs[j])
-            upsert_bulk(db, schema, table, attrs_reduced, values)
+            upsert_bulk(db, schema, table, attrs_reduced, [tuple(values)])
         db.conn.commit()
 
     except Exception as ex:
