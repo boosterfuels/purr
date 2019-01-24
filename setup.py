@@ -3,7 +3,7 @@ from etl.monitor import logger
 
 with open('requirements.txt') as f:
     requirements = f.read().splitlines()
-version = '0.1.11'
+version = '0.1.12'
 
 setup(name='purr',
       version=version,
