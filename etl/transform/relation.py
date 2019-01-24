@@ -240,10 +240,6 @@ class Relation():
           values.append(None)
       result.append(tuple(values))
 
-    import pprint
-    if len(docs) == 3:
-      pprint.pprint(result)
-      
     if self.created is True or len(docs) == 1:
       row.upsert_bulk_tail(self.db, self.schema, self.relation_name, attrs_pg, result)
     else:
