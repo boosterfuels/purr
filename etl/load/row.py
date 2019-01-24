@@ -73,11 +73,6 @@ def insert_bulk(db, schema, table, attrs, values):
     -------
     insert('Audience', [attributes], [values])
     """
-    temp = []
-    for a in attrs:
-        temp.append('%s')
-
-    temp = ', '.join(temp)
     # prepare attributes for insert
     attrs_reduced = ', '.join([('"%s"' % a) for a in attrs])
     attrs = ', '.join([('"%s"' % a) for a in attrs])
@@ -172,7 +167,7 @@ def upsert_bulk_tail(db, schema, table, attrs, rows):
                 elif row[j] is not None:
                     values.append(row[j])
                     attrs_reduced.append(attrs[j])
-            update(db, schema, table, attrs_reduced, values)
+            upsert_bulk(db, schema, table, attrs_reduced, values)
         db.conn.commit()
 
     except Exception as ex:
@@ -212,7 +207,8 @@ def update(db, schema, table_name, attrs, values):
         if attrs[i] == "id":
             oid = "'%s'" % str(values[i])
             continue
-        logger.info("\n\tVALUE -> %s \n\tTYPE -> %s" % (values[i], type(values[i])))
+        logger.info("\n\tVALUE -> %s \n\tTYPE -> %s" %
+                    (values[i], type(values[i])))
         if values[i] is None:
             pair = "%s = null" % (attrs[i])
         elif type(values[i]) is datetime.datetime:
