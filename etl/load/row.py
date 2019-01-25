@@ -207,8 +207,6 @@ def update(db, schema, table_name, attrs, values):
         if attrs[i] == "id":
             oid = "'%s'" % str(values[i])
             continue
-        logger.info("\n\tVALUE -> %s \n\tTYPE -> %s" %
-                    (values[i], type(values[i])))
         if values[i] is None:
             pair = "%s = null" % (attrs[i])
         elif type(values[i]) is datetime.datetime:
