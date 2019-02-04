@@ -116,6 +116,8 @@ def create_coll_map_table(db, schema, coll_map):
             "[TRANSFER_INFO] Failed to create table %s.%s: %s" % (schema, table_name, ex))
 
     populate_coll_map_table(db, coll_map, schema, table_name, attrs)
-    procedure.drop_type_notification(db)
-    procedure.create_type_notification(db)
-    table.create_trigger_type_notification(db, 'notify_trigger')
+    procedure_name = 'notify_type'
+    procedure.drop_type_notification(db, procedure_name)
+    procedure.create_type_notification(db, procedure_name)
+    table.drop_trigger_type_notification(db, 'public', 'purr_collection_map', 'notify', procedure_name)
+    table.create_trigger_type_notification(db, 'public', 'purr_collection_map', 'notify', procedure_name)

@@ -9,7 +9,7 @@ from psycopg2.extras import execute_values
 # Open a cursor to perform database operations
 
 
-def create_type_notification(db):
+def create_type_notification(db, name):
     """
     Creates a notification with a payload and sends it to channel 'purr'.
 
@@ -21,25 +21,25 @@ def create_type_notification(db):
     -------
     create_notification(db)
     """
-
-    name = 'notify_trigger'
-    cmd = """
-    -- Trigger notification for messaging to PG Notify
-    CREATE FUNCTION %s() RETURNS trigger AS $trigger$
+    cmd = """CREATE OR REPLACE FUNCTION %s()
+    RETURNS TRIGGER AS $$
     BEGIN
-      PERFORM pg_notify('purr', 'schemachange');
+        PERFORM pg_notify('purr', 'type_change');
+        RETURN NULL;
     END;
-    $trigger$ LANGUAGE plpgsql;
+    $$ LANGUAGE plpgsql;
     """ % name
 
     try:
-        db.execute_cmd(cmd)
         logger.info("[PROCEDURE] Creating procedure: %s" % name)
+        db.execute_cmd(cmd)
+        logger.info("%s" % cmd)
+
     except Exception as ex:
         logger.error("[ROW] Insert failed: %s" % ex)
 
 
-def drop_type_notification(db):
+def drop_type_notification(db, name):
     """
     Drops a notification with a payload and sends it to channel 'purr'.
 
@@ -51,7 +51,6 @@ def drop_type_notification(db):
     -------
     drop_notification(db)
     """
-    name = 'notify_trigger'
     cmd = "DROP FUNCTION IF EXISTS %s();" % name
 
     try:

@@ -89,7 +89,7 @@ def drop(db, schema, tables):
 
     Parameters
     ----------
-    tables : list  
+    tables : list
 
     Example
     -------
@@ -122,7 +122,7 @@ def add_column(db, schema, table, column_name, column_type):
     column_name : str
                 : name of new column
     column_type : str
-                : type of new column 
+                : type of new column
     Example
     -------
     add_column(db, 'some_integer', 'integer')
@@ -245,6 +245,7 @@ def get_table_names(db, schema):
         tables = []
         for t in row:
             tables.append(t[0])
+        logger.info("[TABLE] Checking tables.")
         return tables
     except Exception as ex:
         logger.error('[TABLE] %s when executing command %s.' % (ex, cmd))
@@ -267,13 +268,15 @@ def get_column_names_and_types(db, schema, table):
     Get column names and column types of a specific table.
     Parameters
     ----------
-    table_name: str  
+    table_name: str
     Returns
     -------
     List of column names and corresponding types.
     """
     cmd = "SELECT column_name, data_type FROM information_schema.columns WHERE table_schema='%s' AND table_name = '%s';" % (
         schema, table.lower())
+    logger.info("[TABLE] Checking columns and types for table %s.%s" %
+                (schema, table))
     try:
         rows = db.execute_cmd_with_fetch(cmd)
         return rows
@@ -281,14 +284,23 @@ def get_column_names_and_types(db, schema, table):
         logger.error('[TABLE] %s when executing command %s.' % (ex, cmd))
 
 
-def create_trigger_type_notification(db, function):
-    print("created trigger")
+def create_trigger_type_notification(db, schema, table, name, proc):
     cmd = """
-    CREATE TRIGGER notify_type AFTER INSERT OR UPDATE OR DELETE ON public.purr_collection_map
+    CREATE TRIGGER %s AFTER INSERT OR UPDATE OR DELETE ON %s.%s
     FOR EACH ROW EXECUTE PROCEDURE %s()
-    """ % function
-    print(cmd)
+    """ % (name, schema, table, proc)
     try:
+        logger.info("[TABLE] Creating trigger '%s'" % name)
+        db.execute_cmd(cmd)
+        logger.info("%s" % cmd)
+    except Exception as ex:
+        logger.error("[TABLE] Creating trigger '%s' failed: %s" % (name, ex))
+
+
+def drop_trigger_type_notification(db, schema, table, name, proc):
+    cmd = "DROP TRIGGER IF EXISTS %s ON %s.%s CASCADE" % (name, schema, table)
+    try:
+        logger.info("[TABLE] Dropping trigger '%s'" % name)
         db.execute_cmd(cmd)
     except Exception as ex:
-        logger.error('[TABLE] Creating trigger failed: %s' % ex)
+        logger.error("[TABLE] Dropping trigger '%s' failed: %s" % (name, ex))

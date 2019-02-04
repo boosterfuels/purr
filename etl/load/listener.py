@@ -12,20 +12,19 @@ import select
 def listen(pg):
     """
     Listens for changes from the channel.
-
     Parameters
     ----------
     db :    pgection
-
     Returns
     -------
     -
-
     Example
     -------
     listen(pg)
     """
-    cmd = 'LISTEN test;'
+
+    channel = 'purr'
+    cmd = 'LISTEN %s;' % channel
     db = pg.conn
     try:
         db.cursor().execute(cmd)
@@ -36,7 +35,7 @@ def listen(pg):
             db.commit()
             while db.notifies:
                 notify = db.notifies.pop()
-                print("Got NOTIFY:", datetime.datetime.now(),
-                        notify.pid, notify.channel, notify.payload)
+                logger.info("[LISTENER] New notification: pid=%s channel=%s payload=%s" % (notify.pid, notify.channel, notify.payload))
+
     except Exception as ex:
         logger.error("[LISTENER] Listener failed: %s" % ex)
