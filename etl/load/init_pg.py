@@ -29,6 +29,12 @@ class PgConnection:
 
             self.__init__(self.conn_details, self.ttw * 2)
 
+    def get_conn(self):
+        return self.conn
+
+    def get_cur(self):
+        return self.cur
+
     def execute_cmd(self, cmd, values=None):
         try:
             if values is not None:
@@ -42,6 +48,7 @@ class PgConnection:
         except Exception as ex:
             logger.info(
                 "[INIT_PG] Executing query without fetch failed. Details: %s" % ex)
+            print(cmd)
 
     def execute_cmd_with_fetch(self, cmd, values=None):
         try:
@@ -57,6 +64,13 @@ class PgConnection:
         except Exception as ex:
             logger.info(
                 "[INIT_PG] Executing query with fetch failed. Details: %s" % ex)
+
+    def poll(self):
+        self.cur.execute(cmd)
+        self.cur.commit()
+    
+    def notifies(self):
+        return self.conn.notifies
 
     def __del__(self):
         self.conn.close()
