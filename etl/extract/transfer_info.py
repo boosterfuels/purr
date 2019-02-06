@@ -84,8 +84,9 @@ def populate_coll_map_table(db, coll_map, schema, table, attrs):
     collection_map = collections.OrderedDict(coll_map)
     values = []
     for coll_name, v in coll_map.items():
+        columns = json.dumps(v[":columns"])
         values.append(
-            tuple([list(collection_map).index(coll_name), coll_name, v[":meta"][":table"], json.dumps(v[":columns"], default=str), datetime.utcnow()]))
+            tuple([list(collection_map).index(coll_name), coll_name, v[":meta"][":table"], columns, datetime.utcnow()]))
     row.upsert_bulk(db, schema, table, attrs, values)
 
 
@@ -103,7 +104,7 @@ def create_coll_map_table(db, schema, coll_map):
   """
     table_name = "purr_collection_map"
     attrs = ["id", "collection_name", "relation_name", "types", "updated_at"]
-    types = ["integer", "text", "text", "jsonb", "timestamp"]
+    types = ["integer", "text", "text", "jsonb[]", "timestamp"]
     values = [int(time.time())]
 
     try:
@@ -119,5 +120,7 @@ def create_coll_map_table(db, schema, coll_map):
     procedure_name = 'notify_type'
     procedure.drop_type_notification(db, procedure_name)
     procedure.create_type_notification(db, procedure_name)
-    table.drop_trigger_type_notification(db, 'public', 'purr_collection_map', 'notify', procedure_name)
-    table.create_trigger_type_notification(db, 'public', 'purr_collection_map', 'notify', procedure_name)
+    table.drop_trigger_type_notification(
+        db, 'public', 'purr_collection_map', 'notify', procedure_name)
+    table.create_trigger_type_notification(
+        db, 'public', 'purr_collection_map', 'notify', procedure_name)

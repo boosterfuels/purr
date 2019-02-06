@@ -5,6 +5,7 @@ from etl.load import init_pg as pg, table
 from etl.monitor import logger
 import datetime
 from psycopg2.extras import execute_values
+from psycopg2.extras import Json
 
 # Open a cursor to perform database operations
 
@@ -88,10 +89,10 @@ def insert_bulk(db, schema, table, attrs, values):
         logger.error("[ROW] INSERT failed: %s" % ex)
         logger.error("[ROW] CMD: %s" % cmd)
         logger.error("[ROW] VALUES: %s" % values)
-        raise SystemExit
+        raise SystemExit()
 
 
-def upsert_bulk(db, schema, table, attrs, values):
+def upsert_bulk(db, schema, table, attrs, rows):
     """
     Inserts a row defined by attributes and values into a specific
     table of the PG database.
@@ -108,33 +109,40 @@ def upsert_bulk(db, schema, table, attrs, values):
 
     Example
     -------
-    insert('Audience', [attributes], [values])
+    upsert_bulk(db, 'public', 'audience', [attributes], [values])
     """
     temp = []
-    for a in attrs:
-        temp.append('%s')
+    for v in rows[0]:
+        if type(v) is str and v.startswith("[{"):
+            temp.append('array[%s]::jsonb[]')
+        else:
+            temp.append('%s')
 
     temp = ', '.join(temp)
-    # needed for upsert
-    excluded = [('EXCLUDED.%s' % a) for a in attrs]
+    
     attrs_reduced = [('"%s"' % a) for a in attrs]
     attrs_reduced = ', '.join(attrs_reduced)
+
+    excluded = [('EXCLUDED.%s' % a) for a in attrs]
+    excluded = ', '.join(excluded)
+    
     attrs = [('"%s"' % a) for a in attrs]
     attrs = ', '.join(attrs)
-    excluded = ', '.join(excluded)
+
+
     # default primary key in Postgres is name_of_table_pkey
     constraint = '%s_pkey' % table
-    cmd = "INSERT INTO %s.%s (%s) VALUES %s ON CONFLICT ON CONSTRAINT %s DO UPDATE SET (%s) = (%s);" % (
-        schema, table.lower(), attrs, '%s', constraint, attrs_reduced, excluded)
+
+    cmd = "INSERT INTO %s.%s (%s) VALUES (%s) ON CONFLICT ON CONSTRAINT %s DO UPDATE SET (%s) = (%s);" % (
+        schema, table.lower(), attrs, temp, constraint, attrs_reduced, excluded)
     try:
-        execute_values(db.cur, cmd, values)
+        db.cur.executemany(cmd, rows)
         db.conn.commit()
     except Exception as ex:
         logger.error("[ROW] UPSERT failed: %s" % ex)
-        logger.error("[ROW] CMD: %s" % cmd)
-        logger.error("[ROW] VALUES: %s" % values)
-        raise SystemExit
-
+        logger.error("\n[ROW] CMD:\n %s" % cmd)
+        logger.error("\n[ROW] VALUES:\n %s" % rows)
+        raise SystemExit()
 
 def upsert_bulk_tail(db, schema, table, attrs, rows):
     """
@@ -171,9 +179,9 @@ def upsert_bulk_tail(db, schema, table, attrs, rows):
         db.conn.commit()
 
     except Exception as ex:
-        logger.error("[ROW] UPSERT failed: %s" % ex)
+        logger.error("[ROW] UPSERT failed when tailing: %s" % ex)
         logger.error("[ROW] VALUES: %s" % values)
-        raise SystemExit
+        raise SystemExit()
 
 
 def update(db, schema, table_name, attrs, values):

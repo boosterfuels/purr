@@ -58,13 +58,15 @@ def start(settings, coll_config):
         schema.reset(pg, setup_pg["schema_name"])
 
     transfer_info.create_stat_table(pg, setup_pg["schema_name"])
-    transfer_info.create_coll_map_table(pg, setup_pg["schema_name"], coll_config)
+    transfer_info.create_coll_map_table(
+        pg, setup_pg["schema_name"], coll_config)
 
     try:
         _thread.start_new_thread(listener.listen, (pg,))
     except:
         logger.error("Error: unable to start thread")
         raise SystemExit()
+
     # Skip collection transfer if started in tailing mode.
     if settings["tailing_from_db"] is False and settings["tailing_from"] is None:
         if ex.typecheck_auto is True:

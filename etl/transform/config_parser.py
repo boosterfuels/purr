@@ -47,7 +47,7 @@ def config_basic(path):
       return conf_file
   except Exception as ex:
     monitor.logging.error("[CONFIG PARSER] Failed to open setup file: %s" % ex)
-    raise SystemExit
+    raise SystemExit()
     
 def config_collections(path):
   """
@@ -81,7 +81,7 @@ def config_collections(path):
       return colls
   except Exception as ex:
     monitor.logging.error("[CONFIG PARSER] Failed to open collection file: %s" % ex)
-    raise SystemExit
+    raise SystemExit()
 
 def config_collection_names(colls):
   '''
@@ -98,7 +98,7 @@ def config_collection_names(colls):
   coll_names = list(colls.keys())
   if len(coll_names) == 0:
     monitor.logging.error("[CONFIG PARSER] No collections found in the collection map.")
-    raise SystemExit
+    raise SystemExit()
   return coll_names
 
 def config_fields(colls, name):

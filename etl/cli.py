@@ -77,7 +77,7 @@ def main():
         
         if (setup["tailing"] and (setup["tailing_from"] or setup["tailing_from_db"]) or (setup["tailing_from"] and setup["tailing_from_db"])):
             print("\nOnly one tailing option is allowed.")
-            raise SystemExit 
+            raise SystemExit()
         etl.core.start(setup, coll_file)
 
 
