@@ -35,6 +35,7 @@ class Tailer(extractor.Extractor):
         self.settings = settings
         self.coll_settings = coll_settings
         self.setup_pg = setup_pg
+        self.stop_tailing = False
 
     def coll_in_map(self, name):
         '''
@@ -209,7 +210,6 @@ class Tailer(extractor.Extractor):
                 docs_with_equal_oper = [doc_details]
         self.flush(docs_with_equal_oper, oper, r)
 
-
     def handle_one(self, doc, updated_at):
         try:
             self.transform_and_load_one(doc)
@@ -287,7 +287,7 @@ class Tailer(extractor.Extractor):
         try:
             updated_at = datetime.utcnow()
             loop = False
-            while True:
+            while True and self.stop_tailing is False:
                 logger.info("""[TAILER] Details:
                 In loop: %s
                 Client: %s
@@ -300,7 +300,6 @@ class Tailer(extractor.Extractor):
                     latest_ts = int((list(res)[0])[0])
                     dt = latest_ts
                     logger.info("[TAILER] Next time, bring more cookies.")
-                    #self.start(dt)
                     break
                 else:
                     loop = True
@@ -323,6 +322,9 @@ class Tailer(extractor.Extractor):
 
                 docs = []
                 while cursor.alive and self.pg.attempt_to_reconnect is False:
+                    if self.stop_tailing is True:
+                        logger.info("[TAILER] Stopping now but will be back soon.")
+                        break
                     try:
                         for doc in cursor:
                             if doc["op"] != "n" and self.coll_in_map(doc["ns"]) is True:
@@ -344,3 +346,7 @@ class Tailer(extractor.Extractor):
             logger.error("[TAILER] Tailing was stopped unexpectedly: %s" % e)
         except KeyboardInterrupt:
             logger.error("[TAILER] Tailing was stopped by the user.")
+
+    def stop(self):
+        logger.info("[TAILER] Tailing is stopped due to schema change.")
+        self.stop_tailing = True

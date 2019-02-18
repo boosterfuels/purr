@@ -26,16 +26,18 @@ def listen(pg):
     channel = 'purr'
     cmd = 'LISTEN %s;' % channel
     db = pg.conn
+    db.cursor().execute(cmd)
+    seconds_passed = 0
     try:
-        db.cursor().execute(cmd)
-        seconds_passed = 0
         while 1:
             db.commit()
             db.poll()
             db.commit()
             while db.notifies:
                 notify = db.notifies.pop()
-                logger.info("[LISTENER] New notification: pid=%s channel=%s payload=%s" % (notify.pid, notify.channel, notify.payload))
-
+                logger.info("[LISTENER] New notification: pid=%s channel=%s payload=%s" % (
+                    notify.pid, notify.channel, notify.payload))
+                raise EnvironmentError
     except Exception as ex:
-        logger.error("[LISTENER] Listener failed: %s" % ex)
+        logger.error("Details: %s" % ex)
+        return
