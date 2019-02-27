@@ -124,8 +124,8 @@ class Tailer(extractor.Extractor):
         docs_useful = []
 
         if oper == INSERT:
-            logger.info("Inserting %s documents:" % (len(docs)))
-            logger.info("%s" % (docs))
+            logger.info("[TAILER] Inserting %s documents" % (len(docs)))
+            # logger.info("[TAILER] %s" % (docs))
 
             # TODO: add functionality which includes extra props
             for doc in docs:
@@ -133,8 +133,8 @@ class Tailer(extractor.Extractor):
             super().insert_multiple(docs_useful, r, docs[0]["coll_name"])
 
         elif oper == UPDATE:
-            logger.info("Updating %s documents" % (len(docs)))
-            logger.info("%s" % (docs))
+            logger.info("[TAILER] Updating %s documents" % (len(docs)))
+            # logger.info("%s" % (docs))
             r.created = True
             docs_id = []
             for doc in docs:
@@ -169,8 +169,8 @@ class Tailer(extractor.Extractor):
             super().update_multiple(docs_useful, r, docs[0]["coll_name"])
 
         elif oper == DELETE:
-            logger.info("Deleting %s documents" % (len(docs)))
-            logger.info("%s" % (docs))
+            logger.info("[TAILER] Deleting %s documents" % (len(docs)))
+            # logger.info("%s" % (docs))
             ids = []
             for doc in docs:
                 ids.append(doc["o"])
@@ -300,7 +300,7 @@ class Tailer(extractor.Extractor):
                     latest_ts = int((list(res)[0])[0])
                     dt = latest_ts
                     logger.info("[TAILER] Next time, bring more cookies.")
-                    break
+                    raise SystemExit()
                 else:
                     loop = True
 
@@ -333,7 +333,7 @@ class Tailer(extractor.Extractor):
                         time.sleep(1)
                         seconds = datetime.utcnow().second
                         if (seconds > SECONDS_BETWEEN_FLUSHES/3 and len(docs) > 0):
-                            logger.info("Flushing after %s seconds. Number of documents: %s" % (
+                            logger.info("[TAILER] Flushing after %s seconds. Number of documents: %s" % (
                                 seconds, len(docs)))
                             self.handle_multiple(docs)
                             docs = []
