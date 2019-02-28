@@ -34,7 +34,6 @@ class Tailer(extractor.Extractor):
         self.schema = setup_pg["schema_name"]
         self.settings = settings
         self.coll_settings = coll_settings
-        self.setup_pg = setup_pg
         self.stop_tailing = False
 
     def coll_in_map(self, name):
@@ -52,70 +51,6 @@ class Tailer(extractor.Extractor):
         except Exception as ex:
             return False
 
-    def transform_and_load_one(self, doc):
-        """
-        Gets the document and passes it to the corresponding function in order to exeucte command INSERT/UPDATE/DELETE 
-        Parameters
-        ----------
-        doc :   dict
-                document from MongoDB
-        Example
-        -------
-        transform_and_load({"_id":ObjectId("5acf593eed101e0c1266e32b"))
-        Return
-        ------
-        None
-        """
-
-        fullname = doc["ns"]
-        table_name_mdb = fullname.split(".")[1]
-        table_name_pg = self.coll_settings[table_name_mdb][":meta"][":table"]
-
-        oper = doc["op"]
-        doc_useful = {}
-        doc_useful = doc["o"]
-        '''
-        Check if relation exists in the PG database. 
-        Skip the document if the trelation does not exist.
-        '''
-
-        r = relation.Relation(self.pg, self.schema_name, table_name_pg)
-        logger.info("[TAILER] [%s] [%s]: [%s]" % (
-            table_name_mdb, oper, doc_useful
-        ))
-        try:
-            if oper == INSERT:
-                if self.typecheck_auto is False:
-                    super().transfer_one(doc_useful, r, table_name_mdb)
-                else:
-                    r.insert(doc_useful)
-
-            elif oper == UPDATE:
-                unset = []
-                if "$set" in doc_useful.keys():
-                    doc_useful = doc_useful["$set"]
-                if "$unset" in doc_useful.keys():
-                    for k, v in doc_useful["$unset"].items():
-                        unset.append(k)
-
-                if "o2" in doc.keys():
-                    if "_id" in doc["o2"].keys():
-                        doc_useful["_id"] = doc["o2"]["_id"]
-                        logger.info("[TAILER] [%s]: [%s]" % (oper, doc_useful))
-
-                    if self.typecheck_auto is False:
-                        super().transfer_one(doc_useful, r, table_name_mdb, unset)
-                    else:
-                        r.update(doc_useful, unset)
-            elif oper == DELETE:
-                r.delete(doc_useful)
-
-        except Exception as ex:
-            logger.error(
-                "[TAILER] %s - %s\n Document: %s\n %s"
-                % (oper, table_name_pg, doc_useful, ex)
-            )
-
     def flush(self, docs, oper, r):
         """
         sends all the data which was collected for one 
@@ -130,7 +65,11 @@ class Tailer(extractor.Extractor):
             # TODO: add functionality which includes extra props
             for doc in docs:
                 docs_useful.append(doc["o"])
-            super().insert_multiple(docs_useful, r, docs[0]["coll_name"])
+            try:
+                super().insert_multiple(docs_useful, r, docs[0]["coll_name"])
+            except Exception as ex:
+                logger.info(
+                    "[TAILER] Inserting multiple documents failed: %s" % (docs))
 
         elif oper == UPDATE:
             logger.info("[TAILER] Updating %s documents" % (len(docs)))
@@ -166,7 +105,11 @@ class Tailer(extractor.Extractor):
                             break
                 else:
                     docs_useful.append(doc_useful)
-            super().update_multiple(docs_useful, r, docs[0]["coll_name"])
+            try:
+                super().update_multiple(docs_useful, r, docs[0]["coll_name"])
+            except Exception as ex:
+                logger.info(
+                    "[TAILER] Updating multiple documents failed: %s" % (docs))
 
         elif oper == DELETE:
             logger.info("[TAILER] Deleting %s documents" % (len(docs)))
@@ -174,7 +117,11 @@ class Tailer(extractor.Extractor):
             ids = []
             for doc in docs:
                 ids.append(doc["o"])
-            r.delete(ids)
+            try:
+                r.delete(ids)
+            except Exception as ex:
+                logger.info(
+                    "[TAILER] Deleting multiple documents failed: %s" % (docs))
 
     def transform_and_load_many(self, docs_details):
         """
@@ -210,31 +157,8 @@ class Tailer(extractor.Extractor):
                 docs_with_equal_oper = [doc_details]
         self.flush(docs_with_equal_oper, oper, r)
 
-    def handle_one(self, doc, updated_at):
-        try:
-            self.transform_and_load_one(doc)
 
-            # every 5 minutes update the timestamp because we need to continue
-            # tailing in case of disconnecting from the PGDB
-            diff = datetime.utcnow() - updated_at
-            minutes_between_update = (
-                diff.seconds//60) % 60
-            if minutes_between_update > 5:
-                t = int(time.time())
-                transfer_info.update_latest_successful_ts(
-                    self.pg, self.schema, t
-                )
-                logger.info(
-                    "[TAILER] Updated latest_successful_ts: %d" % t)
-            return datetime.utcnow()
-
-        except Exception as ex:
-            logger.error(
-                "[TAILER] Transfer failed for document: %s: %s"
-                % (doc, ex)
-            )
-
-    def handle_multiple(self, docs):
+    def handle_multiple(self, docs, updated_at):
         # group by name
         docs_grouped = {}
         for doc in docs:
@@ -255,6 +179,19 @@ class Tailer(extractor.Extractor):
 
         for coll, docs_details in docs_grouped.items():
             self.transform_and_load_many(docs_details)
+            # every 5 minutes update the timestamp because we need to continue
+            # tailing in case of disconnecting from the PGDB
+            diff = datetime.utcnow() - updated_at
+            minutes_between_update = (
+                diff.seconds//60) % 60
+            if minutes_between_update > 5:
+                t = int(time.time())
+                transfer_info.update_latest_successful_ts(
+                    self.pg, self.schema, t
+                )
+                logger.info(
+                    "[TAILER] Updated latest_successful_ts: %d" % t)
+            return datetime.utcnow()
 
     def start(self, dt=None):
         """
@@ -323,7 +260,8 @@ class Tailer(extractor.Extractor):
                 docs = []
                 while cursor.alive and self.pg.attempt_to_reconnect is False:
                     if self.stop_tailing is True:
-                        logger.info("[TAILER] Stopping now but will be back soon.")
+                        logger.info(
+                            "[TAILER] Stopping now but will be back soon.")
                         break
                     try:
                         for doc in cursor:
@@ -335,10 +273,10 @@ class Tailer(extractor.Extractor):
                         if (seconds > SECONDS_BETWEEN_FLUSHES/3 and len(docs) > 0):
                             logger.info("[TAILER] Flushing after %s seconds. Number of documents: %s" % (
                                 seconds, len(docs)))
-                            self.handle_multiple(docs)
+                            self.handle_multiple(docs, updated_at)
                             docs = []
                     except Exception as ex:
-                        logger.error("[TAILER] %s" % ex)
+                        logger.error("[TAILER] Cursor error %s" % ex)
                 cursor.close()
                 continue
 
