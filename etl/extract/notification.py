@@ -30,7 +30,6 @@ class NotificationThread(Thread):
         cmd = 'LISTEN %s;' % channel
         db = self.conn.conn
         db.cursor().execute(cmd)
-        seconds_passed = 0
         try:
             while 1:
                 db.commit()

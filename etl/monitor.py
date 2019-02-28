@@ -4,7 +4,7 @@ import sys
 
 class Logger():
   """Class for logs."""
-  def __init__(self, file='', name=''):
+  def __init__(self, name=''):
     '''
     Creates log handlers, adds formatters to them and finally adds the handlers to the logger.
     '''

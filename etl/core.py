@@ -7,7 +7,6 @@ from etl.load import schema, init_pg as postgres
 from etl.monitor import logger
 from etl.transform import config_parser as cp
 import pkg_resources
-import _thread
 
 
 def start(settings, coll_config):

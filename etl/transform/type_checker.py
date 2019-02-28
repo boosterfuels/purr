@@ -84,6 +84,3 @@ def type_equal(old, new):
   if('char' in old and 'char' in new) or (old == 'array' and new == 'jsonb[]') or (old == 'double precision' and new == 'float'):
     return True
   return False
-
-def is_nan(x):
-  return x != x

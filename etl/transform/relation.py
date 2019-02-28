@@ -1,5 +1,4 @@
 import pymongo
-from bson.json_util import default
 
 from etl.load import table, row, constraint
 from etl.transform import type_checker, keyword_checker, config_parser, unnester
@@ -82,32 +81,6 @@ class Relation():
       result.append(values)
     attributes_all.sort()
     row.insert_bulk(self.db, self.schema, self.relation_name, attributes_all, result, unset)
-
-  def insert_config(self, doc, attrs, attrs_and_types):
-    """
-    Transforms document and inserts it into the corresponding table.
-    Parameters
-    ----------
-    doc : dict
-          the document we want to insert
-    TODO 
-    CHECK if self.column_names and self.column_types are still the same, do not
-    """
-    # This is needed because sometimes there is no value for attributes (null)
-    # - in this case
-    attrs_temp = [a.replace("_", "") for a in attrs]
-    values = [None] * len(attrs)
-    for k, v in doc.items():
-      k = k.lower().replace("_", "")
-      if k in attrs_temp:
-        idx = attrs_temp.index(k)
-        value = unnester.cast(attrs_and_types[k], v)
-        values[idx] = value
-      else:
-        continue
-    
-    row.insert(self.db, self.schema, self.relation_name, attrs, values)
-
 
   def insert_config_bulk(self, docs, attrs, include_extra_props = True, unset = []):
     """

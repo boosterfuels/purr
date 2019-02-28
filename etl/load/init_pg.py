@@ -29,12 +29,6 @@ class PgConnection:
 
             self.__init__(self.conn_details, self.ttw * 2)
 
-    def get_conn(self):
-        return self.conn
-
-    def get_cur(self):
-        return self.cur
-
     def execute_cmd(self, cmd, values=None):
         try:
             if values is not None:

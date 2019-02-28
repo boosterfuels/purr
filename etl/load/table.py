@@ -216,53 +216,6 @@ def remove_column(db, table, column_name):
         logger.error('[TABLE] %s when executing command %s.' % (ex, cmd))
 
 
-def get_table_names(db, schema):
-    """
-    Get existing tables from the PG database.
-
-    Parameters
-    ----------
-    None
-
-    Returns
-    -------
-    tables: list of strings
-    List (strings) of table names of public schema.
-
-    Example
-    -------
-    exists(pg.db, 'Audience')
-
-    Todo
-    ----
-    don't hardcode schema
-    """
-    cmd = "SELECT table_name FROM information_schema.tables WHERE table_schema='%s'" % (
-        schema)
-    try:
-        res = execute_cmd_with_fetch(cmd)
-        row = map(list, res)
-        tables = []
-        for t in row:
-            tables.append(t[0])
-        logger.info("[TABLE] Checking tables.")
-        return tables
-    except Exception as ex:
-        logger.error('[TABLE] %s when executing command %s.' % (ex, cmd))
-
-
-def column_exists(db, table, column):
-    cmd = "SELECT column_name FROM information_schema.columns WHERE table_name='%s' AND column_name='%s';" % (
-        table.lower(), column)
-    try:
-        rows = db.execute_cmd_with_fetch(cmd)
-        if rows:
-            return True
-        return False
-    except Exception as ex:
-        logger.error('[TABLE] %s when executing command %s.' % (ex, cmd))
-
-
 def get_column_names_and_types(db, schema, table):
     """
     Get column names and column types of a specific table.

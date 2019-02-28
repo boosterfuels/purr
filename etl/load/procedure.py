@@ -1,5 +1,5 @@
 import psycopg2
-from bson.json_util import loads, dumps
+from bson.json_util import dumps
 
 from etl.load import init_pg as pg, table
 from etl.monitor import logger
