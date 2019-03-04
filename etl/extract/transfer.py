@@ -17,7 +17,7 @@ class TransferThread(Thread):
         self.t = tailer.Tailer(self.pg, self.mongo,
                                self.settings["postgres"], self.settings, self.coll_config)
         # initialize extractor
-        self.ex = ex
+        self.extractor = ex
         
     def run(self):
         # collections which will be transferred
@@ -47,10 +47,10 @@ class TransferThread(Thread):
                 self.pg, setup_pg["schema_name"], self.coll_config)
 
         # Skip collection transfer if started in tailing mode.
-            if self.ex.typecheck_auto is True:
-                self.ex.transfer_auto(collections)
+            if self.extractor.typecheck_auto is True:
+                self.extractor.transfer_auto(collections)
             else:
-                self.ex.transfer_conf(collections)
+                self.extractor.transfer_conf(collections)
         self.tail(start_date_time)
 
     def tail(self, start_date_time=None):
@@ -76,4 +76,4 @@ class TransferThread(Thread):
         self.t.stop_tailing = True
 
     def schema_update(self):
-        self.ex.update_coll_settings()
+        self.extractor.update_coll_settings()
