@@ -225,12 +225,6 @@ class Tailer(extractor.Extractor):
             updated_at = datetime.utcnow()
             loop = False
             while True and self.stop_tailing is False:
-                logger.info("""[TAILER] Details:
-                In loop: %s
-                Client: %s
-                Oplog: %s
-                Timestamp (dt): %s""" % (
-                    loop, client, oplog, str(dt)))
                 if loop is True:
                     res = transfer_info.get_latest_successful_ts(
                         self.pg, self.schema)
@@ -254,6 +248,8 @@ class Tailer(extractor.Extractor):
                     cursor_type=pymongo.CursorType.TAILABLE_AWAIT,
                     oplog_replay=True,
                 )
+                if type(dt) is int:
+                    dt = datetime.utcfromtimestamp(dt).strftime('%Y-%m-%d %H:%M:%S') 
                 logger.info("[TAILER] Started tailing from %s." % str(dt))
                 logger.info("[TAILER] Timestamp: %s" % datetime.utcnow())
 
