@@ -28,7 +28,7 @@ class TransferThread(Thread):
 
         if collections is None:
             logger.error(
-                "[CORE] No collections found. Check your collection names in the setup file.")
+                "[TRANSFER] No collections found. Check your collection names in the setup file.")
             return
 
         start_date_time = datetime.utcnow()
@@ -57,15 +57,15 @@ class TransferThread(Thread):
         self.t.stop_tailing = False
 
         if self.settings["tailing"] is True:
-            logger.info("Starting standard tailing.")
+            logger.info("[TRANSFER] Starting standard tailing.")
             self.t.start(start_date_time)
 
         elif self.settings["tailing_from"] is not None:
-            logger.info("Starting tailing from provided timestamp.")
+            logger.info("[TRANSFER] Starting tailing from provided timestamp.")
             self.t.start(settings["tailing_from"])
 
         elif self.settings["tailing_from_db"] is True or start_date_time is None:
-            logger.info("Starting tailing from timestamp found in purr_info.")
+            logger.info("[TRANSFER] Starting tailing from timestamp found in purr_info.")
             ts = transfer_info.get_latest_successful_ts(self.pg, 'public')
             latest_ts = int((list(ts)[0])[0])
             self.t.start(latest_ts)
