@@ -114,12 +114,12 @@ def create_coll_map_table(db, schema, coll_map):
   -------
   create_stat_table(pg, 'purr')
   """
-    table_name = ["purr_collection_map"]
+    table_name = "purr_collection_map"
     attrs = ["id", "collection_name", "relation_name", "types", "updated_at"]
     types = ["integer", "text", "text", "jsonb[]", "timestamp"]
 
     try:
-        table.drop(db, schema, table_name)
+        table.drop(db, schema, [table_name])
         table.create(db, schema, table_name, attrs, types)
         logger.info("[TRANSFER INFO] Created table %s.%s." %
                     (schema, table_name))

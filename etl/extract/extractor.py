@@ -38,6 +38,7 @@ class Extractor():
         self.tailing_from = settings_general['tailing_from']
         self.tailing_from_db = settings_general['tailing_from_db']
         self.coll_map_cur = transfer_info.get_coll_map_table(self.pg)
+        self.attrs_details = {}
 
     def update_coll_settings(self):
         # TODO: get types from pg
@@ -47,7 +48,8 @@ class Extractor():
         coll_map_new = transfer_info.get_coll_map_table(self.pg)
 
         for i in range(0, len(coll_map_cur)):
-            coll = coll_map_cur[i][1]
+            name_coll = coll_map_cur[i][1]
+            name_table = coll_map_cur[i][2]
             fields_cur = coll_map_cur[i][3]
             fields_new = coll_map_new[i][3]
 
@@ -60,16 +62,15 @@ class Extractor():
             source_persistent = [
                 x for x in sources_removed if x in sources_added]
             if len(sources_removed):
-                logger.info("TYPE CHANGE: ", coll, source_persistent)
+                logger.info("TYPE CHANGE! table: %s column: %s" % (name_table, source_persistent))
 
-            table_name = coll_map_cur[i][2]
             for item in added:
                 if item[":source"] not in source_persistent:
                     for attribute, v in item.items():
                         if v is None:
-                            self.coll_settings[coll][":columns"] = coll_map_new[i][3]
+                            self.coll_settings[name_coll][":columns"] = coll_map_new[i][3]
                             table.add_column(
-                                self.pg, self.schema_name, table_name, attribute, item[":type"])
+                                self.pg, self.schema_name, name_table, attribute, item[":type"])
                             self.transfer_coll(coll_map_cur[i][1])
 
             for item in removed:
@@ -77,9 +78,9 @@ class Extractor():
                     for attribute, v in item.items():
                         if v is None:
                             # update collection settings
-                            self.coll_settings[coll][":columns"] = coll_map_new[i][3]
+                            self.coll_settings[name_coll][":columns"] = coll_map_new[i][3]
                             table.remove_column(
-                                self.pg, self.schema_name, table_name, attribute)
+                                self.pg, self.schema_name, name_table, attribute)
 
         # update current collection map - from the db
         self.coll_map_cur = coll_map_new
@@ -160,6 +161,7 @@ class Extractor():
         coll : string
              : name of collection which is going to be transferred
         '''
+        (r, attrs_details) = self.adjust_columns(coll)
 
         if self.tailing_from is not None or self.tailing_from_db is True:
             return
