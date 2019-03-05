@@ -336,13 +336,13 @@ class Relation():
 
         temp_attrs_conf = []
         temp_types_conf = []
-        
+
         for i in range(0, len(attrs_pg)):
           try:
             # check if attributes in PG are part of the collection map)
             idx = attrs_conf.index(attrs_pg[i])
           except ValueError:
-            table.remove_column(self.db, self.relation_name, attrs_pg[i])
+            table.remove_column(self.db, self.schema, self.relation_name, attrs_pg[i])
             attrs_pg[i] = None
             types_pg[i] = None
             continue

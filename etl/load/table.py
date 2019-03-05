@@ -205,12 +205,25 @@ def column_change_type(db, schema, table, column_name, column_type):
         logger.error('[TABLE] %s when executing command %s.' % (ex, cmd))
 
 
-def remove_column(db, table, column_name):
-    cmd = "ALTER TABLE IF EXISTS %s DROP COLUMN IF EXISTS %s;" % (
-        table.lower(), column_name)
-    logger.warn("[TABLE] Removing column '%s' from table '%s' if exists." % (
-        column_name, table.lower()))
+def remove_column(db, schema, table, column_name):
+    """
+    Remove a column from a table.
+    Parameters
+    ----------
+    db: obj
+    schema: str
+    table: str
+    column_name: str
+
+    Example
+    -------
+    remove_column(pg, 'public', 'user', age')
+    """
+    cmd = "ALTER TABLE IF EXISTS %s.%s DROP COLUMN IF EXISTS %s;" % (
+        schema, table.lower(), column_name)
     try:
+        logger.warn("[TABLE] Removing column '%s' from table '%s.%s' if exists." % (
+            column_name, schema, table.lower()))
         db.execute_cmd(cmd)
     except Exception as ex:
         logger.error('[TABLE] %s when executing command %s.' % (ex, cmd))
