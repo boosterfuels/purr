@@ -67,5 +67,5 @@ def start(settings, coll_config):
 
     except Exception as ex:
         logger.error(
-            "Error: unable to start listener thread. Details: %s" % ex)
+            "[CORE] Unable to start listener thread. Details: %s" % ex)
         raise SystemExit()
