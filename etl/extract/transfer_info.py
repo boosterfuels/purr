@@ -80,14 +80,26 @@ def update_latest_successful_ts(db, schema, dt):
 
 
 def populate_coll_map_table(db, coll_map, schema, table, attrs):
-    # def upsert_bulk(db, schema, table, attrs, values):
     collection_map = collections.OrderedDict(coll_map)
-    values = []
     for coll_name, v in coll_map.items():
-        columns = json.dumps(v[":columns"])
-        values.append(
-            tuple([list(collection_map).index(coll_name), coll_name, v[":meta"][":table"], columns, datetime.utcnow()]))
-    row.upsert_bulk(db, schema, table, attrs, values)
+        values = tuple([list(collection_map).index(coll_name), coll_name,
+                        v[":meta"][":table"], v[":columns"], datetime.utcnow()])
+        row.upsert_transfer_info(db, schema, table, attrs, values)
+
+
+def get_coll_map_table(db, schema='public'):
+    cmd = "SELECT id, collection_name, relation_name, types FROM %s.purr_collection_map ORDER BY id" % (
+        schema)
+    try:
+        coll_map = db.execute_cmd_with_fetch(cmd)
+        logger.info("[TRANSFER_INFO] Get schema from DB:\n%s" % coll_map)
+        return coll_map
+
+    except Exception as ex:
+        logger.error(
+            "[TRANSFER_INFO] Failed to get collection map table"
+            % (ex)
+        )
 
 
 def create_coll_map_table(db, schema, coll_map):
@@ -102,13 +114,12 @@ def create_coll_map_table(db, schema, coll_map):
   -------
   create_stat_table(pg, 'purr')
   """
-    table_name = "purr_collection_map"
+    table_name = ["purr_collection_map"]
     attrs = ["id", "collection_name", "relation_name", "types", "updated_at"]
     types = ["integer", "text", "text", "jsonb[]", "timestamp"]
-    values = [int(time.time())]
 
     try:
-        table.drop(db, schema, [table_name])
+        table.drop(db, schema, table_name)
         table.create(db, schema, table_name, attrs, types)
         logger.info("[TRANSFER INFO] Created table %s.%s." %
                     (schema, table_name))

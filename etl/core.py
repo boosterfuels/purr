@@ -39,14 +39,12 @@ def start(settings, coll_config):
     pg = postgres.PgConnection(setup_pg["connection"])
     mongo = mongodb.MongoConnection(setup_mdb)
 
-    transfer_info.get_coll_map_table(pg)
     ex = extractor.Extractor(
         pg, mongo.conn, setup_pg, settings, coll_config)
     try:
 
         thr_notification = notification.NotificationThread(pg)
         thr_notification.start()
-        print("bz")
         thr_transfer = transfer.TransferThread(
             settings, coll_config, pg, mongo, ex)
         thr_transfer.start()
@@ -71,6 +69,3 @@ def start(settings, coll_config):
         logger.error(
             "Error: unable to start listener thread. Details: %s" % ex)
         raise SystemExit()
-
-
-# def transfer_and_sync(settings, coll_config, pg, mongo):
