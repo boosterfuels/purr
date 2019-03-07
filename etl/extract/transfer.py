@@ -22,6 +22,7 @@ class TransferThread(Thread):
                                self.coll_config)
         # initialize extractor
         self.extractor = ex
+        self.terminate = False
 
     def run(self):
         # collections which will be transferred
@@ -59,6 +60,10 @@ class TransferThread(Thread):
             else:
                 self.extractor.transfer_conf(collections)
         self.tail(start_date_time)
+
+    def stop(self):
+        self.terminate = True
+        self.t.stop_tailing = True
 
     def tail(self, start_date_time=None):
         self.t.stop_tailing = False

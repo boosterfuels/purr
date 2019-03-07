@@ -46,12 +46,15 @@ def start(settings, coll_config):
 
     ex = extractor.Extractor(
         pg, mongo.conn, setup_pg, settings, coll_config)
+    THREADS = []
     try:
 
         thr_notification = notification.NotificationThread(pg)
+        THREADS.append(thr_notification)
         thr_notification.start()
         thr_transfer = transfer.TransferThread(
             settings, coll_config, pg, mongo, ex)
+        THREADS.append(thr_transfer)
         thr_transfer.start()
         while True:
             time.sleep(2)
@@ -63,6 +66,7 @@ def start(settings, coll_config):
 
                 thr_transfer = transfer.TransferThread(
                     settings, coll_config, pg, mongo, ex)
+                THREADS.append(thr_transfer)
                 thr_transfer.settings["tailing"] = False
                 thr_transfer.settings["tailing_from_db"] = True
                 thr_transfer.schema_update()
@@ -70,6 +74,10 @@ def start(settings, coll_config):
         thr_notification.join(3)  # wait for 3 seconds
         thr_transfer.join(3)
 
+    except (KeyboardInterrupt, SystemExit):
+        logger.error('[CORE] Stopping all threads.')
+        for t in THREADS:
+            t.stop()
     except Exception as ex:
         logger.error(
             "[CORE] Unable to start listener thread. Details: %s" % ex)

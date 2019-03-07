@@ -9,9 +9,13 @@ class NotificationThread(Thread):
     def __init__(self, conn):
         Thread.__init__(self)
         self.conn = conn
+        self.terminate = False
 
     def run(self):
         self.listen()
+
+    def stop(self):
+        self.terminate = True
 
     def listen(self):
         """
@@ -34,6 +38,8 @@ class NotificationThread(Thread):
         running = True
         try:
             while running:
+                if self.terminate is True:
+                    break
                 db.commit()
                 db.poll()
                 db.commit()

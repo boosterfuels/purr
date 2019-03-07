@@ -261,7 +261,7 @@ class Tailer(extractor.Extractor):
                 while cursor.alive and self.pg.attempt_to_reconnect is False:
                     if self.stop_tailing is True:
                         logger.info(
-                            "[TAILER] Stopping now but will be back soon.")
+                            "[TAILER] Meow")
                         break
                     try:
                         for doc in cursor:
@@ -282,11 +282,8 @@ class Tailer(extractor.Extractor):
                         logger.error("[TAILER] Cursor error %s" % ex)
                 cursor.close()
                 continue
-
         except StopIteration as e:
             logger.error("[TAILER] Tailing was stopped unexpectedly: %s" % e)
-        except KeyboardInterrupt:
-            logger.error("[TAILER] Tailing was stopped by the user.")
 
     def stop(self):
         logger.info("[TAILER] Tailing is stopped due to schema change.")
