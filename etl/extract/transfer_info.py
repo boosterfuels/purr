@@ -81,14 +81,33 @@ def update_latest_successful_ts(db, schema, dt):
         )
 
 
+def get_query_update(def_coll, schema, table, attrs, row_id):
+    types = []
+    for field in def_coll:
+        tmp = (str(field).replace("'", '"').replace('None', 'null'))
+        types.append("$$%s$$" % tmp)
+
+    query = """
+    UPDATE %s.%s SET types = ARRAY[%s]::JSONB[]
+    where id=%s;
+    """ % (schema, table, ", ".join(types), row_id)
+
+    return query
+
+
 def populate_coll_map_table(db, coll_map, schema, table, attrs):
     collection_map = collections.OrderedDict(coll_map)
     for coll_name, v in coll_map.items():
-        values = tuple([list(collection_map).index(coll_name),
+        row_id = list(collection_map).index(coll_name)
+        query_update = get_query_update(
+            v[":columns"], schema, table, attrs, row_id
+        )
+        values = tuple([row_id,
                         coll_name,
                         v[":meta"][":table"],
                         v[":columns"],
-                        datetime.utcnow()])
+                        datetime.utcnow(),
+                        query_update])
         row.upsert_transfer_info(db, schema, table, attrs, values)
 
 
@@ -121,8 +140,9 @@ def create_coll_map_table(db, schema, coll_map):
   create_stat_table(pg, 'purr')
   """
     table_name = "purr_collection_map"
-    attrs = ["id", "collection_name", "relation_name", "types", "updated_at"]
-    types = ["integer", "text", "text", "jsonb[]", "timestamp"]
+    attrs = ["id", "collection_name", "relation_name",
+             "types", "updated_at", "query_update"]
+    types = ["integer", "text", "text", "jsonb[]", "timestamp", "text"]
 
     try:
         table.drop(db, schema, [table_name])
