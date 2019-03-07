@@ -1,8 +1,11 @@
 import psycopg2
 import time
 
-from etl.load import table, row, constraint, schema
+from etl.load import table, row, constraint, schema, procedure
 from etl.monitor import logger
+from datetime import datetime
+import json
+import collections
 
 
 def create_stat_table(db, schema):
@@ -30,10 +33,10 @@ def create_stat_table(db, schema):
         ts = get_latest_successful_ts(db, 'public')
         if len(ts) == 0:
             row.insert(db, schema, table_name, attrs, values)
-        
         logger.info("[TRANSFER INFO] Created table %s." % (table_name))
     except Exception as ex:
-        logger.error("[TRANSFER_INFO] Failed to create table purr_info: %s" % (ex))
+        logger.error(
+            "[TRANSFER_INFO] Failed to create table %s: %s" % (table_name, ex))
 
 
 def get_latest_successful_ts(db, schema):
@@ -59,17 +62,84 @@ def get_latest_successful_ts(db, schema):
         return res
     except Exception as ex:
         logger.error(
-            "[TRANSFER_INFO] Failed to get the timestamp of the latest successful transfer: %s"
+            """[TRANSFER_INFO] Failed to get the timestamp
+             of the latest successful transfer: %s"""
             % (ex)
         )
 
 
 def update_latest_successful_ts(db, schema, dt):
-    cmd = "UPDATE %s.purr_info SET latest_successful_ts='%s';" % (schema, str(dt))
+    cmd = "UPDATE %s.purr_info SET latest_successful_ts='%s';" % (
+        schema, str(dt))
     try:
         db.execute_cmd(cmd)
     except Exception as ex:
         logger.error(
-            "[TRANSFER_INFO] Failed to update the timestamp of the latest successful transfer: %s"
+            """[TRANSFER_INFO] Failed to update the timestamp
+            of the latest successful transfer: %s"""
             % (ex)
         )
+
+
+def populate_coll_map_table(db, coll_map, schema, table, attrs):
+    collection_map = collections.OrderedDict(coll_map)
+    for coll_name, v in coll_map.items():
+        values = tuple([list(collection_map).index(coll_name),
+                        coll_name,
+                        v[":meta"][":table"],
+                        v[":columns"],
+                        datetime.utcnow()])
+        row.upsert_transfer_info(db, schema, table, attrs, values)
+
+
+def get_coll_map_table(db, schema='public'):
+    cmd = """SELECT id, collection_name, relation_name,
+    types FROM %s.purr_collection_map ORDER BY id""" % (
+        schema)
+    try:
+        coll_map = db.execute_cmd_with_fetch(cmd)
+        logger.info("[TRANSFER_INFO] Get schema from DB:\n%s" % coll_map)
+        return coll_map
+
+    except Exception as ex:
+        logger.error(
+            "[TRANSFER_INFO] Failed to get collection map table"
+            % (ex)
+        )
+
+
+def create_coll_map_table(db, schema, coll_map):
+    """
+  Adds primary key to a PostgreSQL table.
+  Parameters
+  ----------
+  Returns
+  -------
+  -
+  Example
+  -------
+  create_stat_table(pg, 'purr')
+  """
+    table_name = "purr_collection_map"
+    attrs = ["id", "collection_name", "relation_name", "types", "updated_at"]
+    types = ["integer", "text", "text", "jsonb[]", "timestamp"]
+
+    try:
+        table.drop(db, schema, [table_name])
+        table.create(db, schema, table_name, attrs, types)
+        logger.info("[TRANSFER INFO] Created table %s.%s." %
+                    (schema, table_name))
+    except Exception as ex:
+        logger.error(
+            """
+            [TRANSFER_INFO] Failed to create table %s.%s: %s
+            """ % (schema, table_name, ex))
+
+    populate_coll_map_table(db, coll_map, schema, table_name, attrs)
+    procedure_name = 'notify_type'
+    procedure.drop_type_notification(db, procedure_name)
+    procedure.create_type_notification(db, procedure_name)
+    table.drop_trigger_type_notification(
+        db, 'public', 'purr_collection_map', 'notify', procedure_name)
+    table.create_trigger_type_notification(
+        db, 'public', 'purr_collection_map', 'notify', procedure_name)

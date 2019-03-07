@@ -3,34 +3,38 @@ import sys
 
 
 class Logger():
-  """Class for logs."""
-  def __init__(self, file='', name=''):
-    '''
-    Creates log handlers, adds formatters to them and finally adds the handlers to the logger.
-    '''
-    self.logger = logging.getLogger()
-    self.logger.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('%(asctime)s - [%(levelname)s] - %(message)s')
+    """Class for logs."""
 
-    h = logging.StreamHandler(sys.stdout)
-    h.setLevel(logging.DEBUG)
-    h.setFormatter(formatter)
+    def __init__(self, name=""):
+        """
+          Creates log handlers, adds formatters to them
+          and finally adds the handlers to the logger.
+        """
+        self.logger = logging.getLogger()
+        self.logger.setLevel(logging.DEBUG)
+        formatter = logging.Formatter(
+            "%(asctime)s - [%(levelname)s] - %(message)s")
 
-    self.logger.addHandler(h)
+        h = logging.StreamHandler(sys.stdout)
+        h.setLevel(logging.DEBUG)
+        h.setFormatter(formatter)
 
-  def info(self, m):
-    self.logger.info(m)
+        self.logger.addHandler(h)
 
-  def warn(self, m):
-    self.logger.warn(m)
+    def info(self, m):
+        self.logger.info(m)
 
-  def debug(self, m):
-    self.logger.debug(m)
+    def warn(self, m):
+        self.logger.warn(m)
 
-  def error(self, m):
-    self.logger.error(m)  
+    def debug(self, m):
+        self.logger.debug(m)
 
-  def critical(self, m):
-    self.logger.critical(m)
+    def error(self, m):
+        self.logger.error(m)
+
+    def critical(self, m):
+        self.logger.critical(m)
+
 
 logger = Logger()

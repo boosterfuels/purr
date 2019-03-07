@@ -22,7 +22,10 @@ class PgConnection:
         except Exception as ex:
             self.attempt_to_reconnect = True
             logger.error(
-                "[INIT_PG] Could not connect to Postgres. Reconnecting in %s seconds..."
+                """
+                [INIT_PG] Could not connect to Postgres.
+                Reconnecting in %s seconds...
+                """
                 % self.ttw
             )
             time.sleep(self.ttw)
@@ -41,7 +44,11 @@ class PgConnection:
             self.handle_interface_and_oper_error()
         except Exception as ex:
             logger.info(
-                "[INIT_PG] Executing query without fetch failed. Details: %s" % ex)
+                """
+                [INIT_PG] Executing query without fetch failed.
+                Details: %s
+                """ % ex)
+            print(cmd)
 
     def execute_cmd_with_fetch(self, cmd, values=None):
         try:
@@ -56,7 +63,17 @@ class PgConnection:
             self.handle_interface_and_oper_error()
         except Exception as ex:
             logger.info(
-                "[INIT_PG] Executing query with fetch failed. Details: %s" % ex)
+                """
+                [INIT_PG] Executing query with fetch failed.
+                Details: %s
+                """ % ex)
+
+    def poll(self):
+        self.cur.execute(cmd)
+        self.cur.commit()
+
+    def notifies(self):
+        return self.conn.notifies
 
     def __del__(self):
         self.conn.close()
@@ -64,7 +81,9 @@ class PgConnection:
 
     def handle_interface_and_oper_error(self):
         logger.error(
-            "[INIT_PG] Executing query failed. MOGRIFIED: %s" % self.cur.mogrify(cmd))
+            """
+            [INIT_PG] Executing query failed. MOGRIFIED: %s
+            """ % self.cur.mogrify(cmd))
         logger.error("[INIT_PG] Trying to reconnect to Postgres...")
         self.attempt_to_reconnect = True
         self.__init__(self.conn_details, self.ttw * 2)

@@ -284,3 +284,5 @@ Contributing to Purr is a great way to learn more about
 - MongoDB
 - PostgreSQL
 - Python3
+
+### Use [pep8](https://pypi.org/project/pep8/) to check if your code follows some of the style conventions in PEP8
