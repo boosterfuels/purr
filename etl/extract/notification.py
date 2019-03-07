@@ -39,11 +39,11 @@ class NotificationThread(Thread):
                 db.commit()
                 while db.notifies:
                     notify = db.notifies.pop()
-                    logger.info("""[CORE]
+                    logger.info("""[NOTIFICATION]
                      New notification: pid=%s channel=%s payload=%s new=%s
                     """ % (
                         notify.pid, notify.channel, notify.payload, self.new))
                     self.new = True
         except Exception as ex:
-            logger.error("Details: %s" % ex)
+            logger.error("[NOTIFICATION] Details: %s" % ex)
             return
