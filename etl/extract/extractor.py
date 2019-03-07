@@ -5,7 +5,7 @@ from etl.extract import collection, transfer_info
 from etl.load import table, row, constraint, schema
 from etl.monitor import logger
 
-from etl.transform import relation, config_parser as cp
+from etl.transform import relation, type_checker, config_parser as cp
 
 from datetime import datetime, timedelta
 from bson import Timestamp
@@ -31,7 +31,7 @@ class Extractor():
             self.include_extra_props = settings_general['include_extra_props']
         except KeyError:
             self.include_extra_props = False
-        self.schema_name = settings_pg["schema_name"]
+        self.schema = settings_pg["schema_name"]
         self.truncate = settings_pg['table_truncate']
         self.drop = settings_pg['table_drop']
         self.coll_def = coll_def
@@ -65,9 +65,34 @@ class Extractor():
 
             source_persistent = [
                 x for x in sources_removed if x in sources_added]
-            if len(sources_removed):
-                logger.info("TYPE CHANGE! table: %s column: %s" %
-                            (name_table, source_persistent))
+
+            if len(source_persistent):
+                for i in range(0, len(fields_new)):
+                    field = fields_new[i]
+                    if field[":source"] in source_persistent:
+                        for column, v in field.items():
+                            if v is None:
+                                type_old = fields_cur[i][":type"]
+                                type_new = field[":type"]
+                                if type_checker.is_convertable(type_old, type_new):
+                                    # (1) Try to convert the column
+                                    logger.info("""[EXTRACTOR] In table %s, column %s: 
+                                    Type [%s] is convertable to [%s]""" % (
+                                        name_table, column, type_old, type_new))
+                                    table.column_change_type(
+                                        self.pg,
+                                        self.schema,
+                                        name_table,
+                                        column,
+                                        type_new)
+                                else:
+                                    # (2) If (1) was not successful (PG could not convert the column),
+                                    # just rename it and add the column again so Purr can take care of it
+                                    logger.error("""
+                                    [EXTRACTOR] In table %s, column %s: 
+                                    Type [%s] is NOT convertable to [%s]
+                                    """ % (
+                                        name_table, column, type_old, type_new))
 
             for item in added:
                 if item[":source"] not in source_persistent:
@@ -76,7 +101,7 @@ class Extractor():
                             self.coll_def[name_coll][":columns"] = fields_new
                             table.add_column(
                                 self.pg,
-                                self.schema_name,
+                                self.schema,
                                 name_table,
                                 attribute,
                                 item[":type"])
@@ -90,7 +115,7 @@ class Extractor():
                             self.coll_def[name_coll][":columns"] = fields_new
                             table.remove_column(
                                 self.pg,
-                                self.schema_name,
+                                self.schema,
                                 name_table,
                                 attribute)
 
@@ -112,15 +137,15 @@ class Extractor():
             return
 
         if self.drop:
-            table.drop(self.pg, self.schema_name, coll_names)
+            table.drop(self.pg, self.schema, coll_names)
         elif self.truncate:
-            table.truncate(self.pg, self.schema_name, coll_names)
+            table.truncate(self.pg, self.schema, coll_names)
 
-        schema.create(self.pg, self.schema_name)
+        schema.create(self.pg, self.schema)
 
         for coll in coll_names:
-            r = relation.Relation(self.pg, self.schema_name, coll)
-            table.create(self.pg, self.schema_name, coll)
+            r = relation.Relation(self.pg, self.schema, coll)
+            table.create(self.pg, self.schema, coll)
             docs = collection.get_by_name(self.mdb, coll)
             nr_of_docs = docs.count()
             for i in range(nr_of_docs):
@@ -156,11 +181,11 @@ class Extractor():
             return
 
         if self.drop:
-            table.drop(self.pg, self.schema_name, coll_names)
+            table.drop(self.pg, self.schema, coll_names)
         elif self.truncate:
-            table.truncate(self.pg, self.schema_name, coll_names)
+            table.truncate(self.pg, self.schema, coll_names)
 
-        schema.create(self.pg, self.schema_name)
+        schema.create(self.pg, self.schema)
 
         for coll in coll_names:
             self.transfer_coll(coll)
@@ -402,7 +427,7 @@ class Extractor():
         if types == []:
             return
 
-        r = relation.Relation(self.pg, self.schema_name, relation_name)
+        r = relation.Relation(self.pg, self.schema, relation_name)
 
         # This dict contains all the necessary information about the
         # Mongo fields, Postgres columns and their types
@@ -417,7 +442,7 @@ class Extractor():
             attrs_mdb.append(name_extra_props_mdb)
 
             # Add column extra_props to table if it does not exist
-            # table.add_column(self.pg, self.schema_name, r.relation_name,
+            # table.add_column(self.pg, self.schema, r.relation_name,
             # name_extra_props_pg, type_x_props)
         # else:
         #   # Remove column extra_props from table if it exists

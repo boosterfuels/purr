@@ -91,3 +91,41 @@ def type_equal(old, new):
     if equal_char or equal_array or equal_float:
         return True
     return False
+
+
+def is_convertable(type_old, type_new):
+    """
+    Returns True if type old can be converted to type new
+
+    convertables: list of tuples
+                : contains convertable types (type_old, type_new)
+    """
+    convertables = [
+        ('boolean', 'double precision'),
+        ('boolean', 'jsonb'),
+        ('boolean', 'timestamp'),
+        ('boolean', 'text'),
+
+        ('double precision', 'boolean'),  # TODO: test again
+        ('double precision', 'jsonb'),
+        ('double precision', 'timestamp'),
+        ('double precision', 'text'),
+
+        ('jsonb', 'text'),  # TODO: test again
+        ('jsonb', 'double precision'),
+        ('jsonb', 'timestamp'),
+        ('jsonb', 'text'),
+
+        ('timestamp', 'boolean'),
+        ('timestamp', 'double precision'),
+        ('timestamp', 'jsonb'),
+        ('timestamp', 'text'),  # works (tested)
+
+        ('text', 'jsonb'),  # not possible
+        ('text', 'boolean'),
+        ('text', 'double precision'),
+        ('text', 'timestamp'),  # works (tested)
+    ]
+    if (type_old.lower(), type_new.lower()) in convertables:
+        return True
+    return False

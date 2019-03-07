@@ -419,7 +419,7 @@ class Relation():
                         if type_old == name_ts_no_tz and type_new == name_ts:
                             continue
                         elif type_old != type_new:
-                            if self.is_convertable(type_old, type_new):
+                            if type_checker.is_convertable(type_old, type_new):
                                 table.column_change_type(
                                     self.db,
                                     self.schema,
@@ -465,27 +465,3 @@ class Relation():
         # we need to check if it is possible to convert the
         # old type into the new one.
         # Anything can be converted to JSONB.
-
-    def is_convertable(self, type_old, type_new):
-        """
-        Returns True if type old can be converted to type new
-
-        convertables: list of tuples
-                    : contains convertable types (type_old, type_new)
-        """
-        convertables = [
-            ('boolean', 'jsonb'),
-            ('double precision', 'jsonb'),
-            ('text', 'jsonb'),
-            ('timestamp', 'jsonb'),
-            ('jsonb', 'jsonb'),
-
-            ('boolean', 'text'),
-            ('double precision', 'text'),
-            ('text', 'text'),
-            ('timestamp', 'text'),
-            ('jsonb', 'text'),
-        ]
-        if (type_old, type_new) in convertables:
-            return True
-        return False
