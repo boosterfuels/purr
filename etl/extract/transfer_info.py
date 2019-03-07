@@ -117,7 +117,7 @@ def get_coll_map_table(db, schema='public'):
         schema)
     try:
         coll_map = db.execute_cmd_with_fetch(cmd)
-        logger.info("[TRANSFER_INFO] Get schema from DB:\n%s" % coll_map)
+        logger.info("[TRANSFER_INFO] Getting schema from DB.")
         return coll_map
 
     except Exception as ex:

@@ -43,12 +43,11 @@ class PgConnection:
         except (psycopg2.InterfaceError, psycopg2.OperationalError) as exc:
             self.handle_interface_and_oper_error()
         except Exception as ex:
-            logger.info(
+            logger.error(
                 """
                 [INIT_PG] Executing query without fetch failed.
                 Details: %s
                 """ % ex)
-            print(cmd)
 
     def execute_cmd_with_fetch(self, cmd, values=None):
         try:
@@ -62,7 +61,7 @@ class PgConnection:
         except (psycopg2.InterfaceError, psycopg2.OperationalError) as exc:
             self.handle_interface_and_oper_error()
         except Exception as ex:
-            logger.info(
+            logger.error(
                 """
                 [INIT_PG] Executing query with fetch failed.
                 Details: %s

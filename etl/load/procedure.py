@@ -33,7 +33,6 @@ def create_type_notification(db, name):
     try:
         logger.info("[PROCEDURE] Creating procedure: %s" % name)
         db.execute_cmd(cmd)
-        logger.info("%s" % cmd)
 
     except Exception as ex:
         logger.error("[PROCEDURE] Insert failed: %s" % ex)
