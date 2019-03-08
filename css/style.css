@@ -1,5 +1,21 @@
 body {
-  background: white; }
+  background: white;
+  font-family: "Avenir", Helvetica, Arial, sans-serif;
+  font-size: 16px; }
+
+.nav {
+  background: #920d92; }
+  .nav li > a {
+    position: relative;
+    display: block;
+    padding: 10px 15px;
+    color: whitesmoke; }
+    .nav li > a:hover {
+      color: #db13dc;
+      background: purple; }
+    .nav li > a:active {
+      color: #db13dc;
+      background: purple; }
 
 ul li a {
   color: dimgrey;
