@@ -2,6 +2,8 @@ body {
   background: white;
   font-family: "Avenir", Helvetica, Arial, sans-serif;
   font-size: 16px; }
+  body h4 {
+    color: orange; }
 
 .nav {
   background: #920d92; }
@@ -45,7 +47,15 @@ ul li a {
   .content .row-light {
     color: dimgrey; }
     .content .row-light .image-center {
-      margin: 2% auto; }
+      margin: 2% auto;
+      height: 55% !important;
+      width: 55% !important; }
+      @media (min-width: 768px) {
+        .content .row-light .image-center {
+          width: 40%; } }
+      @media (max-width: 599px) {
+        .content .row-light .image-center {
+          width: 33%; } }
   .content .content-body {
     max-width: 768px;
     margin: 0 auto; }

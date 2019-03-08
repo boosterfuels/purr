@@ -1,370 +1,426 @@
 <!DOCTYPE html>
 <html class="no-js gr__localhost" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Purr</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="." />
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+      integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"
+      integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp"
+      crossorigin="anonymous"
+    />
+    <!--[htmlclean-protect]-->
+    <!-- inject:css -->
+    <link rel="stylesheet" href="css/style.css">
+    <!-- endinject -->
+    <!--[/htmlclean-protect]-->
+  </head>
 
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  <title>Purr</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <base href=".">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
-    crossorigin="anonymous">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp"
-    crossorigin="anonymous">
-  <!--[htmlclean-protect]-->
-  <!-- inject:css -->
-  <link rel="stylesheet" href="css/style.css">
-  <!-- endinject -->
-  <!--[/htmlclean-protect]-->
-</head>
-
-<body>
-  <!--[htmlclean-protect]-->
-  <!-- inject:js -->
-  <script src="js/script.js"></script>
-  <!-- endinject -->
-  <!--[/htmlclean-protect]-->
-  <ul class="nav nav-pills justify-content-end">
-    <li class="nav-item">
-      <a data-scroll="" href="#home" class="nav-link">Home</a>
-    </li>
-    <li class="nav-item ">
-      <a data-scroll="" href="#get_started" class="nav-link get-started">Get started</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" href="#">Docs</a>
-    </li>
-    <li class="nav-item">
-      <a data-scroll="" href="#contribute" class="nav-link">Contribute</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" href="#">FAQ</a>
-    </li>
-    <li class="nav-item">
-      <a data-scroll="" href="#contact" class="nav-link disabled">Contact</a>
-    </li>
-  </ul>
-  <div class="content">
-    <div id="home" class="row row-dark home align-middle home">
-      <div class="content-body">
-        <div class="text-intro">
-          <h2>
-            <!-- Transfer your data
+  <body>
+    <!--[htmlclean-protect]-->
+    <!-- inject:js -->
+    <script src="js/script.js"></script>
+    <!-- endinject -->
+    <!--[/htmlclean-protect]-->
+    <ul class="nav nav-pills justify-content-end">
+      <li class="nav-item">
+        <a data-scroll="" href="#home" class="nav-link">Home</a>
+      </li>
+      <li class="nav-item ">
+        <a data-scroll="" href="#get_started" class="nav-link get-started"
+          >Get started</a
+        >
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Docs</a>
+      </li>
+      <li class="nav-item">
+        <a data-scroll="" href="#contribute" class="nav-link">Contribute</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">FAQ</a>
+      </li>
+      <li class="nav-item">
+        <a data-scroll="" href="#contact" class="nav-link disabled">Contact</a>
+      </li>
+    </ul>
+    <div class="content">
+      <div id="home" class="row row-dark home align-middle home">
+        <div class="content-body">
+          <div class="text-intro">
+            <h2>
+              <!-- Transfer your data
             <span>faster</span> and <span>better</span> with Purr. -->
-            Purr is an easy to use <span>ETL tool</span> that makes your data from <span>MongoDB</span> fit into your
-            <span>PostgreSQL</span> database.
-          </h2>
-          <div class="image-center">
-            <img src="images/cat_stretching.png" alt="">
+              Purr is an easy to use <span>ETL tool</span> that makes your data
+              from <span>MongoDB</span> fit into your
+              <span>PostgreSQL</span> database.
+            </h2>
+            <div class="image-center">
+              <img src="images/cat_stretching.png" alt="" />
+            </div>
           </div>
-        </div>
-        <!-- <div>
+          <!-- <div>
           <a data-scroll="" href="#get_started" class="try-purr">Try Purr</a>
         </div> -->
-        <div class="button-center">
-          <a data-scroll="" href="#get_started" class="button-center button-light">Try Purr</a>
+          <div class="button-center">
+            <a
+              data-scroll=""
+              href="#get_started"
+              class="button-center button-light"
+              >Try Purr</a
+            >
+          </div>
         </div>
       </div>
-    </div>
-    <div class="row row-light about">
-      <div class="content-body">
-        <div class="row">
-          <div class="col-9">
-            <h2>
-              About Purr
-            </h2>
-            <h5>
-              The Beginning of Booster
-            </h5>
-            <p>
-              <span class="link">
-                <a href="https://www.trybooster.com/">Booster</a>
-              </span> is a company that has been making people’s lives easier and more convenient in the past 4 years.
-              The idea is
-              simple: you order a boost via the mobile app and you get high-quality gas at your parking spot while you
-              are
-              away. </p>
-          </div>
-          <div class="col-3 align-self-center ">
-            <div class="image-center booster-truck">
-              <img src="images/booster-truck.png" alt="">
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <div class="row">
-
-            <div class="col-9">
-              <p>In the beginning, we had to make a choice about the DBMS around which we would build Booster: we
-                needed flexibility,
-                high availability and easy development. All of these were offered by MongoDB for free. To make our
-                loyal
-                users happy, we constantly improve our applications which sometimes causes changes in our data
-                structures.
-                MongoDB handles these situations well and lets us focus on different problems.
-              </p>
-              <p>
-                Booster quickly became part of people’s everyday lives in Silicon Valley, resulting with rapid growth
-                which has not stopped
-                since then.
-              </p>
-            </div>
-            <div class="col-3 align-self-center align-items-center logo-pg">
-              <div class="image-center">
-                <img src="images/mongo.png" alt="">
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div>
+      <div class="row row-light about">
+        <div class="content-body">
           <div class="row">
             <div class="col-9">
-              <h5>
-                Need for PostgreSQL
-              </h5>
+              <h2>
+                About Purr
+              </h2>
+              <h4>
+                The Beginning of Booster
+              </h4>
               <p>
-                Just like many other companies, we recognized the importance of data analysis as we grew. Data analysis helps us
-                increase our productivity and make better decisions for the future. We needed the ability to perform joins and our data engineers were mostly familiar with SQL, 
-                which means we needed a RDBMS.
-                <!-- We came across a great data visualisation tool called Periscope. Periscope is flexible and very easy to use.  -->
-              </p>
-              <p>
-                Choosing the right RDBMS is also a tough task and there are many database vendors to choose from.
-                We wanted to keep our costs as low as possible and we chose Postgres since it offered the most important things we were looking for: 
-              </p>
-              <ul>
-                <li>object-relational</li>
-                <li>fast</li>
-                <li>flexible (the JSON support lets us go schema-less whenever we want to)</li> 
-                <li>free</li> 
-              </ul>
-            </div>
-            <div class="col-3 align-self-center align-items-center logo-pg">
-              <div class="image-center">
-                <img class="image" src="images/postgres.png" alt="">
-              </div>
-            </div>
-          </div>
-        </div>
-        <div>
-          <div class="row">
-            <div class="col-9">
-              <h5>
-                Adventures with MoSQL
-              </h5>
-              <p>
-                We used an ETL tool called
                 <span class="link">
-                  <a href="https://github.com/stripe/mosql">MoSQL</a>
-                </span> to transfer our data from MongoDB to Postgres. MoSQL is open-source and easy to use: it
-                transfers all of
-                the collections defined in a collection map and syncs with MongoDB for changes. We loved MoSQL but it
-                is
-                no longer maintained and lately some issues appeared more and more frequently: MoSQL crashed when there
-                were
-                schema changes and connectivity issues. This resulted with reimporting millions of documents from the
-                beginning.
-                Before the reimporting has been started, all of the tables were dropped by MoSQL, making us unable to
-                generate
-                reports and plan the next day(s) or week(s). A full reimport took more than 5 hours. As time passed, we
-                were
-                more and more sure that we need to take things into our own hands.
+                  <a href="https://www.trybooster.com/">Booster</a>
+                </span>
+                is a company that has been making people’s lives easier and more
+                convenient in the past 4 years. The idea is simple: you order a
+                boost via the mobile app and you get high-quality gas at your
+                parking spot while you are away.
               </p>
             </div>
-            <div class="col-3 align-self-center">
+            <div class="col-3 align-self-center ">
+              <div class="image-center booster-truck">
+                <img src="images/booster-truck.png" alt="" />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="row">
+              <div class="col-9">
+                <p>
+                  In the beginning, we had to make a choice about the DBMS
+                  around which we would build Booster: we needed flexibility,
+                  high availability and easy development. All of these were
+                  offered by MongoDB for free. To make our loyal users happy, we
+                  constantly improve our applications which sometimes causes
+                  changes in our data structures. MongoDB handles these
+                  situations well and lets us focus on different problems.
+                </p>
+                <p>
+                  Booster quickly became part of people’s everyday lives in
+                  Silicon Valley, resulting with rapid growth which has not
+                  stopped since then.
+                </p>
+              </div>
+              <div class="col-3 align-self-center align-items-center logo-pg">
+                <div class="image-center">
+                  <img src="images/mongo.png" alt="" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="row">
+              <div class="col-9">
+                <h4>
+                  Need for PostgreSQL
+                </h4>
+                <p>
+                  Just like many other companies, we recognized the importance
+                  of data analysis as we grew. Data analysis helps us increase
+                  our productivity and make better decisions for the future. We
+                  needed the ability to perform joins and our data engineers
+                  were mostly familiar with SQL, which means we needed a RDBMS.
+                  <!-- We came across a great data visualisation tool called Periscope. Periscope is flexible and very easy to use.  -->
+                </p>
+                <p>
+                  Choosing the right RDBMS is also a tough task and there are
+                  many database vendors to choose from. We wanted to keep our
+                  costs as low as possible and we chose Postgres since it
+                  offered the most important things we were looking for:
+                </p>
+                <ul>
+                  <li>object-relational</li>
+                  <li>fast</li>
+                  <li>
+                    flexible (the JSON support lets us go schema-less whenever
+                    we want to)
+                  </li>
+                  <li>free</li>
+                </ul>
+              </div>
+              <div class="col-3 align-self-center align-items-center logo-pg">
+                <div class="image-center">
+                  <img class="image" src="images/postgres.png" alt="" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="row">
+              <div class="col-9">
+                <h4>
+                  Adventures with MoSQL
+                </h4>
+                <p>
+                  We used an ETL tool called
+                  <span class="link">
+                    <a href="https://github.com/stripe/mosql">MoSQL</a>
+                  </span>
+                  to transfer our data from MongoDB to Postgres. MoSQL is
+                  open-source and easy to use: it transfers all of the
+                  collections defined in a collection map and syncs with MongoDB
+                  for changes. We loved MoSQL but it is no longer maintained and
+                  lately some issues appeared more and more frequently: MoSQL
+                  crashed when there were schema changes and connectivity
+                  issues. This resulted with reimporting millions of documents
+                  from the beginning. Before the reimporting has been started,
+                  all of the tables were dropped by MoSQL, making us unable to
+                  generate reports and plan the next day(s) or week(s). A full
+                  reimport took more than 5 hours. As time passed, we were more
+                  and more sure that we need to take things into our own hands.
+                </p>
+              </div>
+              <!-- <div class="col-3 align-self-center">
               <div class="image-center">
                 <img class="image" src="images/etl2.png" alt="">
               </div>
+            </div> -->
             </div>
           </div>
-        </div>
-        <div>
-          <div class="row col-12">
-            <h5>A Real Solution</h5>
-            <div class="">
-              <p>
-                We created Purr to do what MoSQL did right and handle the issues MoSQL could not handle anymore. Since
-                we relied on MoSQL
-                and did not want to make drastic changes in our app logic, we made Purr except very similar input we
-                already
-                had and provide a MoSQL-like output. We also needed to keep performance in mind and connectivity issues
-                MoSQL
-                could not always handle. Purr has many features that MoSQL doesn't: you can set it to transfer to a
-                custom
-                schema, in case of reimport you can tell it to keep your schema, drop your tables or specific columns,
-                etc.
-                In case of connectivity issues from both MongoDB and Postgres, Purr waits for a while, attempts to
-                reconnect
-                and starts tailing the oplog again. Extra properties: You can include and exclude extra properties that
-                are
-                not defined in your collection map. Leaving only the necessary information decreases transfer time.
-              </p>
+          <div>
+            <div class="row col-12">
+              <h4>A Real Solution</h4>
+              <div class="">
+                <p>
+                  We created Purr to do what MoSQL did right and handle the
+                  issues MoSQL could not handle anymore. Since we relied on
+                  MoSQL and did not want to make drastic changes in our app
+                  logic, we made Purr accept very similar input we already had
+                  and provide a MoSQL-like output. We also needed to keep
+                  performance in mind and connectivity issues MoSQL could not
+                  always handle. Purr has some additional features:
+                </p>
+                <ul>
+                  <li>
+                    you can set it to transfer to a custom schema,
+                  </li>
+                  <li>
+                    when restarting, it can be set to keep the existing schema,
+                    drop the existing tables etc.
+                  </li>
+                  <li>
+                    In case of connectivity issues from both MongoDB and
+                    Postgres, Purr waits for a while, attempts to reconnect and
+                    starts tailing the oplog again.
+                  </li>
+                  Extra properties: You can include and exclude extra properties
+                  that are not defined in your collection map. Leaving only the
+                  necessary information decreases transfer time.
+                </ul>
 
-              <div class=" align-self-center row etl-logos">
-                <div class="col-2"></div>
-                <div class="col-2 align-self-center">
-                  <div class="image-center">
-                    <img class="image" src="images/mongo.png" alt="">
+                <div class="align-self-center row etl-logos">
+                  <div class=" align-self-center">
+                    <div class="image-center">
+                      <img class="image" src="images/transfer.png" alt="" />
+                    </div>
                   </div>
                 </div>
-                <div class="col-1 align-self-center arrow">
-                  <img class="image" src="images/arrow.png" alt="">
-                </div>
-                <div class="col-2 align-self-center">
-                  <img class="image" src="images/python.png" alt="">
-                </div>
-                <div class="col-1 align-self-center arrow">
-                  <img class="image" src="images/arrow.png" alt="">
-                </div>
-                <div class="col-2 align-self-center">
-                  <img class="image" src="images/postgres.png" alt="">
-                </div>
-                <div class="col-2"></div>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
+      <div id="get_started" class="row row-dark get-started-now">
+        <div class="content-body">
+          <h2>
+            Ready to get started?
+          </h2>
+          <p class="desc">
+            Learn everything you need to know about Purr.
+          </p>
+          <div class="card-deck">
+            <div class="card">
+              <div class="card-body">
+                <h4 class="card-title">Quickstart</h4>
+                <p class="card-text">
+                  Follow the instructions to get started quickly.
+                </p>
+                <div class="image-center ">
+                  <img
+                    class="image image-shrink"
+                    src="images/rocket.png"
+                    alt=""
+                  />
+                </div>
+                <div class="button-center">
+                  <a class="btn btn-primary button-center button-light" href="#"
+                    >Go!</a
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-body">
+                <h4 class="card-title">Docker</h4>
+                <p class="card-text">
+                  Get Purr on docker hub and start transfering documents.
+                </p>
+                <div class="image-center">
+                  <img class="image" src="images/docker.png" alt="" />
+                </div>
+
+                <div class="footer button-center">
+                  <a class="btn btn-primary button-center button-light" href="#"
+                    >Go!</a
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-body">
+                <h4 class="card-title">Docs</h4>
+                <p class="card-text">
+                  Want to find out more about Purr? Check out our docs!
+                </p>
+                <div class="image-center ">
+                  <img
+                    class="image image-shrink"
+                    src="images/books.png"
+                    alt=""
+                  />
+                </div>
+                <div class="footer button-center">
+                  <a class="btn btn-primary button-center button-light" href="#"
+                    >Go!</a
+                  >
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-    <div id="get_started" class="row row-dark get-started-now">
-      <div class="content-body">
-        <h2>
-          Ready to get started?
-        </h2>
-        <p class="desc">
-          Learn everything you need to know about Purr.
-        </p>
-        <div class="card-deck">
-          <div class="card">
-            <div class="card-body">
-              <h5 class="card-title">Quickstart</h5>
-              <p class="card-text">Follow the instructions to get started quickly.</p>
-              <div class="image-center ">
-                <img class="image image-shrink" src="images/rocket.png" alt="">
-              </div>
-              <div class="button-center">
-                <a class="btn btn-primary button-center button-light" href="#">Go!</a>
-              </div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-body">
-              <h5 class="card-title">Docker</h5>
-              <p class="card-text">Get Purr on docker
-                hub and start transfering documents.</p>
-              <div class="image-center">
-                <img class="image" src="images/docker.png" alt=""></div>
-              <div class="footer button-center">
-                <a class="btn btn-primary button-center button-light" href="#">Go!</a>
-              </div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-body">
-              <h5 class="card-title">Docs</h5>
-              <p class="card-text">Want to find out more about Purr? Check out our docs!</p>
-              <div class="image-center ">
-                <img class="image image-shrink" src="images/books.png" alt="">
-              </div>
-              <div class="footer button-center">
-                <a class="btn btn-primary button-center button-light" href="#">Go!</a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div id="contribute" class="row row-light contribute">
-      <div class="content-body">
-        <div class="row">
-          <div class="col-10">
-            <h2>
-              Help Purr become
-              <i>purrfect</i>
-            </h2>
-            <div class="row-contribute know-python">
-              <h5>
-                Want to contribute?
-              </h5>
-              <p>
-                Contributing to an open-source project is a great opportunity to help the community and increase your
-                knowledge. Purr is
-                open-source and free and we would like to keep it that way. You implemented a new feature? Fixed an
-                issue
-                or just a typo? We would be happy to see your pull request on
-                <a href="#">Github</a>, but first, check out our
-                <span class="link">
-                  <a href="#">Guidlines</a>
-                </span>.
-              </p>
-              <!-- <p>
+      <div id="contribute" class="row row-light contribute">
+        <div class="content-body">
+          <div class="row">
+            <div class="col-10">
+              <h2>
+                Help Purr become
+                <i>purrfect</i>
+              </h2>
+              <div class="row-contribute know-python">
+                <h4>
+                  Want to contribute?
+                </h4>
+                <p>
+                  Contributing to an open-source project is a great opportunity
+                  to help the community and increase your knowledge. Purr is
+                  open-source and free and we would like to keep it that way.
+                  You implemented a new feature? Fixed an issue or just a typo?
+                  We would be happy to see your pull request on
+                  <a href="#">Github</a>, but first, check out our
+                  <span class="link"> <a href="#">Guidlines</a> </span>.
+                </p>
+                <!-- <p>
                                 Check out our documentation on
                                 <span class="link">
                                     <a href="#">Doxygen</a>.
                                 </span>
                 </p> -->
+              </div>
+              <div class="row-contribute issues">
+                <h4>Found any issues?</h4>
+                <p>
+                  Purr is actively maintained by Booster. Head over to
+                  <a href="#">Github</a> and help the community by
+                  opening an issue. We will try to fix it ASAP.
+                </p>
+              </div>
+              <div class="row-contribute ideas">
+                <h4>Got an idea on how to improve Purr?</h4>
+                <p>
+                  We are open to new ideas and suggestions which can help us
+                  change positively.
+                  <span>Don't hesitate to <a href="#">contact us</a>!</span>
+                </p>
+              </div>
             </div>
-            <div class="row-contribute issues">
-              <h5>Found any issues?</h5>
-              <p> Purr is actively maintained by Booster. Head over to
-                <a href="#">Github</a> and help yourself and the community by opening an issue. We will try to fix it
-                ASAP.
-              </p>
-            </div>
-            <div class="row-contribute ideas">
-              <h5>Got an idea on how to improve Purr?</h5>
-              <p>We are open to new ideas and suggestions which can help us change positively.
-                <span>Don't hesitate to
-                  <a href="#">contact us</a>!</span>
-              </p>
+            <div class="col-2 align-self-center">
+              <div class="image-center">
+                <img src="images/octocat.png" alt="" />
+              </div>
             </div>
           </div>
-          <div class="col-2 align-self-center">
-            <div class="image-center">
-              <img src="images/octocat.png" alt="">
+        </div>
+      </div>
+
+      <div id="contact" class="row row-dark contact">
+        <div class="content-body">
+          <div class="row">
+            <h2>
+              Contact
+            </h2>
+            <div class="col-4 align-self-center">
+              <div class="image-center">
+                <img src="images/cat_cleaning.png" alt="" />
+              </div>
+            </div>
+            <div class="col-8">
+              <form>
+                <div class="form-group">
+                  <label for="exampleFormControlInput1">Your name</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="name"
+                    placeholder="Diego"
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="exampleFormControlInput1"
+                    >Your email address</label
+                  >
+                  <input
+                    type="email"
+                    class="form-control"
+                    id="email"
+                    placeholder="diego@boosterfuels.com"
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="exampleFormControlTextarea1">Message</label>
+                  <textarea
+                    class="form-control"
+                    id="exampleFormControlTextarea1"
+                    rows="3"
+                  ></textarea>
+                </div>
+                <a
+                  class="btn btn-primary send button-center button-light"
+                  href="#"
+                  >Send</a
+                >
+              </form>
             </div>
           </div>
         </div>
       </div>
     </div>
-
-
-    <div id="contact" class="row row-dark contact">
-      <div class="content-body">
-        <div class="row">
-          <h2>
-            Contact
-          </h2>
-          <div class="col-4 align-self-center">
-            <div class="image-center">
-              <img src="images/cat_cleaning.png" alt="">
-            </div>
-          </div>
-          <div class="col-8">
-            <form>
-              <div class="form-group">
-                <label for="exampleFormControlInput1">Your name</label>
-                <input type="text" class="form-control" id="name" placeholder="Diego">
-              </div>
-              <div class="form-group">
-                <label for="exampleFormControlInput1">Your email address</label>
-                <input type="email" class="form-control" id="email" placeholder="diego@boosterfuels.com">
-              </div>
-              <div class="form-group">
-                <label for="exampleFormControlTextarea1">Message</label>
-                <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
-              </div>
-              <a class="btn btn-primary send button-center button-light" href="#">Send</a>
-            </form>
-          </div>
-
-        </div>
-      </div>
-    </div>
-  </div>
-  <div>2018</div>
-</body>
-
+    <div>2018</div>
+  </body>
 </html>
