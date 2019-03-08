@@ -195,6 +195,7 @@ def column_change_type(db, schema, table, column_name, column_type):
     if len(expression) == 0:
         cmd = "ALTER TABLE %s.%s ALTER COLUMN %s TYPE %s;" % (
             schema, table.lower(), column_name, column_type)
+        print(cmd)
     else:
         cmd = "ALTER TABLE %s.%s ALTER COLUMN %s TYPE %s USING %s;" % (
             schema, table.lower(), column_name, column_type, expression)
@@ -210,6 +211,36 @@ def column_change_type(db, schema, table, column_name, column_type):
             """
             [TABLE] ProgrammingError: %s when executing command %s.
             """ % (ex, cmd))
+    except Exception as ex:
+        logger.error('[TABLE] %s when executing command %s.' % (ex, cmd))
+
+
+def column_rename(db, schema, table, name_old, name_new = None):
+    """
+    Change a column's name.
+    Parameters
+    ----------
+    schema : str
+    table : str
+    name_old : str
+    name_new : str
+
+    Example
+    -------
+    column_rename(pg.db, 'public', 'note', 'title', 'new_title')
+    """
+    if name_new is None:
+        name_new = name_old + '_tmp'
+
+    cmd = "ALTER TABLE %s.%s RENAME %s TO %s;" % (
+        schema, table.lower(), name_old, name_new)
+    logger.warn("""
+    [TABLE] Changing table %s: renaming column '%s' to '%s'
+    """ % (
+        table.lower(), name_old, name_new))
+
+    try:
+        db.execute_cmd(cmd)
     except Exception as ex:
         logger.error('[TABLE] %s when executing command %s.' % (ex, cmd))
 
@@ -272,7 +303,6 @@ def create_trigger_type_notification(db, schema, table, name, proc):
     try:
         logger.info("[TABLE] Creating trigger '%s'" % name)
         db.execute_cmd(cmd)
-        logger.info("%s" % cmd)
     except Exception as ex:
         logger.error("[TABLE] Creating trigger '%s' failed: %s" % (name, ex))
 
