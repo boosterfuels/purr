@@ -143,7 +143,7 @@ class Tailer(extractor.Extractor):
         table_name_mdb = docs_details[0]["coll_name"]
         table_name_pg = self.coll_settings[table_name_mdb][":meta"][":table"]
 
-        r = relation.Relation(self.pg, self.schema_name, table_name_pg, True)
+        r = relation.Relation(self.pg, self.schema, table_name_pg, True)
 
         oper = docs_details[0]["op"]
         logger.info("[TAILER] [%s] [%s]" % (

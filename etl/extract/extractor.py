@@ -5,7 +5,7 @@ from etl.extract import collection, transfer_info
 from etl.load import table, row, constraint, schema
 from etl.monitor import logger
 
-from etl.transform import relation, type_checker, config_parser as cp
+from etl.transform import relation, type_checker as tc, config_parser as cp
 
 from datetime import datetime, timedelta
 from bson import Timestamp
@@ -67,6 +67,10 @@ class Extractor():
                 x for x in sources_removed if x in sources_added]
 
             if len(source_persistent):
+                # (1) Try to convert the column
+                # (2) If (1) was not successful (PG could not
+                # convert the column), just rename it and add
+                # the column again so Purr can take care of it
                 for i in range(0, len(fields_new)):
                     field = fields_new[i]
                     if field[":source"] in source_persistent:
@@ -74,11 +78,15 @@ class Extractor():
                             if v is None:
                                 type_old = fields_cur[i][":type"]
                                 type_new = field[":type"]
-                                if type_checker.is_convertable(type_old, type_new):
-                                    # (1) Try to convert the column
-                                    logger.info("""[EXTRACTOR] In table %s, column %s: 
+                                if tc.is_convertable(type_old, type_new):
+                                    logger.info(
+                                        """[EXTRACTOR] table %s, column %s:
                                     Type [%s] is convertable to [%s]""" % (
-                                        name_table, column, type_old, type_new))
+                                            name_table,
+                                            column,
+                                            type_old,
+                                            type_new
+                                        ))
                                     table.column_change_type(
                                         self.pg,
                                         self.schema,
@@ -86,13 +94,15 @@ class Extractor():
                                         column,
                                         type_new)
                                 else:
-                                    # (2) If (1) was not successful (PG could not convert the column),
-                                    # just rename it and add the column again so Purr can take care of it
+
                                     logger.error("""
-                                    [EXTRACTOR] In table %s, column %s: 
+                                    [EXTRACTOR] In table %s, column %s:
                                     Type [%s] is NOT convertable to [%s]
                                     """ % (
-                                        name_table, column, type_old, type_new))
+                                        name_table,
+                                        column,
+                                        type_old,
+                                        type_new))
 
             for item in added:
                 if item[":source"] not in source_persistent:

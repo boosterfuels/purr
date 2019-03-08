@@ -215,7 +215,7 @@ def column_change_type(db, schema, table, column_name, column_type):
         logger.error('[TABLE] %s when executing command %s.' % (ex, cmd))
 
 
-def column_rename(db, schema, table, name_old, name_new = None):
+def column_rename(db, schema, table, name_old, name_new=None):
     """
     Change a column's name.
     Parameters
