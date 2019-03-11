@@ -20,6 +20,10 @@ body {
     .nav li > a:active {
       color: #db13dc;
       background: purple; }
+  .nav .navbar-brand {
+    color: white;
+    font-weight: bolder;
+    font-size: 16px; }
 
 ul li a {
   color: dimgrey;
@@ -105,11 +109,12 @@ ul li a {
     display: flex;
     align-items: center; }
     .content .home .text-intro {
-      margin-bottom: 50 px; }
+      margin-bottom: 50px; }
       .content .home .text-intro span {
         color: #ffa500c7; }
-      .content .home .text-intro p {
-        color: #cb93d2; }
+      .content .home .text-intro h3 {
+        color: #cb93d2;
+        font-weight: lighter; }
     .content .home .image-center {
       height: 100%;
       width: 100%; }
