@@ -221,10 +221,10 @@
                   created by Stripe and announced in 2013: free, open-source and
                   easy-to-use. It transfers all of the collections defined in a
                   collection map and syncs with MongoDB for changes. We loved
-                  MoSQL but it is no longer maintained. In 2018 some issues
-                  appeared more and more frequently: MoSQL crashed when there
-                  were schema changes and connectivity issues. This resulted
-                  with reimporting millions of documents from the beginning on a
+                  MoSQL but unfortunately it is no longer maintained. In 2018 we
+                  faced multiple issues: MoSQL crashed when there were schema
+                  changes and connectivity issues. This resulted with
+                  reimporting millions of documents from the beginning on a
                   weekly basis. Before the reimporting has been started, all of
                   the tables were dropped by MoSQL, making us
                   <b
@@ -232,8 +232,10 @@
                     and weeks</b
                   >
                   when necessary. A full reimport took more than 5 hours. As
-                  time passed, we were more and more sure we need to take things
-                  into our own hands.
+                  time passed, the issues were more and more frequent and we
+                  were left with error messages which did not describe what went
+                  wrong. We recognized the need to take things into our own
+                  hands.
                 </p>
               </div>
 
@@ -249,31 +251,32 @@
               <h4>A Working Solution</h4>
               <div class="">
                 <p>
-                  We loved MoSQL during our journey but we needed a service our
-                  analytics team could rely on. We created Purr to do what MoSQL
-                  did right and handle the issues MoSQL could not handle
-                  anymore. We did not want to make drastic changes in our app
-                  logic because we wanted the trasition be as smooth as
-                  possible. We kept the collection map we used for MoSQL and
-                  generated an output similar to the one MoSQL generates. This
-                  way we could avoid refactoring most of our SQL and integrate
-                  our solution with a very small number of changes. We also kept
-                  in mind the connectivity issues MoSQL could not always handle.
-                  We named our tool Purr and extended it with some additional
-                  features:
+                  We needed a service our analytics team could rely on. We
+                  created Purr to do what MoSQL did right and handle the issues
+                  MoSQL could not handle anymore. We did not want to make
+                  drastic changes in our app logic because we wanted the
+                  trasition to be as smooth as possible. We kept the collection
+                  map and generated an output similar to the one that MoSQL
+                  generates. This way we could avoid refactoring most of our SQL
+                  queries and integrate our solution with a only a few changes.
+                  We also kept in mind the connectivity issues MoSQL could not
+                  always handle. We also added Purr some new features:
                   <!-- has some additional features MoSQL does not have  -->
                 </p>
                 <ul>
                   <li>
-                    it can transfer to a custom schema
+                    transfering data to a custom schema
                   </li>
                   <li>
-                    when restarting, it can keep, drop or trucate the existing
-                    tables etc.
+                    when restarting, keep, drop or trucate the existing tables,
+                    create or empty the whole schema etc.
                   </li>
                   <li>
-                    in case of connectivity issues Purr waits for a while,
-                    attempts to reconnect and starts tailing the oplog again
+                    in case of connectivity issues wait for a while, attempt to
+                    reconnect and start tailing the oplog again
+                  </li>
+                  <li>
+                    update collection map without dropping or stopping anything
                   </li>
                   <li>
                     etc
@@ -284,7 +287,7 @@
                 </ul>
 
                 <!-- <div class="align-self-center row etl-logos">
-                  <div class=" align-self-center">
+                  <div class="align-self-center">
                     <div class="image-center">
                       <img class="image" src="images/transfer.png" alt="" />
                     </div>
@@ -372,6 +375,11 @@
                         <p>choose auto typecheck</p>
                       </td>
                       <td>create a collection</td>
+                    </tr>
+                    <tr>
+                      <td>Written in</td>
+                      <td>Python</td>
+                      <td>Ruby</td>
                     </tr>
                   </table>
                 </div>
