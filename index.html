@@ -280,6 +280,9 @@
                   </div>
                 </div>
 
+                <h4>
+                  Comparison: Purr vs MoSQL
+                </h4>
                 <div class="row border">
                   <table class="table table-borderless ">
                     <tr>
@@ -307,7 +310,7 @@
                     </tr>
                     <tr>
                       <td>Schema changes coming from MongoDB</td>
-                      <td>logs and error and continues</td>
+                      <td>logs an error and continues tailing</td>
                       <td>-</td>
                     </tr>
                     <tr>
@@ -321,12 +324,7 @@
                       <td>Schema changes</td>
                       <td>update the collection map in the database</td>
                       <td>
-                        <ul>
-                          <li>
-                            update the collection map file
-                          </li>
-                          <li>needs to be restarted</li>
-                        </ul>
+                        <p>update the collection map file and restart</p>
                       </td>
                     </tr>
                     <!-- <tr>
@@ -337,10 +335,22 @@
                     <tr>
                       <td>Tailing</td>
                       <td>
-                        tailing from any date and time from the past or from the
-                        current timestamp
+                        <p>
+                          tailing from any date and time from the past or
+                        </p>
+                        <p>
+                          from the current timestamp
+                        </p>
                       </td>
                       <td>tail from the current timestamp</td>
+                    </tr>
+                    <tr>
+                      <td>Types</td>
+                      <td>
+                        <p>create a collection map or</p>
+                        <p>choose auto typecheck</p>
+                      </td>
+                      <td>create a collection</td>
                     </tr>
                   </table>
                 </div>

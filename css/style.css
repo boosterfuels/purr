@@ -176,15 +176,15 @@ ul li a {
   display: flex;
   align-items: center; }
 
-.table th {
-  vertical-align: middle !important;
-  border: none !important; }
-
-.table td {
-  vertical-align: middle !important;
-  text-align: center; }
-  .table td li {
-    text-align: left; }
-
-.table .small {
-  font-size: 12px; }
+.table {
+  font-size: 14px; }
+  .table th {
+    vertical-align: middle !important;
+    border: none !important; }
+  .table td {
+    vertical-align: middle !important;
+    text-align: center; }
+    .table td li {
+      text-align: left; }
+  .table .small {
+    font-size: 12px; }
