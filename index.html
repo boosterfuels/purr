@@ -268,18 +268,19 @@
                     transfering data to a custom schema
                   </li>
                   <li>
-                    when restarting, keep, drop or trucate the existing tables,
-                    create or empty the whole schema etc.
+                    when restarting, update, drop or trucate the existing
+                    tables, create or empty the whole schema etc.
                   </li>
                   <li>
                     in case of connectivity issues wait for a while, attempt to
-                    reconnect and start tailing the oplog again
+                    reconnect to PostgreSQL or MongoDB and start tailing the
+                    oplog again from the timestamp saved in the database
                   </li>
                   <li>
                     update collection map without dropping or stopping anything
                   </li>
                   <li>
-                    etc
+                    ...
                   </li>
                   <!-- Extra properties: You can include and exclude extra properties
                   that are not defined in your collection map. Leaving only the
@@ -378,16 +379,14 @@
                     </tr>
                     <tr>
                       <td>Written in</td>
-                      <td>Python  <img
-                        class="postgres"
-                        src="images/python.png"
-                        alt=""
-                      /></td>
-                      <td>Ruby  <img
-                        class="postgres"
-                        src="images/ruby.png"
-                        alt=""
-                      /></td>
+                      <td>
+                        Python
+                        <img class="postgres" src="images/python.png" alt="" />
+                      </td>
+                      <td>
+                        Ruby
+                        <img class="postgres" src="images/ruby.png" alt="" />
+                      </td>
                     </tr>
                   </table>
                 </div>
