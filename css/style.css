@@ -168,6 +168,8 @@ ul li a {
           left: 0;
           right: 0;
           margin: auto; }
+  .content .contact .col-md-4 {
+    border: 1px solid blue; }
 
 .you-are-grey {
   -webkit-filter: grayscale(90%);

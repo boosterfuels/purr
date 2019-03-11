@@ -177,12 +177,14 @@
                   Just like many other companies, we recognized the importance
                   of data analysis as we grew. Data analysis helps us increase
                   our productivity and make better decisions for the future. We
-                  needed the ability to perform joins and our data engineers
-                  were mostly familiar with SQL, which means we needed a RDBMS.
+                  needed the ability to perform joins which means that we needed
+                  a relational system. Our data engineers were mostly familiar
+                  with SQL and we just needed to pick a RDBMS for our data
+                  warehouse.
                   <!-- We came across a great data visualisation tool called Periscope. Periscope is flexible and very easy to use.  -->
                 </p>
                 <p>
-                  Choosing the right RDBMS is also a tough task and there are
+                  Finding the right RDBMS is also a tough task and there are
                   many database vendors to choose from. We wanted to keep our
                   costs as low as possible and we chose Postgres since it
                   offered the most important things we were looking for:
@@ -215,16 +217,16 @@
                   <span class="link">
                     <a href="https://github.com/stripe/mosql">MoSQL</a>
                   </span>
-                  to transfer our data from MongoDB to Postgres. MoSQL is
-                  open-source and easy to use: it transfers all of the
-                  collections defined in a collection map and syncs with MongoDB
-                  for changes. We loved MoSQL but it is no longer maintained. In
-                  2018 some issues appeared more and more frequently: MoSQL
-                  crashed when there were schema changes and connectivity
-                  issues. This resulted with reimporting millions of documents
-                  from the beginning on a weekly basis. Before the reimporting
-                  has been started, all of the tables were dropped by MoSQL,
-                  making us
+                  to transfer our data from MongoDB to Postgres. MoSQL was
+                  created by Stripe and announced in 2013: free, open-source and
+                  easy-to-use. It transfers all of the collections defined in a
+                  collection map and syncs with MongoDB for changes. We loved
+                  MoSQL but it is no longer maintained. In 2018 some issues
+                  appeared more and more frequently: MoSQL crashed when there
+                  were schema changes and connectivity issues. This resulted
+                  with reimporting millions of documents from the beginning on a
+                  weekly basis. Before the reimporting has been started, all of
+                  the tables were dropped by MoSQL, making us
                   <b
                     >unable to generate reports and make plans for the next days
                     and weeks</b
@@ -525,57 +527,52 @@
               Contact
             </h2>
             <div class="row">
-              <div class="row">
-                <div class="col-4 align-self-center">
-                  <div class="image-center">
-                    
-                    <img src="images/cat_cleaning.png" alt="" />
-                  </div>
+              <div class="align-self-center">
+                <div class="image-center">
+                  <img src="images/cat_cleaning.png" alt="" />
                 </div>
-              </div>
-              <div class="row">
-                <div class="col-4"></div>
-                <div class="col-4">
-                  <form>
-                    <div class="form-group">
-                      <label for="exampleFormControlInput1">Your name</label>
-                      <input
-                        type="text"
-                        class="form-control"
-                        id="name"
-                        placeholder="Diego"
-                      />
-                    </div>
-                    <div class="form-group">
-                      <label for="exampleFormControlInput1"
-                        >Your email address</label
-                      >
-                      <input
-                        type="email"
-                        class="form-control"
-                        id="email"
-                        placeholder="diego@boosterfuels.com"
-                      />
-                    </div>
-                    <div class="form-group">
-                      <label for="exampleFormControlTextarea1">Message</label>
-                      <textarea
-                        class="form-control"
-                        id="exampleFormControlTextarea1"
-                        rows="3"
-                      ></textarea>
-                    </div>
-                    <a
-                      class="btn btn-primary send button-center button-light"
-                      href="#"
-                      >Send</a
-                    >
-                  </form>
-                </div>
-                <div class="col-4"></div>
               </div>
             </div>
-
+            <div class="row">
+              <div class="col-md-3"></div>
+              <div class="col-md-6">
+                <form>
+                  <div class="form-group">
+                    <label for="exampleFormControlInput1">Your name</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="name"
+                      placeholder="Diego"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="exampleFormControlInput1"
+                      >Your email address</label
+                    >
+                    <input
+                      type="email"
+                      class="form-control"
+                      id="email"
+                      placeholder="diego@boosterfuels.com"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="exampleFormControlTextarea1">Message</label>
+                    <textarea
+                      class="form-control"
+                      id="exampleFormControlTextarea1"
+                      rows="5"
+                    ></textarea>
+                  </div>
+                  <a
+                    class="btn btn-primary send button-center button-light"
+                    href="#"
+                    >Send</a
+                  >
+                </form>
+              </div>
+              <div class="col-md-3"></div>
             </div>
           </div>
         </div>
