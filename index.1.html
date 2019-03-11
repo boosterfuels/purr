@@ -19,7 +19,6 @@
     />
     <!--[htmlclean-protect]-->
     <!-- inject:css -->
-    <link rel="stylesheet" href="css/style.css">
     <!-- endinject -->
     <!--[/htmlclean-protect]-->
   </head>
@@ -27,7 +26,6 @@
   <body>
     <!--[htmlclean-protect]-->
     <!-- inject:js -->
-    <script src="js/script.js"></script>
     <!-- endinject -->
     <!--[/htmlclean-protect]-->
     <ul class="nav nav-pills justify-content-end">
@@ -36,9 +34,6 @@
       </li>
       <li class="nav-item">
         <a data-scroll="" href="#home" class="nav-link">Home</a>
-      </li>
-      <li class="nav-item">
-        <a data-scroll="" href="about.html" class="nav-link">About</a>
       </li>
       <li class="nav-item ">
         <a data-scroll="" href="#get_started" class="nav-link get-started"
@@ -95,6 +90,39 @@
 
       <div class="row row-light about">
         <div class="content-body">
+          <div class="row border">
+            <table class="table table-borderless">
+              <tr>
+                <th class="text-center">Purr</th>
+                <th class="text-center">MoSQL</th>
+              </tr>
+              <tr>
+                <td>Alfreds Futterkiste</td>
+                <td>Maria Anders</td>
+              </tr>
+              <tr>
+                <td>Centro comercial Moctezuma</td>
+                <td>Francisco Chang</td>
+              </tr>
+              <tr>
+                <td>Ernst Handel</td>
+                <td>Roland Mendel</td>
+              </tr>
+              <tr>
+                <td>Island Trading</td>
+                <td>Helen Bennett</td>
+              </tr>
+              <tr>
+                <td>Laughing Bacchus Winecellars</td>
+                <td>Canada</td>
+              </tr>
+              <tr>
+                <td>Magazzini Alimentari Riuniti</td>
+                <td>Italy</td>
+              </tr>
+            </table>
+          </div>
+          <hr />
           <div class="row">
             <div class="col-9">
               <h2>
@@ -205,14 +233,10 @@
                   issues. This resulted with reimporting millions of documents
                   from the beginning on a weekly basis. Before the reimporting
                   has been started, all of the tables were dropped by MoSQL,
-                  making us
-                  <b
-                    >unable to generate reports and make plans for the next days
-                    and weeks</b
-                  >
-                  when necessary. A full reimport took more than 5 hours. As
-                  time passed, we were more and more sure we need to take things
-                  into our own hands.
+                  making us unable to generate reports and make plans for the
+                  next days and weeks. A full reimport took more than 5 hours.
+                  As time passed, we were more and more sure we need to take
+                  things into our own hands. Purr was born.
                 </p>
               </div>
 
@@ -228,38 +252,30 @@
               <h4>A Working Solution</h4>
               <div class="">
                 <p>
-                  We loved MoSQL during our journey but we needed a service our
-                  analytics team could rely on. We created Purr to do what MoSQL
-                  did right and handle the issues MoSQL could not handle
-                  anymore. We did not want to make drastic changes in our app
-                  logic because we wanted the trasition be as smooth as
-                  possible. We kept the collection map we used for MoSQL and
-                  generated an output similar to the one MoSQL generates. This
-                  way we could avoid refactoring most of our SQL and integrate
-                  our solution with a very small number of changes. We also kept
-                  in mind the connectivity issues MoSQL could not always handle.
-                  We named our tool Purr and extended it with some additional
-                  features:
-                  <!-- has some additional features MoSQL does not have  -->
+                  We created Purr to do what MoSQL did right and handle the
+                  issues MoSQL could not handle anymore. Since we relied on
+                  MoSQL and did not want to make drastic changes in our app
+                  logic, we made Purr accept very similar input we already had
+                  and provide a MoSQL-like output. We also needed to keep
+                  performance in mind and connectivity issues MoSQL could not
+                  always handle. Purr has some additional features:
                 </p>
                 <ul>
                   <li>
-                    it can transfer to a custom schema
+                    you can set it to transfer to a custom schema,
                   </li>
                   <li>
-                    when restarting, it can keep, drop or trucate the existing
-                    tables etc.
+                    when restarting, it can be set to keep the existing schema,
+                    drop the existing tables etc.
                   </li>
                   <li>
-                    in case of connectivity issues Purr waits for a while,
-                    attempts to reconnect and starts tailing the oplog again
+                    In case of connectivity issues from both MongoDB and
+                    Postgres, Purr waits for a while, attempts to reconnect and
+                    starts tailing the oplog again.
                   </li>
-                  <li>
-                    etc
-                  </li>
-                  <!-- Extra properties: You can include and exclude extra properties
+                  Extra properties: You can include and exclude extra properties
                   that are not defined in your collection map. Leaving only the
-                  necessary information decreases transfer time. -->
+                  necessary information decreases transfer time.
                 </ul>
 
                 <!-- <div class="align-self-center row etl-logos">
@@ -278,71 +294,6 @@
                       alt=""
                     />
                   </div>
-                </div>
-
-                <div class="row border">
-                  <table class="table table-borderless ">
-                    <tr>
-                      <th class="text-center"></th>
-                      <th class="text-center">Purr</th>
-                      <th class="text-center">MoSQL</th>
-                    </tr>
-                    <tr>
-                      <td>
-                        <span>Transfer time</span>
-                        <p class="small">(cca 50GB data, 10 000 000 rows)</p>
-                        <!-- <p class="small">TODO: CHECK!</p> -->
-                      </td>
-                      <td>
-                        <span>~ 3.5 h</span>
-                      </td>
-                      <td>
-                        <span>~ 5 h</span>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>Size</td>
-                      <td>x MB</td>
-                      <td>y MB</td>
-                    </tr>
-                    <tr>
-                      <td>Schema changes coming from MongoDB</td>
-                      <td>logs and error and continues</td>
-                      <td>-</td>
-                    </tr>
-                    <tr>
-                      <td>Database unavailable</td>
-                      <td>
-                        tries to reconnect to the database
-                      </td>
-                      <td>-</td>
-                    </tr>
-                    <tr>
-                      <td>Schema changes</td>
-                      <td>update the collection map in the database</td>
-                      <td>
-                        <ul>
-                          <li>
-                            update the collection map file
-                          </li>
-                          <li>needs to be restarted</li>
-                        </ul>
-                      </td>
-                    </tr>
-                    <!-- <tr>
-                      <td></td>
-                      <td>update the collection map in the database</td>
-                      <td>needs to be restarted</td>
-                    </tr> -->
-                    <tr>
-                      <td>Tailing</td>
-                      <td>
-                        tailing from any date and time from the past or from the
-                        current timestamp
-                      </td>
-                      <td>tail from the current timestamp</td>
-                    </tr>
-                  </table>
                 </div>
               </div>
             </div>
@@ -432,12 +383,6 @@
                 Help Purr become
                 <i>purrfect</i>
               </h2>
-              <p>
-                This is just the beginning for Purr. No tool is perfect but we
-                would love to improve what we created and help other teams just
-                like MoSQL helped us. We are always open to new ideas and
-                suggestions.
-              </p>
               <div class="row-contribute know-python">
                 <h4>
                   Want to contribute?
@@ -446,18 +391,16 @@
                   Contributing to an open-source project is a great opportunity
                   to help the community and increase your knowledge. Purr is
                   open-source and free and we would like to keep it that way.
-                  You implemented a new feature? Fixed an issue or just a typo
-                  in our documentation? We would be happy to see your pull
-                  request on
-                  <a href="#">Github</a>. Check out our
-                  <span class="link"> <a href="#">Guidlines</a></span> on how to
-                  contribute.
+                  You implemented a new feature? Fixed an issue or just a typo?
+                  We would be happy to see your pull request on
+                  <a href="#">Github</a>, but first, check out our
+                  <span class="link"> <a href="#">Guidlines</a> </span>.
                 </p>
                 <!-- <p>
-                  Check out our documentation on
-                  <span class="link">
-                      <a href="#">Doxygen</a>.
-                  </span>
+                                Check out our documentation on
+                                <span class="link">
+                                    <a href="#">Doxygen</a>.
+                                </span>
                 </p> -->
               </div>
               <div class="row-contribute issues">
@@ -465,14 +408,14 @@
                 <p>
                   Purr is actively maintained by Booster. Head over to
                   <a href="#">Github</a> and help the community by opening an
-                  issue.
+                  issue. We will try to fix it ASAP.
                 </p>
               </div>
               <div class="row-contribute ideas">
                 <h4>Got an idea on how to improve Purr?</h4>
                 <p>
-                  We are always open to new ideas and suggestions which can help
-                  us become better and more efficient.
+                  We are open to new ideas and suggestions which can help us
+                  change positively.
                   <span>Don't hesitate to <a href="#">contact us</a>!</span>
                 </p>
               </div>
