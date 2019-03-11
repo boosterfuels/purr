@@ -195,5 +195,8 @@ ul li a {
     text-align: center; }
     .table td li {
       text-align: left; }
+    .table td img {
+      width: 20px;
+      height: 20px; }
   .table .small {
     font-size: 12px; }
