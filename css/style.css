@@ -94,9 +94,9 @@ ul li a {
     font-weight: bold;
     text-decoration: none;
     line-height: 2;
-    background-image: linear-gradient(to right, #ff792f 0%, #FF9710 51%, #ff792f 100%); }
+    background-image: linear-gradient(to right, #ff792f 0%, #ff9710 51%, #ff792f 100%); }
     .content .button-light:hover {
-      background-image: linear-gradient(to left, #ff7022 0%, #FF9710 51%, #ff7022 100%);
+      background-image: linear-gradient(to left, #ff5a00 0%, #ff9710 51%, #ff5a00 100%);
       box-shadow: 1px 1px 10px 1px #80008061; }
   .content .button-empty {
     background: transparent;
@@ -179,6 +179,14 @@ ul li a {
           left: 0;
           right: 0;
           margin: auto; }
+  .content .get-started-now:after {
+    content: '';
+    width: 35vh;
+    height: 50vh;
+    /* background-size: 30px 20px; */
+    background: transparent url(https://www.pngrepo.com/download/94135/witch-cat.png) no-repeat 4vw 22vh fixed;
+    position: absolute;
+    display: inline-block; }
   .content .contact .col-md-4 {
     border: 1px solid blue; }
 
@@ -188,9 +196,9 @@ ul li a {
   -o-filter: grayscale(100%);
   -ms-filter: grayscale(100%);
   filter: grayscale(100%);
-  opacity: .2;
+  opacity: 0.2;
   transition-property: opacity, -webkit-filter, -moz-filter;
-  transition-duration: .2s; }
+  transition-duration: 0.2s; }
   .you-are-grey:hover {
     -webkit-filter: grayscale(0);
     -moz-filter: grayscale(0);
@@ -220,7 +228,34 @@ ul li a {
     font-size: 12px; }
 
 .grow {
-  transition: all .2s ease-in-out; }
+  transition: all 0.2s ease-in-out; }
 
 .grow:hover {
   transform: scale(1.01); }
+
+#docs {
+  min-height: 100vh; }
+  #docs .banner {
+    padding: 1%;
+    background-color: #f5f0fd; }
+  #docs .button-light {
+    width: max-content !important;
+    font-weight: normal !important;
+    margin: 0 !important;
+    padding: 0px 10px;
+    font-size: 14px; }
+  #docs .bg-grey {
+    background-color: whitesmoke; }
+  #docs .menu {
+    text-align: right; }
+  #docs ul {
+    list-style-type: none; }
+  #docs .docs-text h1,
+  #docs .docs-text h2,
+  #docs .docs-text h3,
+  #docs .docs-text h4,
+  #docs .docs-text h5,
+  #docs .docs-text h6,
+  #docs .docs-text p {
+    margin: 0 0 10px 0;
+    color: #6e6969; }
