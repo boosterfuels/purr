@@ -2,7 +2,7 @@
 <html class="no-js gr__localhost" lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title>Purr</title>
+    <title>The Story of Purr</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base href="." />
     <link
@@ -17,9 +17,10 @@
       integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp"
       crossorigin="anonymous"
     />
+    <link href="style.css" rel="stylesheet" type="text/css"/>
+
     <!--[htmlclean-protect]-->
     <!-- inject:css -->
-    <link rel="stylesheet" href="css/style.css">
     <!-- endinject -->
     <!--[/htmlclean-protect]-->
   </head>
@@ -27,93 +28,69 @@
   <body>
     <!--[htmlclean-protect]-->
     <!-- inject:js -->
-    <script src="js/script.js"></script>
     <!-- endinject -->
     <!--[/htmlclean-protect]-->
-    <!-- <ul class="nav nav-pills justify-content-end">
-   
-      
-    </ul> -->
-    <nav class="nav nav-pills">
-      <div class="container-fluid">
-        <div class="navbar-header">
-          <a class="navbar-brand" href="#">Purr</a>
-        </div>
-        <ul class="nav navbar-nav">
-          <!-- <li class="nav-item">
-                <a data-scroll="" href="#home" class="nav-link">Home</a>
-              </li> -->
-        </ul>
-        <ul class="nav navbar-nav navbar-right">
-          <li class="nav-item">
-            <a data-scroll="" href="#home" class="nav-link">Home</a>
-          </li>
-          <li class="nav-item">
-            <a data-scroll="" href="about.html" class="nav-link">About</a>
-          </li>
-          <li class="nav-item ">
-            <a data-scroll="" href="#get_started" class="nav-link get-started"
-              >Get started</a
-            >
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">Docs</a>
-          </li>
-          <li class="nav-item">
-            <a data-scroll="" href="#contribute" class="nav-link">Contribute</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">FAQ</a>
-          </li>
-          <li class="nav-item">
-            <a data-scroll="" href="#contact" class="nav-link disabled"
-              >Contact</a
-            >
-          </li>
-        </ul>
-      </div>
-    </nav>
-
+    <ul class="nav nav-pills justify-content-end">
+      <li class="nav-item">
+        <a data-scroll="" href="#home" class="nav-link">Purr</a>
+      </li>
+      <li class="nav-item">
+        <a data-scroll="" href="#home" class="nav-link">Home</a>
+      </li>
+      <li class="nav-item ">
+        <a data-scroll="" href="#get_started" class="nav-link get-started"
+          >Get started</a
+        >
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Docs</a>
+      </li>
+      <li class="nav-item">
+        <a data-scroll="" href="#contribute" class="nav-link">Contribute</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">FAQ</a>
+      </li>
+      <li class="nav-item">
+        <a data-scroll="" href="#contact" class="nav-link disabled">Contact</a>
+      </li>
+    </ul>
     <div class="content">
-      <div
-        id="home"
-        class="row row-eq-height row-dark home align-middle home vertical-center height-max"
-      >
-        <!-- <div class="content-body">
-          <div class="row"></div>
-        </div> -->
-        <div class="col-md-1"></div>
-        <div class="col-md-5 ">
-          <div class="text-intro">
-            <h1>
-              Simplify Data Transfer from <span>MongoDB</span> to
-              <span>PostgreSQL</span>
-            </h1>
-            <h3 class="desc">
-              Use Purr to efficiently sync your relational analytics warehouse
-              with your non-relational database.
-            </h3>
-          </div>
-
-          <div class="button-center">
-            <a href="#get_started" class="button-center button-light grow"
-              >TRY PURR</a
-            >
-            <a href="#get_started" class="button-center button-empty grow"
-              >SEE THE DOCS</a
-            >
-          </div>
-        </div>
-        <div class="col-md-5">
-          <div class="image-center">
-            <img src="images/cat_stretching.png" alt="" />
-          </div>
-        </div>
-        <div class="col-md-1"></div>
-      </div>
-
       <div class="row row-light about">
         <div class="content-body">
+          <div class="row border">
+            <table class="table table-borderless">
+              <tr>
+                <th class="text-center">Purr</th>
+                <th class="text-center">MoSQL</th>
+              </tr>
+              <tr>
+                <td>Alfreds Futterkiste</td>
+                <td>Maria Anders</td>
+              </tr>
+              <tr>
+                <td>Centro comercial Moctezuma</td>
+                <td>Francisco Chang</td>
+              </tr>
+              <tr>
+                <td>Ernst Handel</td>
+                <td>Roland Mendel</td>
+              </tr>
+              <tr>
+                <td>Island Trading</td>
+                <td>Helen Bennett</td>
+              </tr>
+              <tr>
+                <td>Laughing Bacchus Winecellars</td>
+                <td>Canada</td>
+              </tr>
+              <tr>
+                <td>Magazzini Alimentari Riuniti</td>
+                <td>Italy</td>
+              </tr>
+            </table>
+          </div>
+          <hr />
           <div class="row">
             <div class="col-9">
               <h2>
@@ -177,14 +154,12 @@
                   Just like many other companies, we recognized the importance
                   of data analysis as we grew. Data analysis helps us increase
                   our productivity and make better decisions for the future. We
-                  needed the ability to perform joins which means that we needed
-                  a relational system. Our data engineers were mostly familiar
-                  with SQL and we just needed to pick a RDBMS for our data
-                  warehouse.
+                  needed the ability to perform joins and our data engineers
+                  were mostly familiar with SQL, which means we needed a RDBMS.
                   <!-- We came across a great data visualisation tool called Periscope. Periscope is flexible and very easy to use.  -->
                 </p>
                 <p>
-                  Finding the right RDBMS is also a tough task and there are
+                  Choosing the right RDBMS is also a tough task and there are
                   many database vendors to choose from. We wanted to keep our
                   costs as low as possible and we chose Postgres since it
                   offered the most important things we were looking for:
@@ -217,25 +192,19 @@
                   <span class="link">
                     <a href="https://github.com/stripe/mosql">MoSQL</a>
                   </span>
-                  to transfer our data from MongoDB to Postgres. MoSQL was
-                  created by Stripe and announced in 2013: free, open-source and
-                  easy-to-use. It transfers all of the collections defined in a
-                  collection map and syncs with MongoDB for changes. We loved
-                  MoSQL but unfortunately it is no longer maintained. In 2018 we
-                  faced multiple issues: MoSQL crashed when there were schema
-                  changes and connectivity issues. This resulted with
-                  reimporting millions of documents from the beginning on a
-                  weekly basis. Before the reimporting has been started, all of
-                  the tables were dropped by MoSQL, making us
-                  <b
-                    >unable to generate reports and make plans for the next days
-                    and weeks</b
-                  >
-                  when necessary. A full reimport took more than 5 hours. As
-                  time passed, the issues were more and more frequent and we
-                  were left with error messages which did not describe what went
-                  wrong. We recognized the need to take things into our own
-                  hands.
+                  to transfer our data from MongoDB to Postgres. MoSQL is
+                  open-source and easy to use: it transfers all of the
+                  collections defined in a collection map and syncs with MongoDB
+                  for changes. We loved MoSQL but it is no longer maintained. In
+                  2018 some issues appeared more and more frequently: MoSQL
+                  crashed when there were schema changes and connectivity
+                  issues. This resulted with reimporting millions of documents
+                  from the beginning on a weekly basis. Before the reimporting
+                  has been started, all of the tables were dropped by MoSQL,
+                  making us unable to generate reports and make plans for the
+                  next days and weeks. A full reimport took more than 5 hours.
+                  As time passed, we were more and more sure we need to take
+                  things into our own hands. Purr was born.
                 </p>
               </div>
 
@@ -251,44 +220,34 @@
               <h4>A Working Solution</h4>
               <div class="">
                 <p>
-                  We needed a service our analytics team could rely on. We
-                  created Purr to do what MoSQL did right and handle the issues
-                  MoSQL could not handle anymore. We did not want to make
-                  drastic changes in our app logic because we wanted the
-                  trasition to be as smooth as possible. We kept the collection
-                  map and generated an output similar to the one that MoSQL
-                  generates. This way we could avoid refactoring most of our SQL
-                  queries and integrate our solution with a only a few changes.
-                  We also kept in mind the connectivity issues MoSQL could not
-                  always handle. We also added Purr some new features:
-                  <!-- has some additional features MoSQL does not have  -->
+                  We created Purr to do what MoSQL did right and handle the
+                  issues MoSQL could not handle anymore. Since we relied on
+                  MoSQL and did not want to make drastic changes in our app
+                  logic, we made Purr accept very similar input we already had
+                  and provide a MoSQL-like output. We also needed to keep
+                  performance in mind and connectivity issues MoSQL could not
+                  always handle. Purr has some additional features:
                 </p>
                 <ul>
                   <li>
-                    transfering data to a custom schema
+                    you can set it to transfer to a custom schema,
                   </li>
                   <li>
-                    when restarting, update, drop or trucate the existing
-                    tables, create or empty the whole schema etc.
+                    when restarting, it can be set to keep the existing schema,
+                    drop the existing tables etc.
                   </li>
                   <li>
-                    in case of connectivity issues wait for a while, attempt to
-                    reconnect to PostgreSQL or MongoDB and start tailing the
-                    oplog again from the timestamp saved in the database
+                    In case of connectivity issues from both MongoDB and
+                    Postgres, Purr waits for a while, attempts to reconnect and
+                    starts tailing the oplog again.
                   </li>
-                  <li>
-                    update collection map without dropping or stopping anything
-                  </li>
-                  <li>
-                    ...
-                  </li>
-                  <!-- Extra properties: You can include and exclude extra properties
+                  Extra properties: You can include and exclude extra properties
                   that are not defined in your collection map. Leaving only the
-                  necessary information decreases transfer time. -->
+                  necessary information decreases transfer time.
                 </ul>
 
                 <!-- <div class="align-self-center row etl-logos">
-                  <div class="align-self-center">
+                  <div class=" align-self-center">
                     <div class="image-center">
                       <img class="image" src="images/transfer.png" alt="" />
                     </div>
@@ -303,92 +262,6 @@
                       alt=""
                     />
                   </div>
-                </div>
-
-                <h4>
-                  Comparison: Purr vs MoSQL
-                </h4>
-                <div class="row border">
-                  <table class="table table-borderless ">
-                    <tr>
-                      <th class="text-center"></th>
-                      <th class="text-center">Purr</th>
-                      <th class="text-center">MoSQL</th>
-                    </tr>
-                    <tr>
-                      <td>
-                        <span>Transfer time</span>
-                        <p class="small">(cca 50GB data, 10 000 000 rows)</p>
-                        <!-- <p class="small">TODO: CHECK!</p> -->
-                      </td>
-                      <td>
-                        <span>~ 3.5 h</span>
-                      </td>
-                      <td>
-                        <span>~ 5 h</span>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>Size</td>
-                      <td>x MB</td>
-                      <td>y MB</td>
-                    </tr>
-                    <tr>
-                      <td>Schema changes coming from MongoDB</td>
-                      <td>logs an error and continues tailing</td>
-                      <td>-</td>
-                    </tr>
-                    <tr>
-                      <td>Database unavailable</td>
-                      <td>
-                        tries to reconnect to the database
-                      </td>
-                      <td>-</td>
-                    </tr>
-                    <tr>
-                      <td>Schema changes</td>
-                      <td>update the collection map in the database</td>
-                      <td>
-                        <p>update the collection map file and restart</p>
-                      </td>
-                    </tr>
-                    <!-- <tr>
-                      <td></td>
-                      <td>update the collection map in the database</td>
-                      <td>needs to be restarted</td>
-                    </tr> -->
-                    <tr>
-                      <td>Tailing</td>
-                      <td>
-                        <p>
-                          tailing from any date and time from the past or
-                        </p>
-                        <p>
-                          from the current timestamp
-                        </p>
-                      </td>
-                      <td>tail from the current timestamp</td>
-                    </tr>
-                    <tr>
-                      <td>Types</td>
-                      <td>
-                        <p>create a collection map or</p>
-                        <p>choose auto typecheck</p>
-                      </td>
-                      <td>create a collection</td>
-                    </tr>
-                    <tr>
-                      <td>Written in</td>
-                      <td>
-                        Python
-                        <img class="postgres" src="images/python.png" alt="" />
-                      </td>
-                      <td>
-                        Ruby
-                        <img class="postgres" src="images/ruby.png" alt="" />
-                      </td>
-                    </tr>
-                  </table>
                 </div>
               </div>
             </div>
@@ -410,7 +283,7 @@
             </p>
           </div>
           <div class="card-deck">
-            <div class="card grow">
+            <div class="card">
               <div class="card-body">
                 <h4 class="card-title">Quickstart</h4>
                 <p class="card-text">
@@ -425,12 +298,12 @@
                 </div>
                 <div class="button-center">
                   <a class="btn btn-primary button-center button-light" href="#"
-                    >GO!</a
+                    >Go!</a
                   >
                 </div>
               </div>
             </div>
-            <div class="card grow">
+            <div class="card">
               <div class="card-body">
                 <h4 class="card-title">Docker</h4>
                 <p class="card-text">
@@ -442,12 +315,12 @@
 
                 <div class="footer button-center">
                   <a class="btn btn-primary button-center button-light" href="#"
-                    >GO!</a
+                    >Go!</a
                   >
                 </div>
               </div>
             </div>
-            <div class="card grow">
+            <div class="card">
               <div class="card-body">
                 <h4 class="card-title">Docs</h4>
                 <p class="card-text">
@@ -462,7 +335,7 @@
                 </div>
                 <div class="footer button-center">
                   <a class="btn btn-primary button-center button-light" href="#"
-                    >GO!</a
+                    >Go!</a
                   >
                 </div>
               </div>
@@ -478,35 +351,24 @@
                 Help Purr become
                 <i>purrfect</i>
               </h2>
-              <p>
-                This is just the beginning for Purr. No tool is perfect but we
-                would love to improve what we created and help other teams just
-                like MoSQL helped us. We are always open to new ideas and
-                suggestions.
-              </p>
               <div class="row-contribute know-python">
                 <h4>
                   Want to contribute?
                 </h4>
                 <p>
                   Contributing to an open-source project is a great opportunity
-                  to help the community and increase your knowledge.
-                  <b>Purr is open-source and free</b> and we would like to keep
-                  it that way.
-                </p>
-                <p>
-                  You implemented a new feature? Fixed an issue or just a typo
-                  in our documentation? We would be happy to see your pull
-                  request on
-                  <a href="#">Github</a>! Check out our
-                  <span class="link"> <a href="#">Guidlines</a></span> on how to
-                  contribute.
+                  to help the community and increase your knowledge. Purr is
+                  open-source and free and we would like to keep it that way.
+                  You implemented a new feature? Fixed an issue or just a typo?
+                  We would be happy to see your pull request on
+                  <a href="#">Github</a>, but first, check out our
+                  <span class="link"> <a href="#">Guidlines</a> </span>.
                 </p>
                 <!-- <p>
-                  Check out our documentation on
-                  <span class="link">
-                      <a href="#">Doxygen</a>.
-                  </span>
+                                Check out our documentation on
+                                <span class="link">
+                                    <a href="#">Doxygen</a>.
+                                </span>
                 </p> -->
               </div>
               <div class="row-contribute issues">
@@ -514,14 +376,14 @@
                 <p>
                   Purr is actively maintained by Booster. Head over to
                   <a href="#">Github</a> and help the community by opening an
-                  issue.
+                  issue. We will try to fix it ASAP.
                 </p>
               </div>
               <div class="row-contribute ideas">
                 <h4>Got an idea on how to improve Purr?</h4>
                 <p>
-                  We are always open to new ideas and suggestions which can help
-                  us become better and more efficient.
+                  We are open to new ideas and suggestions which can help us
+                  change positively.
                   <span>Don't hesitate to <a href="#">contact us</a>!</span>
                 </p>
               </div>
@@ -542,15 +404,12 @@
               Contact
             </h2>
             <div class="row">
-              <div class="align-self-center">
+              <div class="col-4 align-self-center">
                 <div class="image-center">
                   <img src="images/cat_cleaning.png" alt="" />
                 </div>
               </div>
-            </div>
-            <div class="row">
-              <div class="col-md-3"></div>
-              <div class="col-md-6">
+              <div class="col-8">
                 <form>
                   <div class="form-group">
                     <label for="exampleFormControlInput1">Your name</label>
@@ -577,22 +436,21 @@
                     <textarea
                       class="form-control"
                       id="exampleFormControlTextarea1"
-                      rows="5"
+                      rows="3"
                     ></textarea>
                   </div>
                   <a
-                    class="btn btn-primary send button-center button-light grow"
+                    class="btn btn-primary send button-center button-light"
                     href="#"
-                    >SEND</a
+                    >Send</a
                   >
                 </form>
               </div>
-              <div class="col-md-3"></div>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <div><p>2018</p></div>
+    <div>2018</div>
   </body>
 </html>
