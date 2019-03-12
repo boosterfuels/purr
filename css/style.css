@@ -179,16 +179,6 @@ ul li a {
           left: 0;
           right: 0;
           margin: auto; }
-  .content .get-started-now:after {
-    content: '';
-    width: 35vh;
-    height: 50vh;
-    /* background-size: 30px 20px; */
-    background: transparent url(https://www.pngrepo.com/download/94135/witch-cat.png) no-repeat 4vw 22vh fixed;
-    position: absolute;
-    display: inline-block; }
-  .content .contact .col-md-4 {
-    border: 1px solid blue; }
 
 .you-are-grey {
   -webkit-filter: grayscale(90%);
@@ -246,16 +236,20 @@ ul li a {
     font-size: 14px; }
   #docs .bg-grey {
     background-color: whitesmoke; }
-  #docs .menu {
-    text-align: right; }
-  #docs ul {
+  #docs .menu ul {
     list-style-type: none; }
+  #docs .menu ul.bullet {
+    list-style-image: url(../images/bullet.png); }
+  #docs .menu ul:hover {
+    cursor: pointer; }
   #docs .docs-text h1,
   #docs .docs-text h2,
   #docs .docs-text h3,
   #docs .docs-text h4,
   #docs .docs-text h5,
-  #docs .docs-text h6,
+  #docs .docs-text h6 {
+    color: orange;
+    margin: 0 0 20px 0; }
   #docs .docs-text p {
-    margin: 0 0 10px 0;
-    color: #6e6969; }
+    color: #6e6969;
+    margin: 0 0 10px 0; }

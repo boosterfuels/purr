@@ -83,6 +83,7 @@
           <h1>
             Documentation
           </h1>
+          <h4>Purr v1</h4>
         </div>
         <div class="col-md-1"></div>
       </div>
@@ -98,20 +99,34 @@
       <div class="row row-light">
         <div class="col-md-1"></div>
         <div class="col-md-10">
-          <div class="col-md-4">
-            <ul class="menu">
+          <div class="col-md-4 menu">
+            <ul class="bullet">
               <li>Setup</li>
               <li>Requirements</li>
               <li>Support</li>
               <li>Quickstart</li>
-              <li>Setup file</li>
-              <li>Command line options</li>
-              <li>Collection Map</li>
-              <li>Data types</li>
-              <li>Extra properties</li>
-              <li>Tailing</li>
-              <li>Errors</li>
-              <li>How to Contribute</li>
+              <li>
+                <span>
+                  v1
+                </span>
+                <ul>
+                  <li>Setup file</li>
+                  <li>Command line options</li>
+                  <li>Collection Map</li>
+                  <li>Data types</li>
+                  <li>Extra properties</li>
+                  <li>Tailing</li>
+                  <li>Errors</li>
+                </ul>
+              </li>
+              <li>
+                <span>
+                  How to Contribute
+                </span>
+                <ul>
+                  <li>Guidelines</li>
+                </ul>
+              </li>
             </ul>
           </div>
           <div class="col-md-8 docs-text">
@@ -128,11 +143,55 @@
               Requirements
             </h2>
             <p>
+              Install requirements locally:
+            </p>
+            <code>
+              pip install -r requirements.txt
+            </code>
+            <p>
+              Install Purr:
+            </p>
+            <div></div>
+            <code>
+              python setup.py install
+            </code>
+
+            <p>
               Blablabla bla bla blablabla bla bla bla bla bla bla. Blablabla bla
               bla blablabla bla bla bla bla bla bla
             </p>
             <p>Blablabla bla bla blablabla bla bla bla bla bla bla</p>
 
+            <h3>Support</h3>
+            <p>MongoDB 3.4</p>
+            <p>PostgreSQL 9.6</p>
+
+            <h2></h2>
+            <div>
+              <ol>
+                <li>Install requirements and Purr</li>
+                <li>Create a YAML file which contains the collection map</li>
+                <li>start Mongo as a replica set</li>
+                <li>start Postgres as a replica set</li>
+                <li>
+                  <p>
+                    On the command line type:
+                  </p>
+                  <code>
+                    purr -cf path/to/collections.yml -pg postgres://127.0.0.1:5432/postgres -mdb mongodb://localhost:27017 -n db_name -t
+                  </code>
+                </li>
+              </ol>
+              <p>
+                With this quickstart, the following happens: After transfering
+                all collections to the public schema, Purr starts tailing the
+                oplog.
+              </p>
+              <p>
+                Make changes to any of your documents and check what happens in
+                your Postgres database.
+              </p>
+            </div>
             <h3>
               H3 header
             </h3>
