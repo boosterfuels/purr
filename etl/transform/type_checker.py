@@ -107,7 +107,7 @@ def is_convertable(type_old, type_new):
         ('boolean', 'text'),
 
         ('double precision', 'boolean'),  # TODO: test again
-        ('double precision', 'jsonb'),
+        # ('double precision', 'jsonb'), # cannot
         ('double precision', 'timestamp'),
         ('double precision', 'text'),
 
