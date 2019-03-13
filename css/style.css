@@ -264,9 +264,13 @@ ul li a {
 
 pre {
   border: none;
-  background: #f9f2f4;
-  color: #c7254e;
+  background: #f8f6fc;
+  color: #600260;
   padding: 2px 4px;
   padding-top: 20px;
   font-size: 90%;
   border-radius: 4px; }
+
+code {
+  background: #f8f6fc;
+  color: #600260; }
