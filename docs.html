@@ -162,11 +162,10 @@
             </p>
             <p>Blablabla bla bla blablabla bla bla bla bla bla bla</p>
 
-            <h3>Support</h3>
+            <h2>Support</h2>
             <p>MongoDB 3.4</p>
             <p>PostgreSQL 9.6</p>
 
-            <h2></h2>
             <div>
               <ol>
                 <li>Install requirements and Purr</li>
@@ -178,7 +177,9 @@
                     On the command line type:
                   </p>
                   <code>
-                    purr -cf path/to/collections.yml -pg postgres://127.0.0.1:5432/postgres -mdb mongodb://localhost:27017 -n db_name -t
+                    purr -cf path/to/collections.yml -pg
+                    postgres://127.0.0.1:5432/postgres -mdb
+                    mongodb://localhost:27017 -n db_name -t
                   </code>
                 </li>
               </ol>
@@ -192,15 +193,323 @@
                 your Postgres database.
               </p>
             </div>
-            <h3>
-              H3 header
-            </h3>
+            <h2>
+              Usage
+            </h2>
+            <p>
+              After installing Purr, you will need a collection map to describe
+              your schema. Without the collection map you can not start Purr.
+              Once you created your collection map, you should have a running
+              MongoDB instance as a source and Postgres as a target database.
+              You can start Purr using command line options or you can create
+              another YAML file to organize your settings. The collection map
+              and the setup file should not be mixed.
+            </p>
+            <h3>Setup file</h3>
+            <p>
+              <code>-h, --help </code>show help message
+              <code>-sf, --setup-file </code>
+            </p>
+            <p>
+              The setup file must have the following form: path to YAML file
+              which contains settings Starting Purr without using a setup file:
+            </p>
             <h4>
-              H4 header
+              Settings for Postgres:
             </h4>
+            <ul>
+              <li>
+                db_name: name of database
+              </li>
+              <li>
+                connection: connection string to database
+              </li>
+              <li>
+                schema_name: name of schema where the collections will be
+                transfered to
+              </li>
+              <li>
+                schema_reset:
+                <ul>
+                  <li>true: reset existing schema</li>
+                  <li>false: keep existing schema</li>
+                </ul>
+              </li>
+              <li>
+                table_truncate: truncate table before starting data transfer
+              </li>
+              <li>
+                table_drop: drop table before starting data transfer
+              </li>
+            </ul>
+            <h4>
+              Settings for MongoDB
+            </h4>
+            <ul>
+              <li>
+                db_name: name of database
+              </li>
+              <li>
+                connection: connection string to database
+              </li>
+            </ul>
+            <h4>General Settings</h4>
+            <ul>
+              <li>
+                tailing: keep tailing the oplog after collection transfer is
+                finished
+              </li>
+              <li>
+                typecheck_auto:
+                <ul>
+                  <li>
+                    true: let Purr decide the data type for each field
+                  </li>
+                  <li>
+                    false: use a YAML file to describe collection types
+                    (<code>-cf</code>)
+                  </li>
+                </ul>
+              </li>
+              <li>
+                include_extra_props: include properties which are not described
+                in the collection map
+              </li>
+            </ul>
+            <p></p>
+            <code> purr -sf path/to/setup.yml -cf path/to/collections.yml</code>
+            <h3>Command line options</h3>
+            <p>
+              You can set all the variables from the previous section using the
+              command line. Passing connection strings to MongoDB and Postgres
+              is mandatory.
+            </p>
+            <ul>
+              <li>
+                -sf or --setup-file: path to the setup file if exists
+              </li>
+              <li>
+                -cf or --collection-file: path to the collection file if exists
+              </li>
+
+              <li>-td or --table-drop: defaults to false</li>
+              <li>-tt or --table-truncate: defaults to false</li>
+              <li>-sr or --schema-reset: defaults to false</li>
+              <li>-sn or --schema-name: defaults to public</li>
+              <li>
+                <code>-pg</code> or <code>--pg-connection</code>: connection
+                string to PG database (*)
+              </li>
+              <li>
+                -mdb or --mongo-connection: connection string to Mongo database
+                (*)
+              </li>
+              <li>
+                -n or --mongo-db-name: equivalent of db_name for MongoDB (*)
+              </li>
+              <li>-t or --tail: equivalent of tailing; defaults to false</li>
+              <li>
+                -s or --start: equivalent of tailing_from; type should be date,
+                defaults to None
+              </li>
+
+              <li>
+                -tsdb or --start-from-tsdb: equivalent of tailing_from_db;
+                defaults to false
+              </li>
+              <li>-ta or --typecheck-auto: defaults to false</li>
+
+              <li>-ex or --include-extra-properties: defaults to false</li>
+            </ul>
+
+            <p>Starting Purr without using a setup file:</p>
+            <code
+              >purr -cf path/to/collections.yml -pg
+              postgres://127.0.0.1:5432/postgres -mdb mongodb://localhost:27017
+              -n mongo_db_name -t</code
+            >
+
+            <p class="note">
+              <i>Variables followed by (*) are mandatory.</i>
+            </p>
+
+            <h5>Example setup.yml</h5>
+            <pre>
+               postgres: 
+                  db_name: my_pg_database
+                  connection: postgres://127.0.0.1:5432/postgres
+                  schema_name: maine_coon
+                  schema_reset: false
+                  table_truncate: false
+                  table_drop: false
+               mongo:
+                  db_name: my_mongo_database
+                  connection: mongodb://localhost:27017
+               tailing: true
+               typecheck_auto: false
+               include_extra_props: true
+              </pre
+            >
+            <hr />
+            <h2>Collection Map</h2>
+            <code>
+              -cf, --collection-file
+            </code>
+            <p>
+              The collection map is a YAML file which contains information about
+              the database and the collections you want to transfer. Only the
+              collections that are described here will be loaded to your
+              Postgres database, other collections will be ignored.
+            </p>
+            <p>
+              The collection map should have the following structure:
+            </p>
+            <pre>
+              mongo_database_name:
+                Collection1:
+                  :columns:
+                    - column1:
+                      :source: field1
+                      :type: TEXT
+                    - column2:
+                      :source: field2
+                      :type: TEXT
+                  :meta:
+                    :table: collection1
+                    :extra_props: JSONB
+                Collection2:
+                  :columns:
+                    - column3:
+                      :source: field3
+                      :type: TEXT
+                    - column4:
+                      :source: field4
+                      :type: TEXT
+                    - ...
+                  :meta:
+                    :table: collection2
+                    :extra_props: JSONB
+            </pre>
+            <h5>Example setup.yml</h5>
+
+            <pre>
+              my_mongo_database:
+                Cat:
+                  :columns:
+                    - id:
+                      :source: _id
+                      :type: TEXT
+                    - name:
+                      :source: name
+                      :type: TEXT
+                    - active:
+                      :source: active
+                      :type: BOOLEAN
+                    - number_of_legs:
+                      :source: numberOfLegs
+                      :type: DOUBLE PRECISION
+                    - created_at:
+                      :source: createdAt
+                      :type: TIMESTAMP
+                  :meta:
+                    :table: cat
+                    :extra_props: JSONB
+            </pre>
+            <p>
+              Explanation: When connecting to the Mongo instance, Purr looks for
+              the database name in the collection map
+              (<i>my_mongo_database</i>). Collection <i>Cat</i> will be
+              transferred to table <i>cat</i> (described under meta -> table).
+              This table will have 6 columns with the following types
+            </p>
+            <pre>
+              id: text
+              name: text
+              active: boolean
+              domains: jsonb
+              created_at: text
+              extra_props: jsonb
+            </pre>
+            <h4>
+              Data Types
+            </h4>
+
+            <p>
+              Purr uses 5 different data types when creating rows for a table:
+            </p>
+            <ul>
+              <li>boolean</li>
+              <li>double precision</li>
+              <li>text</li>
+              <li>timestamp</li>
+              <li>jsonb</li>
+            </ul>
+
             <h5>
-              H5 header
+              Conversion
             </h5>
+            <p>
+              When you already have a schema and decide to re-run Purr with a
+              changed collection map, you will have to keep a couple of things
+              in mind.
+            </p>
+            <p>
+              The following table shows what happens when a schema change happens
+            </p>
+            <!-- wtf: -->
+            <!-- rows = A columns = B converting A to B -->
+
+            <table class="table">
+              <th></th>
+              <th>boolean</th>
+              <th>double precision</th>
+              <th>text</th>
+              <th>timestamp</th>
+              <th>jsonb</th>
+              <tbody>
+                <tr>
+                  <td>boolean</td>
+                  <td>✓</td>
+                  <td></td>
+                  <td>✓</td>
+                  <td></td>
+                  <td>✓</td>
+                </tr>
+                <tr>
+                  <td>double precision</td>
+                  <td></td>
+                  <td>✓</td>
+                  <td>✓</td>
+                  <td></td>
+                  <td>✓</td>
+                </tr>
+                <tr>
+                  <td>text</td>
+                  <td></td>
+                  <td></td>
+                  <td>✓</td>
+                  <td></td>
+                  <td>✓</td>
+                </tr>
+                <tr>
+                  <td>timestamp</td>
+                  <td></td>
+                  <td></td>
+                  <td>✓</td>
+                  <td>✓</td>
+                  <td>✓</td>
+                </tr>
+
+                <tr>
+                  <td>jsonb</td>
+                  <td></td>
+                  <td></td>
+                  <td>✓</td>
+                  <td></td>
+                  <td>✓</td>
+                </tr>
+              </tbody>
+            </table>
             <h6>
               H6 header
             </h6>
@@ -213,8 +522,8 @@
         <div class="col-md-1"></div>
       </div>
     </div>
-    <!-- <div>
+    <div class="footer">
       <p>2019 <span>Booster Fuels</span>, Inc., All Rights Reserved</p>
-    </div> -->
+    </div>
   </body>
 </html>
