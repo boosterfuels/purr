@@ -138,7 +138,6 @@
             <code>
               python setup.py install
             </code>
-            <p>Blablabla bla bla blablabla bla bla bla bla bla bla</p>
             <h2>
               Requirements
             </h2>
@@ -155,12 +154,6 @@
             <code>
               python setup.py install
             </code>
-
-            <p>
-              Blablabla bla bla blablabla bla bla bla bla bla bla. Blablabla bla
-              bla blablabla bla bla bla bla bla bla
-            </p>
-            <p>Blablabla bla bla blablabla bla bla bla bla bla bla</p>
 
             <h2>Support</h2>
             <p>MongoDB 3.4</p>
@@ -454,7 +447,8 @@
               in mind.
             </p>
             <p>
-              The following table shows what happens when a schema change happens
+              The following table shows what happens when a schema change
+              happens
             </p>
             <!-- wtf: -->
             <!-- rows = A columns = B converting A to B -->
@@ -510,13 +504,206 @@
                 </tr>
               </tbody>
             </table>
-            <h6>
-              H6 header
-            </h6>
+
             <p>
-              paragraph
+              Conversions that have ✔, can be easily handled by Postgres. When
+              you assign a new type and your data is not castable to your new
+              type, Purr will have to handle that situation on its own. Purr
+              will rename your inconsistent column to column_name_old and create
+              a new one with the new data type under column_name. This way we
+              can make sure that you will not lose any data and you can continue
+              working on your new column. Purr will restart collection transfer
+              for that specific collection and will try to cast your values so
+              they fit into your new column. If casting cannot be done, you will
+              have NULLs instead of a value.
             </p>
-            <code>this is some code</code>
+
+            <p>
+              Keeping the old version of your column gives you more control over
+              your data: you decide what to do with the values which could not
+              be casted and inserted into the new column. When you re-run Purr
+              again, your old column will be deleted since it's not part of the
+              collection map. Feel free to drop the old column at any moment (if
+              you are sure that you don't need it).
+            </p>
+            <p>
+              When you are tailing and a type change happens in your Mongo
+              database, Purr will try to cast your data to the current column's
+              type. If not succeeded, Purr will log a warning and continue
+              tailing.
+            </p>
+
+            <h4>Extra properties</h4>
+            <p>
+              Extra properties are properties of a document in MongoDB which do
+              not have their name, source and type in the collection map. Having
+              extra properties means that values which are not defined in the
+              collection map will be part of a column named extra_props with
+              type defined based on the collection map. Leaving out extra
+              properties from the collection map will make extra_props type
+              default to JSONB.
+            </p>
+            <p>
+              In case that you want to include extra properties you have to
+              start Purr with option -ex.
+            </p>
+            <p>
+              If you already have an extra_props column but you restarted Purr
+              without this option, all columns named extra_props one by one.
+            </p>
+            <ul>
+              <li>
+                drop column extra_props for Collection1
+              </li>
+              <li>drop columns that are not in the collection map</li>
+              <li>
+                start transfer ... and so on for the other collections
+              </li>
+            </ul>
+            <p>
+              Starting Purr without extra properties can be significantly
+              faster.
+            </p>
+
+            <p>
+              Example: start Purr using a setup file and collections described
+              in collections.yml
+            </p>
+            <code>
+              purr -sf setup.yml -cf collections.yml
+            </code>
+            <p>
+              Example: start Purr without setup file (tailing mode)
+            </p>
+
+            <code>
+              purr -cf collections.yml -pg postgres://127.0.0.1:5432/postgres
+              -mdb mongodb://localhost:27017 -n db_name -t
+            </code>
+            <p>
+              If -t is set, Purr starts tailing the oplog after transferring all
+              the collections described in the collection map. The oplog is a
+              capped collection that records all write operations that happened
+              in your Mongo instance. Tailing is started from the timestamp Purr
+              saved in the beginning (before it created purr_info). Tailing has
+              to happen after all the tables were created since there may be
+              write operations on a collection that was not yet transferred and
+              therefore it's corresponding relation does not yet exist.Start
+              Mongo as a replicaset.
+            </p>
+
+            <h2>Changing the Collection Map</h2>
+            <p>
+              Sooner or later you will need to change your collection map. If
+              you restart Purr and keep your existing schema, your tables'
+              fields in PG will be compared to the ones in your collection map.
+            </p>
+            <li>
+              Adding a new attribute will make Purr update your entire
+              collection.
+            </li>
+            <li>Removing an attribute drops the column.</li>
+            <li>
+              Changing a column name will drop the old column, create the new
+              one and update your entire collection.
+            </li>
+            <li>
+              Changing a column type will result with an attempt to ALTER the
+              column. If the attempt was unsuccessful, Purr will try to convert
+              your data to JSONB.
+            </li>
+            <p>
+              What about the tables in my Postgres database that were in the
+              schema before using Purr?
+            </p>
+            <p>
+              If you have any existing tables in your schema that you want to be
+              left alone, make sure that you
+            </p>
+            <ul>
+              <li>
+                don't include those tables in your collection map as a target
+                (:meta: :table: cat)
+              </li>
+              <li>
+                set schema_reset to false
+              </li>
+              <li>
+                set table_drop to false
+              </li>
+              <li>
+                set table_truncate to false
+              </li>
+            </ul>
+
+            <h2>Tailing</h2>
+            <p>There are two types of tailing:</p>
+            <ul>
+              <li>
+                tailing which is preceded by collection transfer
+              </li>
+              <li>
+                tailing from specific timestamp (only if collections exist)
+              </li>
+            </ul>
+
+            <p>
+              Tailing without collection transfer must have a starting point
+              defined by the user. This starting point can be a timestamp which
+              can be passed using -ts datetime. Purr creates a table called
+              purr_info where it saves the current Unix epoch time. This
+              timestamp is updated every x minutes. The update happens only if
+              the current document is successfully transfered. When an error
+              occurs, you can be sure that Purr saved the latest successful
+              timestamp to purr_info and can continue tailing the oplog from
+              -tsdb. purr_info is always created when you first start Purr. If
+              you do not add any timestamps to -s:
+            </p>
+
+            <ul>
+              <li>
+                the current timestamp will be inserted
+              </li>
+              <li>
+                it will read the latest timestamp and check if the oplog has any
+                new entries
+              </li>
+              <li>
+                if the timestamp is "too old", Purr updates all collections
+              </li>
+            </ul>
+            <p>if the timestamp is "too old", Purr updates all collections</p>
+            <ul>
+              <li>the latest timestamp will be inserted into purr_info</li>
+            </ul>
+
+            <h2>Output</h2>
+            <p>
+              Purr will log a warning if it could not transfer a document.
+            </p>
+
+            <h4>
+              Connectivity issues
+            </h4>
+            <p>
+              In the begging, Purr creates a table called purr_info. This table
+              contains a timestamp which is refreshed every x minutes in case of
+              a successful transfer. If Purr is disconnected from the database,
+              it waits a couple of seconds before attempting to reconnect. If
+              succeeded, Purr first checks purr_info for the latest timestamp it
+              managed to save and continues tailing from there.
+            </p>
+            <h4>
+              Contribute
+            </h4>
+            Purr is an open-source project that was built using Python3. If you
+            would like to contribute, check out our guidelines
+            <h3>Guidelines</h3>
+            <p>
+              Contributing to Purr is a great way to learn more about MongoDB,
+              Python and PostgreSQL
+            </p>
+            <hr />
           </div>
         </div>
         <div class="col-md-1"></div>
