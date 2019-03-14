@@ -242,6 +242,8 @@ ul li a {
     list-style-image: url(../images/bullet.png); }
   #docs .menu ul:hover {
     cursor: pointer; }
+    #docs .menu ul:hover a {
+      text-decoration: none; }
   #docs .docs-text h1,
   #docs .docs-text h2,
   #docs .docs-text h3,

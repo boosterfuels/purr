@@ -83,7 +83,7 @@
           <h1>
             Documentation
           </h1>
-          <h4>Purr v1</h4>
+          <h3>Purr v1.0</h3>
         </div>
         <div class="col-md-1"></div>
       </div>
@@ -91,7 +91,13 @@
       <div class="row banner">
         <div class="col-md-1"></div>
         <div class="col-md-10">
-          <a data-scroll="" class="nav-link button-light">View on Github</a>
+          <a
+            data-scroll=""
+            href="https://github.com/boosterfuels/purr"
+            target="_blank"
+            class="nav-link button-light"
+            >View on Github</a
+          >
         </div>
         <div class="col-md-1"></div>
       </div>
@@ -101,14 +107,14 @@
         <div class="col-md-10">
           <div class="col-md-4 menu">
             <ul class="bullet">
-              <li>Setup</li>
-              <li>Requirements</li>
-              <li>Support</li>
-              <li>Quickstart</li>
+              <li><a href="#">Getting started</a></li>
+              <li><a href="#">Introduction</a></li>
+              <li><a href="#">Requirements</a></li>
+              <li><a href="#">Download</a></li>
+              <li><a href="#">Support</a></li>
+              <li><a href="docs.html#quickstart">Quickstart</a></li>
               <li>
-                <span>
-                  v1
-                </span>
+                <a href="#">v1</a>
                 <ul>
                   <li>Setup file</li>
                   <li>Command line options</li>
@@ -120,21 +126,52 @@
                 </ul>
               </li>
               <li>
-                <span>
-                  How to Contribute
-                </span>
+                <a href="#">Contribute</a>
                 <ul>
                   <li>Guidelines</li>
                 </ul>
               </li>
+              <li><a href="#">FAQ</a></li>
             </ul>
           </div>
           <div class="col-md-8 docs-text">
-            <h1>
-              Setup
-            </h1>
-            Install requirements locally: pip install -r requirements.txt
-            Install Purr:
+            <h2>
+              Introduction
+            </h2>
+            <p>
+              Purr is an open-source ETL tool which transfers data from MongoDB
+              to PostgreSQL.
+            </p>
+            <!-- Purr is written using the Python programming language.  -->
+            <p>
+              Purr is released under the terms of the [...] License, allowing
+              use from both free and proprietary software.
+            </p>
+            <p>
+              Check the features list to see what Purr offers Read the Psycopg
+              documentation. Be sure to check the
+              <a>Frequently Asked Questions</a>
+            </p>
+            <hr />
+
+            <h2>
+              Download
+            </h2>
+            <!-- http://initd.org/psycopg/download/ -->
+            <p>
+              Download the <a>source package</a> or download Purr from
+              <a
+                data-scroll=""
+                href="https://github.com/boosterfuels/purr"
+                target="_blank"
+                >Github</a
+              >
+            </p>
+            <p>The current stable Purr release is 1.0.0</p>
+
+            <p>Install requirements locally:</p>
+            <code>pip install -r requirements.txt</code>
+            <p>Install Purr:</p>
             <code>
               python setup.py install
             </code>
@@ -159,6 +196,7 @@
             <p>MongoDB 3.4</p>
             <p>PostgreSQL 9.6</p>
 
+            <h2 id="quickstart">Quickstart</h2>
             <div>
               <ol>
                 <li>Install requirements and Purr</li>
@@ -177,9 +215,8 @@
                 </li>
               </ol>
               <p>
-                With this quickstart, the following happens: After transfering
-                all collections to the public schema, Purr starts tailing the
-                oplog.
+                Purr transfers all collections to the public schema and starts
+                tailing the oplog.
               </p>
               <p>
                 Make changes to any of your documents and check what happens in
@@ -204,56 +241,54 @@
               <code>-sf, --setup-file </code>
             </p>
             <p>
-              The setup file must have the following form: path to YAML file
-              which contains settings Starting Purr without using a setup file:
+              The setup file must contain:
             </p>
+            <ul>
+              <li>settings for Postgres</li>
+              <li>settings for MongoDB</li>
+              <li>general settings</li>
+            </ul>
             <h4>
               Settings for Postgres:
             </h4>
             <ul>
+              <li><code>db_name</code>: name of database</li>
+              <li><code>connection</code>: connection string to database</li>
               <li>
-                db_name: name of database
+                <code>schema_name</code>: name of schema where the collections
+                will be transfered to
               </li>
               <li>
-                connection: connection string to database
-              </li>
-              <li>
-                schema_name: name of schema where the collections will be
-                transfered to
-              </li>
-              <li>
-                schema_reset:
+                <code>schema_reset</code>:
                 <ul>
                   <li>true: reset existing schema</li>
                   <li>false: keep existing schema</li>
                 </ul>
               </li>
               <li>
-                table_truncate: truncate table before starting data transfer
+                <code>table_truncate</code>: truncate table before starting data
+                transfer
               </li>
               <li>
-                table_drop: drop table before starting data transfer
+                <code>table_drop</code>: drop table before starting data
+                transfer
               </li>
             </ul>
             <h4>
               Settings for MongoDB
             </h4>
             <ul>
-              <li>
-                db_name: name of database
-              </li>
-              <li>
-                connection: connection string to database
-              </li>
+              <li><code>db_name</code>: name of database</li>
+              <li><code>connection</code>: connection string to database</li>
             </ul>
             <h4>General Settings</h4>
             <ul>
               <li>
-                tailing: keep tailing the oplog after collection transfer is
-                finished
+                <code>tailing</code>: keep tailing the oplog after collection
+                transfer is finished
               </li>
               <li>
-                typecheck_auto:
+                <code>typecheck_auto</code>:
                 <ul>
                   <li>
                     true: let Purr decide the data type for each field
@@ -265,8 +300,8 @@
                 </ul>
               </li>
               <li>
-                include_extra_props: include properties which are not described
-                in the collection map
+                <code>include_extra_props</code>: include properties which are
+                not described in the collection map
               </li>
             </ul>
             <p></p>
@@ -279,40 +314,63 @@
             </p>
             <ul>
               <li>
-                -sf or --setup-file: path to the setup file if exists
+                <code>-sf</code> or <code>--setup-file</code>: path to the setup
+                file if exists
               </li>
               <li>
-                -cf or --collection-file: path to the collection file if exists
+                <code>-cf</code> or <code>--collection-file</code>: path to the
+                collection file if exists
               </li>
 
-              <li>-td or --table-drop: defaults to false</li>
-              <li>-tt or --table-truncate: defaults to false</li>
-              <li>-sr or --schema-reset: defaults to false</li>
-              <li>-sn or --schema-name: defaults to public</li>
+              <li>
+                <code>-td</code> or <code>--table-drop</code>: defaults to false
+              </li>
+              <li>
+                <code>-tt</code> or <code>--table-truncate</code>: defaults to
+                false
+              </li>
+              <li>
+                <code>-sr</code> or <code>--schema-reset</code>: defaults to
+                false
+              </li>
+              <li>
+                <code>-sn</code> or <code>--schema-name</code>: defaults to
+                public
+              </li>
               <li>
                 <code>-pg</code> or <code>--pg-connection</code>: connection
                 string to PG database (*)
               </li>
               <li>
-                -mdb or --mongo-connection: connection string to Mongo database
-                (*)
+                <code>-mdb</code> or <code>--mongo-connection</code>: connection
+                string to Mongo database (*)
               </li>
               <li>
-                -n or --mongo-db-name: equivalent of db_name for MongoDB (*)
+                <code>-n</code> or <code>--mongo-db-name</code>: equivalent of
+                db_name for MongoDB (*)
               </li>
-              <li>-t or --tail: equivalent of tailing; defaults to false</li>
               <li>
-                -s or --start: equivalent of tailing_from; type should be date,
-                defaults to None
-              </li>
-
-              <li>
-                -tsdb or --start-from-tsdb: equivalent of tailing_from_db;
+                <code>-t</code> or <code>--tail</code>: equivalent of tailing;
                 defaults to false
               </li>
-              <li>-ta or --typecheck-auto: defaults to false</li>
+              <li>
+                <code>-s</code> or <code>--start</code>: equivalent of
+                tailing_from; type should be date, defaults to None
+              </li>
 
-              <li>-ex or --include-extra-properties: defaults to false</li>
+              <li>
+                <code>-tsdb</code> or <code>--start-from-tsdb</code>: equivalent
+                of tailing_from_db; defaults to false
+              </li>
+              <li>
+                <code>-ta</code> or <code>--typecheck-auto</code>: defaults to
+                false
+              </li>
+
+              <li>
+                <code>-ex</code> or <code>--include-extra-properties</code>:
+                defaults to false
+              </li>
             </ul>
 
             <p>Starting Purr without using a setup file:</p>
@@ -650,14 +708,14 @@
             <p>
               Tailing without collection transfer must have a starting point
               defined by the user. This starting point can be a timestamp which
-              can be passed using -ts datetime. Purr creates a table called
-              purr_info where it saves the current Unix epoch time. This
-              timestamp is updated every x minutes. The update happens only if
-              the current document is successfully transfered. When an error
-              occurs, you can be sure that Purr saved the latest successful
-              timestamp to purr_info and can continue tailing the oplog from
-              -tsdb. purr_info is always created when you first start Purr. If
-              you do not add any timestamps to -s:
+              can be passed using <code>-ts</code> datetime. Purr creates a
+              table called purr_info where it saves the current Unix epoch time.
+              This timestamp is updated every couple of minutes. The update
+              happens only if the current document is successfully transfered.
+              When an error occurs, you can be sure that Purr saved the latest
+              successful timestamp to purr_info and can continue tailing the
+              oplog from -tsdb. purr_info is always created when you first start
+              Purr. If you do not add any timestamps to -s:
             </p>
 
             <ul>
@@ -686,12 +744,13 @@
               Connectivity issues
             </h4>
             <p>
-              In the begging, Purr creates a table called purr_info. This table
-              contains a timestamp which is refreshed every x minutes in case of
-              a successful transfer. If Purr is disconnected from the database,
-              it waits a couple of seconds before attempting to reconnect. If
-              succeeded, Purr first checks purr_info for the latest timestamp it
-              managed to save and continues tailing from there.
+              When starting for the first time, Purr creates a table called
+              <i>purr_info</i>. This table contains a timestamp which is
+              refreshed every couple of minutes in case of a successful
+              transfer. If Purr is disconnected from the database, it waits a
+              couple of seconds before attempting to reconnect. If succeeded,
+              Purr first checks purr_info for the latest timestamp it managed to
+              save and continues tailing from there.
             </p>
             <h4>
               Contribute
