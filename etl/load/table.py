@@ -104,13 +104,13 @@ def drop(db, schema, tables):
     """
     tables_cmd = []
     for t in tables:
-        tables_cmd.append('%s.%s' % (schema, t))
+        tables_cmd.append('%s.%s' % (schema, t.lower()))
     tables_cmd = ','.join(tables_cmd)
 
     cmd = "DROP TABLE IF EXISTS %s" % (tables_cmd)
     try:
         db.execute_cmd(cmd)
-        logger.info('[TABLE] Dropping table %s.%s' % (schema, tables))
+        logger.info('[TABLE] Dropping table(s) %s.' % (tables_cmd))
     except Exception as ex:
         logger.error('[TABLE] %s when executing command %s.' % (ex, cmd))
 
@@ -195,7 +195,6 @@ def column_change_type(db, schema, table, column_name, column_type):
     if len(expression) == 0:
         cmd = "ALTER TABLE %s.%s ALTER COLUMN %s TYPE %s;" % (
             schema, table.lower(), column_name, column_type)
-        print(cmd)
     else:
         cmd = "ALTER TABLE %s.%s ALTER COLUMN %s TYPE %s USING %s;" % (
             schema, table.lower(), column_name, column_type, expression)

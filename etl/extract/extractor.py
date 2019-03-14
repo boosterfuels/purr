@@ -40,17 +40,7 @@ class Extractor():
         self.coll_map_cur = transfer_info.get_coll_map_table(self.pg)
         self.attrs_details = {}
 
-    def update_coll_def(self):
-        # TODO: get types from pg
-        logger.info("[EXTRACTOR] Updating schema from purr_collection_map")
-
-        coll_map_cur = self.coll_map_cur
-        coll_map_new = transfer_info.get_coll_map_table(self.pg)
-
-        if coll_map_cur == coll_map_new:
-            logger.info("[EXTRACTOR] Schema is not changed")
-            return
-
+    def update_table_def(self, coll_map_cur, coll_map_new):
         for i in range(0, len(coll_map_cur)):
             name_coll = coll_map_cur[i][1]
             name_table = coll_map_cur[i][2]
@@ -81,7 +71,7 @@ class Extractor():
                                 if tc.is_convertable(type_old, type_new):
                                     logger.info(
                                         """[EXTRACTOR] table %s, column %s:
-                                    Type [%s] is convertable to [%s]""" % (
+                                        Type [%s] is convertable to [%s]""" % (
                                             name_table,
                                             column,
                                             type_old,
@@ -96,9 +86,9 @@ class Extractor():
                                 else:
 
                                     logger.error("""
-                                    [EXTRACTOR] In table %s, column %s:
-                                    Type [%s] is NOT convertable to [%s]
-                                    """ % (
+                                        [EXTRACTOR] In table %s, column %s:
+                                        Type [%s] is NOT convertable to [%s]
+                                        """ % (
                                         name_table,
                                         column,
                                         type_old,
@@ -128,6 +118,65 @@ class Extractor():
                                 self.schema,
                                 name_table,
                                 attribute)
+
+    def table_track(self, coll_map_cur, coll_map_new):
+        logger.info("[EXTRACTOR] Adding new collection")
+        colls_cur = [x[1] for x in coll_map_cur]
+        colls_new = [x[1] for x in coll_map_new]
+        colls_to_add = [x for x in colls_new if x not in colls_cur]
+
+        for name_coll in colls_to_add:
+            coll_def = [x for x in coll_map_new if x[1] == name_coll][0]
+            columns = coll_def[3]
+            name_rel = coll_def[2]
+            type_extra_prop = 'JSONB'
+
+            meta = {
+                ':table': name_rel,
+                ':extra_props': type_extra_prop
+            }
+            
+            self.coll_def[name_coll] = {
+                ':columns': columns,
+                ':meta': meta,
+            }
+            self.transfer_coll(name_coll)
+
+    def table_untrack(self, coll_map_cur, coll_map_new):
+        tables_cur = [x[2] for x in coll_map_cur]
+        tables_remaining = [x[2] for x in coll_map_new]
+
+        tables_to_drop = [x for x in tables_cur if x not in tables_remaining]
+        colls_to_remove = [x[1]
+                           for x in coll_map_cur if x[2] in tables_to_drop]
+
+        logger.info("[EXTRACTOR] Stop syncing collections %s." %
+                    ", ".join(colls_to_remove))
+
+        for coll in colls_to_remove:
+            self.coll_def.pop(coll, None)
+        # TODO: what to do? drop or just stop tracking?
+        # table.drop(self.pg, self.schema, tables_to_drop)
+
+    def update_coll_map(self):
+        # TODO: get types from pg
+        logger.info("[EXTRACTOR] Updating schema from purr_collection_map")
+
+        coll_map_cur = self.coll_map_cur
+        coll_map_new = transfer_info.get_coll_map_table(self.pg)
+
+        if coll_map_cur == coll_map_new:
+            logger.info("[EXTRACTOR] Schema is not changed")
+            return
+
+        # If no tables were added or removed then update
+        # table definition, otherwise add or remove a table.
+        if len(coll_map_new) == len(coll_map_cur):
+            self.update_table_def(coll_map_cur, coll_map_new)
+        elif len(coll_map_new) > len(coll_map_cur):
+            self.table_track(coll_map_cur, coll_map_new)
+        else:
+            self.table_untrack(coll_map_cur, coll_map_new)
 
         # update current collection map - from the db
         self.coll_map_cur = coll_map_new
@@ -344,6 +393,7 @@ class Extractor():
         Example
         -------
         '''
+
         (attrs_new, attrs_original, types, relation_name,
          type_x_props_pg) = cp.config_fields(self.coll_def, coll)
         if types == []:

@@ -93,4 +93,4 @@ class TransferThread(Thread):
         self.t.stop_tailing = True
 
     def schema_update(self):
-        self.extractor.update_coll_def()
+        self.extractor.update_coll_map()
