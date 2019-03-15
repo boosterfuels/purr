@@ -65,15 +65,14 @@ ul li a {
   overflow: auto; }
 
 .content .row-dark {
-  background-color: purple;
+  background-color: #8c1c96;
   background-image: linear-gradient(144deg, #700570 0%, #a21aa5 51%, #8d21a1 75%);
   background: url(../images/bg.png) center center;
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;
   background-size: cover;
-  color: whitesmoke;
-  min-height: 50vh; }
+  color: whitesmoke; }
 
 .content .row-dark .image-center {
   margin: 2% auto; }
@@ -233,6 +232,9 @@ ul li a {
 
 .content .contact .col-md-4 {
   border: 1px solid blue; }
+
+.content .contact .button-light {
+  margin-bottom: 0; }
 
 .you-are-grey {
   -webkit-filter: grayscale(90%);
