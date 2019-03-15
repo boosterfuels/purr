@@ -65,9 +65,9 @@ ul li a {
   overflow: auto; }
 
 .content .row-dark {
+  background-color: purple;
   background-image: linear-gradient(144deg, #700570 0%, #a21aa5 51%, #8d21a1 75%);
   background: url(../images/bg.png) center center;
-  background-color: purple;
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;
@@ -123,10 +123,11 @@ ul li a {
   font-weight: bold;
   text-decoration: none;
   line-height: 2;
-  background-image: linear-gradient(to right, #ff792f 0%, #FF9710 51%, #ff792f 100%); }
+  background-image: linear-gradient(to right, #ff792f 0%, #ff9710 51%, #ff792f 100%);
+  background-color: orange; }
 
 .content .button-light:hover {
-  background-image: linear-gradient(to left, #ff7022 0%, #FF9710 51%, #ff7022 100%);
+  background-image: linear-gradient(to left, #ff7022 0%, #ff9710 51%, #ff7022 100%);
   box-shadow: 1px 1px 10px 1px #80008061; }
 
 .content .button-empty {
@@ -139,7 +140,8 @@ ul li a {
   font-weight: bold;
   text-decoration: none;
   line-height: 2;
-  background-image: linear-gradient(to right, #b314b3 0%, #c54dc8 51%, #b314b3 100%); }
+  background-image: linear-gradient(to right, #b314b3 0%, #c54dc8 51%, #b314b3 100%);
+  background-color: purple; }
 
 .content .button-empty:hover {
   color: whitesmoke;
@@ -148,17 +150,15 @@ ul li a {
 
 .content .home {
   display: flex;
-  align-items: center; }
-
-.content .home .text-intro {
-  margin-bottom: 50px; }
-
-.content .home .text-intro span {
-  color: #ffa500c7; }
-
-.content .home .text-intro h3 {
-  color: #cb93d2;
-  font-weight: lighter; }
+  align-items: center;
+  height: 100vh; }
+  .content .home .text-intro {
+    margin-bottom: 50px; }
+    .content .home .text-intro span {
+      color: #ffa500c7; }
+    .content .home .text-intro h3 {
+      color: #cb93d2;
+      font-weight: lighter; }
 
 .content .home .image-center {
   height: 100%;
@@ -240,9 +240,9 @@ ul li a {
   -o-filter: grayscale(100%);
   -ms-filter: grayscale(100%);
   filter: grayscale(100%);
-  opacity: .2;
+  opacity: 0.2;
   transition-property: opacity, -webkit-filter, -moz-filter;
-  transition-duration: .2s; }
+  transition-duration: 0.2s; }
 
 .you-are-grey:hover {
   -webkit-filter: grayscale(0);
@@ -278,7 +278,7 @@ ul li a {
   font-size: 12px; }
 
 .grow {
-  transition: all .2s ease-in-out; }
+  transition: all 0.2s ease-in-out; }
 
 .grow:hover {
   transform: scale(1.01); }
