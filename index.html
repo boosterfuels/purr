@@ -28,6 +28,7 @@
   <body>
     <!--[htmlclean-protect]-->
     <!-- inject:js -->
+    <script src="gulpfile.js"></script>
     <script src="js/script.js"></script>
     <!-- endinject -->
     <!--[/htmlclean-protect]-->
@@ -47,7 +48,7 @@
         </ul>
         <ul class="nav navbar-nav navbar-right">
           <li class="nav-item">
-            <a data-scroll="" href="index.html" class="nav-link">Home</a>
+            <a data-scroll="" href="#home" class="nav-link">Home</a>
           </li>
           <li class="nav-item">
             <a data-scroll="" href="about.html" class="nav-link">About</a>
@@ -58,7 +59,7 @@
             >
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="docs.html">Docs</a>
+            <a class="nav-link" href="#">Docs</a>
           </li>
           <li class="nav-item">
             <a data-scroll="" href="#contribute" class="nav-link">Contribute</a>
@@ -108,6 +109,7 @@
         <div class="col-md-5">
           <div class="image-center">
             <img src="images/cat_stretching.png" alt="" />
+            <!-- <img src="images/cat_orange.png" alt="" /> -->
           </div>
         </div>
         <div class="col-md-1"></div>
@@ -149,15 +151,16 @@
                   In the beginning, we had to make a choice about the DBMS
                   around which we would build Booster: we needed flexibility,
                   high availability and easy development. All of these were
-                  offered by MongoDB for free. Booster quickly became part of
-                  people’s everyday lives in Silicon Valley, resulting with
-                  rapid growth which has not stopped since then. To make our
-                  loyal users happy, we constantly add new features and improve
-                  the existing ones in our applications which sometimes causes
-                  bigger changes in our data structures. MongoDB handles these
-                  situations well and lets us focus on other problems.
+                  offered by MongoDB for free. To make our loyal users happy, we
+                  constantly improve our applications which sometimes causes
+                  changes in our data structures. MongoDB handles these
+                  situations well and lets us focus on different problems.
                 </p>
-                <p></p>
+                <p>
+                  Booster quickly became part of people’s everyday lives in
+                  Silicon Valley, resulting with rapid growth which has not
+                  stopped since then.
+                </p>
               </div>
               <div class="col-3 align-self-center align-items-center logo-pg">
                 <div class="image-center you-are-grey">
@@ -186,9 +189,8 @@
                 <p>
                   Finding the right RDBMS is not an easy task and there are many
                   database vendors to choose from. We wanted to keep our costs
-                  as low as possible and we chose PostgreSQL since it offered
-                  the most important things we were looking for. We wanted the
-                  warehouse to be
+                  as low as possible and we chose Postgres since it offered the
+                  most important things we were looking for:
                 </p>
                 <ul>
                   <li>object-relational</li>
@@ -219,18 +221,15 @@
                     <a href="https://github.com/stripe/mosql">MoSQL</a>
                   </span>
                   to transfer our data from MongoDB to Postgres. MoSQL was
-                  created by Stripe. It is free, open-source and easy to use.
-                  All MoSQL needs is a collection map to transfer all of the
-                  collections from MongoDB to Postgres. All the collections and
-                  fields with the corresponding relations and columns needed to
-                  be defined in the collection map. After the successful
-                  transfer MoSQL could sync with MongoDB for changes. We loved
-                  MoSQL but unfortunately in 2018 we faced multiple issues:
-                  MoSQL crashed when there were schema changes and connectivity
-                  issues. This resulted with reimporting millions of documents
-                  from the beginning on a weekly basis. Before the reimporting
-                  has been started, all of the tables were dropped by MoSQL,
-                  making us
+                  created by Stripe and announced in 2013: free, open-source and
+                  easy-to-use. It transfers all of the collections defined in a
+                  collection map and syncs with MongoDB for changes. We loved
+                  MoSQL but unfortunately it is no longer maintained. In 2018 we
+                  faced multiple issues: MoSQL crashed when there were schema
+                  changes and connectivity issues. This resulted with
+                  reimporting millions of documents from the beginning on a
+                  weekly basis. Before the reimporting has been started, all of
+                  the tables were dropped by MoSQL, making us
                   <b
                     >unable to generate reports and make plans for the next days
                     and weeks</b
@@ -238,8 +237,8 @@
                   when necessary. A full reimport took more than 5 hours. As
                   time passed, the issues were more and more frequent and we
                   were left with error messages which did not describe what went
-                  wrong. MoSQL is no longer maintained, therefore we recognized
-                  the need to take things into our own hands.
+                  wrong. We recognized the need to take things into our own
+                  hands.
                 </p>
               </div>
 
@@ -255,16 +254,16 @@
               <h4>A Working Solution</h4>
               <div class="">
                 <p>
-                  We needed a tool our analytics team could rely on. We created
-                  Purr to do what MoSQL did right and handle the issues MoSQL
-                  could not handle anymore. We did not want to make drastic
-                  changes in our app logic because we wanted the trasition to be
-                  as smooth as possible. We kept the collection map and
-                  generated an output similar to the one that MoSQL generates.
-                  This way we could avoid painful refactoring and integrate our
-                  solution with a only a few changes in our SQL queries. We kept
-                  in mind the connectivity issues MoSQL could not always handle.
-                  We also added Purr some new features:
+                  We needed a service our analytics team could rely on. We
+                  created Purr to do what MoSQL did right and handle the issues
+                  MoSQL could not handle anymore. We did not want to make
+                  drastic changes in our app logic because we wanted the
+                  trasition to be as smooth as possible. We kept the collection
+                  map and generated an output similar to the one that MoSQL
+                  generates. This way we could avoid refactoring most of our SQL
+                  queries and integrate our solution with a only a few changes.
+                  We also kept in mind the connectivity issues MoSQL could not
+                  always handle. We also added Purr some new features:
                   <!-- has some additional features MoSQL does not have  -->
                 </p>
                 <ul>
@@ -282,10 +281,6 @@
                   </li>
                   <li>
                     update collection map without dropping or stopping anything
-                  </li>
-                  <li>
-                    start tailing from a specific timestamp with or without
-                    transfering whole collections
                   </li>
                   <li>
                     ...
@@ -357,23 +352,33 @@
                       <td>Schema changes</td>
                       <td>update the collection map in the database</td>
                       <td>
-                        update the collection map file and restart
+                        <p>update the collection map file and restart</p>
                       </td>
                     </tr>
+                    <!-- <tr>
+                      <td></td>
+                      <td>update the collection map in the database</td>
+                      <td>needs to be restarted</td>
+                    </tr> -->
                     <tr>
                       <td>Tailing</td>
                       <td>
-                        tailing from any date and time from the past or from the
-                        current timestamp
+                        <p>
+                          tailing from any date and time from the past or
+                        </p>
+                        <p>
+                          from the current timestamp
+                        </p>
                       </td>
                       <td>tail from the current timestamp</td>
                     </tr>
                     <tr>
                       <td>Types</td>
                       <td>
-                        create a collection map or choose auto typecheck
+                        <p>create a collection map or</p>
+                        <p>choose auto typecheck</p>
                       </td>
-                      <td>create a collection map</td>
+                      <td>create a collection</td>
                     </tr>
                     <tr>
                       <td>Written in</td>
@@ -422,7 +427,7 @@
                   />
                 </div>
                 <div class="button-center">
-                  <a class="btn btn-primary button-center button-light" href="docs.html#quickstart"
+                  <a class="btn btn-primary button-center button-light" href="#"
                     >GO!</a
                   >
                 </div>
@@ -438,7 +443,7 @@
                   <img class="image" src="images/docker.png" alt="" />
                 </div>
 
-                <div class="button-center">
+                <div class="footer button-center">
                   <a class="btn btn-primary button-center button-light" href="#"
                     >GO!</a
                   >
@@ -458,8 +463,8 @@
                     alt=""
                   />
                 </div>
-                <div class="button-center">
-                  <a class="btn btn-primary button-center button-light" href="docs.html"
+                <div class="footer button-center">
+                  <a class="btn btn-primary button-center button-light" href="#"
                     >GO!</a
                   >
                 </div>
@@ -468,7 +473,7 @@
           </div>
         </div>
       </div>
-      <div id="contribute" class="row row-light contribute">
+      <div id="contribute" class="row row-light contribute height-max">
         <div class="content-body">
           <div class="row">
             <div class="col-10">
@@ -515,6 +520,14 @@
                   issue.
                 </p>
               </div>
+              <div class="row-contribute ideas">
+                <h4>Got an idea on how to improve Purr?</h4>
+                <p>
+                  We are always open to new ideas and suggestions which can help
+                  us become better and more efficient.
+                  <span>Don't hesitate to <a href="#">contact us</a>!</span>
+                </p>
+              </div>
             </div>
             <div class="col-2 align-self-center">
               <div class="image-center you-are-grey">
@@ -525,76 +538,65 @@
         </div>
       </div>
 
-      <div id="contact" class="row row-dark contact">
+      <div id="contact" class="row row-dark contact height-max ">
         <div class="content-body ">
-          <div class="row row-eq-height">
+          <div class="row">
             <h2>
               Contact
             </h2>
-            <!-- <div class="row row-contribute ideas "> -->
-            <div class="col-md-6">
-              <h4>Got an idea on how to improve Purr?</h4>
-              <p>
-                We are always open to new ideas and suggestions which can help
-                us become better and more efficient.
-                <span>Don't hesitate to reach out to us!</span>
-              </p>
+            <div class="row">
               <div class="align-self-center">
                 <div class="image-center">
                   <img src="images/cat_cleaning.png" alt="" />
                 </div>
               </div>
             </div>
-            <div class="col-md-6">
-              <form>
-                <div class="form-group">
-                  <label for="name">Your name</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="name"
-                    placeholder="Diego"
-                  />
-                </div>
-                <div class="form-group">
-                  <label for="email">Your email address</label>
-                  <input
-                    type="email"
-                    class="form-control"
-                    id="email"
-                    placeholder="diego@boosterfuels.com"
-                  />
-                </div>
-                <div class="form-group">
-                  <label for="exampleFormControlTextarea1">Message</label>
-                  <textarea
-                    class="form-control"
-                    id="exampleFormControlTextarea1"
-                    rows="5"
-                  ></textarea>
-                </div>
-                <a
-                  class="btn btn-primary send button-center button-light grow"
-                  href="#"
-                  >SEND</a
-                >
-              </form>
-            </div>
-            <!-- </div> -->
-            <!-- <div class="row">
-              
-            </div> -->
             <div class="row">
               <div class="col-md-3"></div>
-              <div class="col-md-6"></div>
+              <div class="col-md-6">
+                <form>
+                  <div class="form-group">
+                    <label for="name">Your name</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="name"
+                      placeholder="Diego"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="email"
+                      >Your email address</label
+                    >
+                    <input
+                      type="email"
+                      class="form-control"
+                      id="email"
+                      placeholder="diego@boosterfuels.com"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="exampleFormControlTextarea1">Message</label>
+                    <textarea
+                      class="form-control"
+                      id="exampleFormControlTextarea1"
+                      rows="5"
+                    ></textarea>
+                  </div>
+                  <a
+                    class="btn btn-primary send button-center button-light grow"
+                    href="#"
+                    >SEND</a
+                  >
+                </form>
+              </div>
               <div class="col-md-3"></div>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <div>
-      <p>2019 <span>Booster Fuels</span>, Inc., All Rights Reserved</p>
-    </div>
+    <div><p>
+    2019 <span>Booster Fuels</span>, Inc., All Rights Reserved</p></div>
   </body>
 </html>

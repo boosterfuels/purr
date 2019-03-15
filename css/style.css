@@ -55,6 +55,8 @@ ul li a {
   .content .row-dark {
     background-color: purple;
     background-image: linear-gradient(144deg, #700570 0%, #a21aa5 51%, #8d21a1 75%);
+    background: url(/images/bg.png) no-repeat;
+    background-size: 100% 100%;
     color: whitesmoke; }
     .content .row-dark .image-center {
       margin: 2% auto; }
@@ -94,9 +96,9 @@ ul li a {
     font-weight: bold;
     text-decoration: none;
     line-height: 2;
-    background-image: linear-gradient(to right, #ff792f 0%, #ff9710 51%, #ff792f 100%); }
+    background-image: linear-gradient(to right, #ff792f 0%, #FF9710 51%, #ff792f 100%); }
     .content .button-light:hover {
-      background-image: linear-gradient(to left, #ff5a00 0%, #ff9710 51%, #ff5a00 100%);
+      background-image: linear-gradient(to left, #ff7022 0%, #FF9710 51%, #ff7022 100%);
       box-shadow: 1px 1px 10px 1px #80008061; }
   .content .button-empty {
     background: transparent;
@@ -179,6 +181,8 @@ ul li a {
           left: 0;
           right: 0;
           margin: auto; }
+  .content .contact .col-md-4 {
+    border: 1px solid blue; }
 
 .you-are-grey {
   -webkit-filter: grayscale(90%);
@@ -186,9 +190,9 @@ ul li a {
   -o-filter: grayscale(100%);
   -ms-filter: grayscale(100%);
   filter: grayscale(100%);
-  opacity: 0.2;
+  opacity: .2;
   transition-property: opacity, -webkit-filter, -moz-filter;
-  transition-duration: 0.2s; }
+  transition-duration: .2s; }
   .you-are-grey:hover {
     -webkit-filter: grayscale(0);
     -moz-filter: grayscale(0);
@@ -218,61 +222,7 @@ ul li a {
     font-size: 12px; }
 
 .grow {
-  transition: all 0.2s ease-in-out; }
+  transition: all .2s ease-in-out; }
 
 .grow:hover {
   transform: scale(1.01); }
-
-#docs {
-  min-height: 100vh; }
-  #docs .banner {
-    padding: 1%;
-    background-color: #f5f0fd; }
-  #docs .button-light {
-    width: max-content !important;
-    font-weight: normal !important;
-    margin: 0 !important;
-    padding: 0px 10px;
-    font-size: 14px; }
-  #docs .bg-grey {
-    background-color: whitesmoke; }
-  #docs .menu ul {
-    list-style-type: none; }
-  #docs .menu ul.bullet {
-    list-style-image: url(../images/bullet.png); }
-  #docs .menu ul:hover {
-    cursor: pointer; }
-    #docs .menu ul:hover a {
-      text-decoration: none; }
-  #docs .docs-text h1,
-  #docs .docs-text h2,
-  #docs .docs-text h3,
-  #docs .docs-text h4,
-  #docs .docs-text h5,
-  #docs .docs-text h6 {
-    color: orange;
-    margin: 50px 0 20px 0; }
-  #docs .docs-text p {
-    color: #6e6969;
-    margin: 10px 0 10px 0; }
-
-.footer {
-  padding: 10px;
-  background-color: #f5f0fd; }
-
-.note {
-  font-size: smaller;
-  margin: 20px 0; }
-
-pre {
-  border: none;
-  background: #f8f6fc;
-  color: #600260;
-  padding: 2px 4px;
-  padding-top: 20px;
-  font-size: 90%;
-  border-radius: 4px; }
-
-code {
-  background: #f8f6fc;
-  color: #600260; }
