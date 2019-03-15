@@ -4,20 +4,17 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <title>Purr</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <base href="." />
-    <link rel=icon href=/images/cat_sitting.png>
+
     <link
       rel="stylesheet"
       href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
       integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
       crossorigin="anonymous"
     />
-    <link
-      rel="stylesheet"
-      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"
-      integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp"
-      crossorigin="anonymous"
-    />
+
+    <base href="." />
+    <link rel=icon href=/images/cat_sitting.png>
+
     <!--[htmlclean-protect]-->
     <!-- inject:css -->
     <link rel="stylesheet" href="css/style.css">
@@ -28,7 +25,6 @@
   <body>
     <!--[htmlclean-protect]-->
     <!-- inject:js -->
-    <script src="gulpfile.js"></script>
     <script src="js/script.js"></script>
     <!-- endinject -->
     <!--[/htmlclean-protect]-->
@@ -59,7 +55,7 @@
             >
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">Docs</a>
+            <a class="nav-link" href="docs.html">Docs</a>
           </li>
           <li class="nav-item">
             <a data-scroll="" href="#contribute" class="nav-link">Contribute</a>
@@ -427,7 +423,9 @@
                   />
                 </div>
                 <div class="button-center">
-                  <a class="btn btn-primary button-center button-light" href="#"
+                  <a
+                    class="btn btn-primary button-center button-light"
+                    href="docs.html#quickstart"
                     >GO!</a
                   >
                 </div>
@@ -443,7 +441,7 @@
                   <img class="image" src="images/docker.png" alt="" />
                 </div>
 
-                <div class="footer button-center">
+                <div class="button-center">
                   <a class="btn btn-primary button-center button-light" href="#"
                     >GO!</a
                   >
@@ -463,7 +461,7 @@
                     alt=""
                   />
                 </div>
-                <div class="footer button-center">
+                <div class=" button-center">
                   <a class="btn btn-primary button-center button-light" href="#"
                     >GO!</a
                   >
@@ -537,66 +535,67 @@
           </div>
         </div>
       </div>
-
-      <div id="contact" class="row row-dark contact height-max ">
+      <div id="contact" class="row row-dark contact">
         <div class="content-body ">
-          <div class="row">
+          <div class="row row-eq-height">
             <h2>
               Contact
             </h2>
-            <div class="row">
+            <!-- <div class="row row-contribute ideas "> -->
+            <div class="col-md-6">
+              <h4>Got an idea on how to improve Purr?</h4>
+              <p>
+                We are always open to new ideas and suggestions which can help
+                us become better and more efficient.
+                <span>Don't hesitate to reach out to us!</span>
+              </p>
               <div class="align-self-center">
                 <div class="image-center">
                   <img src="images/cat_cleaning.png" alt="" />
                 </div>
               </div>
             </div>
-            <div class="row">
-              <div class="col-md-3"></div>
-              <div class="col-md-6">
-                <form>
-                  <div class="form-group">
-                    <label for="name">Your name</label>
-                    <input
-                      type="text"
-                      class="form-control"
-                      id="name"
-                      placeholder="Diego"
-                    />
-                  </div>
-                  <div class="form-group">
-                    <label for="email"
-                      >Your email address</label
-                    >
-                    <input
-                      type="email"
-                      class="form-control"
-                      id="email"
-                      placeholder="diego@boosterfuels.com"
-                    />
-                  </div>
-                  <div class="form-group">
-                    <label for="exampleFormControlTextarea1">Message</label>
-                    <textarea
-                      class="form-control"
-                      id="exampleFormControlTextarea1"
-                      rows="5"
-                    ></textarea>
-                  </div>
-                  <a
-                    class="btn btn-primary send button-center button-light grow"
-                    href="#"
-                    >SEND</a
-                  >
-                </form>
-              </div>
-              <div class="col-md-3"></div>
+            <div class="col-md-6">
+              <form>
+                <div class="form-group">
+                  <label for="name">Your name</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="name"
+                    placeholder="Diego"
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="email">Your email address</label>
+                  <input
+                    type="email"
+                    class="form-control"
+                    id="email"
+                    placeholder="diego@boosterfuels.com"
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="exampleFormControlTextarea1">Message</label>
+                  <textarea
+                    class="form-control"
+                    id="exampleFormControlTextarea1"
+                    rows="5"
+                  ></textarea>
+                </div>
+                <a
+                  class="btn btn-primary send button-center button-light grow"
+                  href="#"
+                  >SEND</a
+                >
+              </form>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <div><p>
-    2019 <span>Booster Fuels</span>, Inc., All Rights Reserved</p></div>
+    <div>
+      <p>2019 <span>Booster Fuels</span>, Inc., All Rights Reserved</p>
+    </div>
   </body>
 </html>
