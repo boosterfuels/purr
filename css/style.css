@@ -55,7 +55,7 @@ ul li a {
   .content .row-dark {
     background-color: purple;
     background-image: linear-gradient(144deg, #700570 0%, #a21aa5 51%, #8d21a1 75%);
-    background: url(/images/bg.png) center center fixed;
+    background: url(/images/bg.png) center center;
     -webkit-background-size: cover;
     -moz-background-size: cover;
     -o-background-size: cover;
