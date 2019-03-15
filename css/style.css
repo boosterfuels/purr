@@ -8,8 +8,13 @@ body {
 body h4 {
   color: orange; }
 
-.nav {
-  background: #920d92; }
+/* .nav {
+  background: #920d92; } */
+nav {
+  position: absolute;
+  top: 0px;
+  width: 100%;
+  background: rgba(0,0,0,0.1) }
 
 .nav li > a {
   position: relative;
@@ -18,8 +23,8 @@ body h4 {
   color: whitesmoke; }
 
 .nav li > a:hover {
-  color: #db13dc;
-  background: purple; }
+  text-decoration: underline;
+  background: rgba(0,0,0,0.2); }
 
 .nav li > a:active {
   color: #db13dc;
@@ -111,7 +116,7 @@ ul li a {
   text-align: right; }
 
 .content .button-light {
-  background: orange;
+  background: #f9a12a;
   color: whitesmoke;
   border-radius: 5px;
   padding: 10px;
@@ -121,12 +126,10 @@ ul li a {
   width: 49%;
   font-weight: bold;
   text-decoration: none;
-  line-height: 2;
-  background-image: linear-gradient(to right, #ff792f 0%, #ff9710 51%, #ff792f 100%);
-  background-color: orange; }
+  line-height: 2; }
 
 .content .button-light:hover {
-  background-image: linear-gradient(to left, #ff7022 0%, #ff9710 51%, #ff7022 100%);
+  background: #ffab39;
   box-shadow: 1px 1px 10px 1px #80008061; }
 
 .content .button-empty {
@@ -139,12 +142,11 @@ ul li a {
   font-weight: bold;
   text-decoration: none;
   line-height: 2;
-  background-image: linear-gradient(to right, #b314b3 0%, #c54dc8 51%, #b314b3 100%);
-  background-color: purple; }
+  background: #65006b; }
 
 .content .button-empty:hover {
   color: whitesmoke;
-  background-image: linear-gradient(to right, #9e0b9e 0%, #c54dc8 51%, #9e0b9e 100%);
+  background: #74007b;
   box-shadow: 1px 1px 10px 1px #7e0587; }
 
 .content .home {
