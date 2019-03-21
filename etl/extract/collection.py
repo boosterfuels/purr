@@ -1,6 +1,33 @@
 from etl.monitor import logger
 from etl.extract import init_mongo
 import pymongo
+from bson.code import Code
+
+
+def get_keys(db, coll):
+    """
+    Get keys of a collection in the database.
+
+    Parameters
+    ----------
+    db : pymongo.database.Database
+      Database connection and name
+    coll : string
+      collection name
+
+    Returns
+    -------
+    result : list
+      All fields of a collection.
+
+    Example
+    -------
+    get_keys(db, 'Customer']
+    """
+    map = Code("function() { for (var key in this) { emit(key, null); } }")
+    reduce = Code("function(key, stuff) { return null; }")
+    result = db[coll].map_reduce(map, reduce, "myresults")
+    return result.distinct('_id')
 
 
 def check(db, colls_requested):
@@ -49,7 +76,7 @@ def check(db, colls_requested):
     return colls_existing
 
 
-def get_by_name(db, name):
+def get_by_name(db, name, size=20000):
     """
     Gets data from collection limited by batch size.
 
@@ -75,7 +102,6 @@ def get_by_name(db, name):
     ----
     - let the user decide batch size
     """
-    size = 20000
     docs = []
     try:
         logger.info('[COLLECTION] Loading data from collection %s...' % name)
@@ -88,7 +114,46 @@ def get_by_name(db, name):
     return docs
 
 
-def get_by_name_reduced(db, name, fields):
+def get_docs_for_type_check(db, name, nr_of_docs=100):
+    """
+    Gets data from a collection limited.
+
+    Parameters
+    ----------
+    db : pymongo.database.Database
+      Database connection
+    name : string
+      Name of collection.
+    nr_of_docs : integer
+      Number of documents to return
+
+    Returns
+    -------
+    docs : pymongo.cursor.Cursor
+
+    Raises
+    ------
+
+    Example
+    -------
+    get_docs_for_type_check(db, 'Car')
+
+    TODO
+    ----
+    - let the user decide batch size
+    """
+    docs = []
+    try:
+        logger.info('[COLLECTION] Loading data from collection %s...' % name)
+        c = db[name]
+        docs = c.find().limit(nr_of_docs)
+    except Exception as ex:
+        logger.error(
+            '[COLLECTION] Loading data from collection %s failed.' % name)
+    return docs
+
+
+def get_by_name_reduced(db, name, fields, size=20000):
     """
     Gets data from collection limited by batch size containing
     only specific fields.
@@ -117,7 +182,7 @@ def get_by_name_reduced(db, name, fields):
     ----
     - let the user decide batch size
     """
-    size = 20000
+
     docs = []
     try:
         logger.info('[COLLECTION] Loading data from collection %s...' % name)
@@ -133,3 +198,11 @@ def get_by_name_reduced(db, name, fields):
         logger.error(
             '[COLLECTION] Loading data from collection %s failed.' % name)
     return docs
+
+
+def get_all(db):
+    try:
+        return db.collection_names(include_system_collections=False)
+    except Exception as ex:
+        logger.error(
+            '[COLLECTION] Loading collection names failed.')
