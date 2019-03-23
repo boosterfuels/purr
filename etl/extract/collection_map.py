@@ -121,9 +121,6 @@ def determine_types(mongo, name_db):
             }
         }
         columns = []
-        fields = collection.get_keys(mongo, coll)
-        for field in fields:
-            columns.append(tc.snake_case(field))
         docs = collection.get_docs_for_type_check(mongo, coll)
         types = {}
         logger.info("%s Reading samples..." % (CURR_FILE))
@@ -144,9 +141,9 @@ def determine_types(mongo, name_db):
             if len(field) > 1:
                 sum = docs.count()
                 max = 0
-                type_chosen = "text"
-
                 for k, v in value.items():
+                    if k is None:
+                        continue
                     curr_perc = v/sum
                     if curr_perc > 0 and curr_perc > max:
                         max = curr_perc
@@ -155,13 +152,14 @@ def determine_types(mongo, name_db):
                 # there is exactly one key which will be the
                 # chosen type
                 type_chosen = list(value.keys())[0]
-        return coll_map
-
-
-from pathlib import Path
-
-mypath = Path().absolute()
-print(mypath)
+            name_column = tc.snake_case(field)
+            def_column = {
+                name_column: None,
+                ":source": field,
+                ":type": type_chosen.upper()
+            }
+            coll_map[name_db][coll][":columns"].append(def_column)
+    return coll_map
 
 
 def create_file(coll_map):
