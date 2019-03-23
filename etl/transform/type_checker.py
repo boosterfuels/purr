@@ -1,8 +1,11 @@
 from bson.json_util import ObjectId
 import datetime
+import re
+from etl.extract import collection
+from etl.monitor import logger
 
 
-def get_pg_type(item):
+def get_type_pg(item):
     """
     Returns the item with its PG type.
     In case of list it detects if it consist of primitive types.
@@ -30,13 +33,15 @@ def get_pg_type(item):
         pg_type = 'timestamp'
 
     elif item_type is ObjectId:
-        pg_type = 'varchar(80)'
+        pg_type = 'text'
 
     elif item_type is dict:
         pg_type = 'jsonb'
 
     elif item_type is list:
-        pg_type = get_list_type(item)
+        pg_type = 'jsonb'
+        # we will use it in the future
+        # pg_type = get_list_type(item)
 
     elif item_type is type(None):
         item = 'null'
@@ -129,3 +134,8 @@ def is_convertable(type_old, type_new):
     if (type_old.lower(), type_new.lower()) in convertables:
         return True
     return False
+
+
+def snake_case(word):
+    return re.sub('([A-Z]+)', r'_\1', word).lower().strip("_")
+
