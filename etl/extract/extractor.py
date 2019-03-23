@@ -2,6 +2,7 @@ import pymongo
 import time
 
 from etl.extract import collection, transfer_info
+from etl.extract import collection_map as cm
 from etl.load import table, row, constraint, schema
 from etl.monitor import logger
 
@@ -36,7 +37,7 @@ class Extractor():
         self.coll_def = coll_def
         self.tailing_from = settings_general['tailing_from']
         self.tailing_from_db = settings_general['tailing_from_db']
-        self.coll_map_cur = transfer_info.get_coll_map_table(self.pg)
+        self.coll_map_cur = cm.get_coll_map_table(self.pg)
         self.attrs_details = {}
 
     def update_table_def(self, coll_map_cur, coll_map_new):
@@ -162,7 +163,7 @@ class Extractor():
         logger.info("[EXTRACTOR] Updating schema from purr_collection_map")
 
         coll_map_cur = self.coll_map_cur
-        coll_map_new = transfer_info.get_coll_map_table(self.pg)
+        coll_map_new = cm.get_coll_map_table(self.pg)
 
         if coll_map_cur == coll_map_new:
             logger.info("[EXTRACTOR] Schema is not changed")
