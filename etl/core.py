@@ -4,9 +4,10 @@ from datetime import datetime
 import os
 from etl.extract import collection, extractor, tailer, transfer
 from etl.extract import init_mongo as mongodb, transfer_info, notification
+from etl.extract import collection_map as cm
 from etl.load import schema, init_pg as postgres
 from etl.monitor import logger
-from etl.transform import config_parser as cp
+from etl.transform import config_parser as cp, type_checker as tc
 import pkg_resources
 
 
@@ -41,14 +42,13 @@ def start(settings, coll_config):
     pg = postgres.PgConnection(setup_pg["connection"])
     mongo = mongodb.MongoConnection(setup_mdb)
 
-    transfer_info.create_coll_map_table(
+    cm.create_coll_map_table(
         pg, setup_pg["schema_name"], coll_config)
 
     ex = extractor.Extractor(
         pg, mongo.conn, setup_pg, settings, coll_config)
     THREADS = []
     try:
-
         thr_notification = notification.NotificationThread(pg)
         THREADS.append(thr_notification)
         thr_notification.start()
@@ -82,3 +82,19 @@ def start(settings, coll_config):
         logger.error(
             "[CORE] Unable to start listener thread. Details: %s" % ex)
         raise SystemExit()
+
+
+def generate_collection_map(settings_mdb):
+    """
+    TODO: 
+    - add docs
+    - disconnect from Mongo!
+    """
+    logger.info("Starting Purr v%s ..." %
+                pkg_resources.require("purr")[0].version)
+
+    logger.info("PID=%s" % os.getpid())
+    mongo = mongodb.MongoConnection(settings_mdb)
+    coll_map = cm.determine_types(mongo.conn, settings_mdb["db_name"])
+    cm.create_file(coll_map)
+    # mongo.disconnect()
