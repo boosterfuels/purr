@@ -13,7 +13,7 @@
     />
 
     <base href="." />
-    <link rel=icon href="./images/cat_sitting.png">
+    <link rel="icon" href="./images/logo_purr.png" />
 
     <!--[htmlclean-protect]-->
     <!-- inject:css -->
@@ -35,6 +35,7 @@
     <nav class="nav nav-pills">
       <div class="container-fluid">
         <div class="navbar-header">
+          <img class="logo" src="images/logo_purr.png" alt="" />
           <a class="navbar-brand" href="#">Purr</a>
         </div>
         <ul class="nav navbar-nav">
@@ -75,40 +76,46 @@
     <div class="content">
       <div
         id="home"
-        class="row row-eq-height row-dark home align-middle home vertical-center height-max"
+        class="row row-eq-height row-dark home align-middle home vertical-center height-max "
       >
         <!-- <div class="content-body">
           <div class="row"></div>
         </div> -->
         <div class="col-md-1"></div>
-        <div class="col-md-5 ">
+        <div class="col-md-5 intro">
           <div class="text-intro">
             <h1>
               Simplify Data Transfer from <span>MongoDB</span> to
               <span>PostgreSQL</span>
             </h1>
+            <div class="image-center cat-mobile">
+              <img src="images/cat_stretching.png" alt="" />
+              <!-- <img src="images/cat_orange.png" alt="" /> -->
+            </div>
             <h3 class="desc">
               Use Purr to efficiently sync your relational analytics warehouse
               with your non-relational database.
             </h3>
           </div>
 
-          <div class="button-center">
-            <a href="#get_started" class="button-center button-light grow"
+          <div class="try">
+            <a href="#get_started" class="button-light text-center grow"
               >TRY PURR</a
             >
-            <a href="#get_started" class="button-center button-empty grow"
-              >SEE THE DOCS</a
-            >
+          </div>
+          <div class="docs">
+            <p>
+              See the <a href="#get_started" class="docs"><b>docs</b></a>
+            </p>
           </div>
         </div>
-        <div class="col-md-5">
-          <div class="image-center">
+        <div id="third" class="col-md-5 block">
+          <div class="image-center cat-desktop">
             <img src="images/cat_stretching.png" alt="" />
             <!-- <img src="images/cat_orange.png" alt="" /> -->
           </div>
         </div>
-        <div class="col-md-1"></div>
+        <div id="fourth" class="col-md-1"></div>
       </div>
 
       <div class="row row-light about">
@@ -119,7 +126,7 @@
                 Our Story
               </h2>
               <h4>
-                The Beginning of Booster
+                The Beginning
               </h4>
               <p>
                 <span class="link">
@@ -128,13 +135,15 @@
                 is a company that has been making people’s lives easier and more
                 convenient in the past 4 years. The idea is simple: you order a
                 boost via the mobile app and you get high-quality gas at your
-                parking spot while you are away.
+                parking spot while you are away. This is the wonderful team of
+                engineers who make all this possible:
               </p>
             </div>
             <div class="row ">
-              <div class="align-self-center ">
-                <div class="image-center booster-truck you-are-grey">
-                  <img src="images/booster-truck.png" alt="" />
+              <div class="">
+                <div class="team">
+                  <!-- <img src="images/booster-truck.png" alt="" /> -->
+                  <img src="images/boosted_with_energy.png" alt="" />
                 </div>
               </div>
             </div>
@@ -286,20 +295,9 @@
                   necessary information decreases transfer time. -->
                 </ul>
 
-                <!-- <div class="align-self-center row etl-logos">
-                  <div class="align-self-center">
-                    <div class="image-center">
-                      <img class="image" src="images/transfer.png" alt="" />
-                    </div>
-                  </div>
-                </div> -->
-
                 <div class="col-3 align-self-center align-items-center ">
                   <div class="image-center">
-                    <img
-                      src="images/cat_lifted_paw.png"
-                      alt=""
-                    />
+                    <img src="images/cat_lifted_paw.png" alt="" />
                   </div>
                 </div>
 
@@ -396,7 +394,7 @@
 
       <div
         id="get_started"
-        class="row row-dark get-started-now height-max vertical-center"
+        class="row row-dark get-started-now vertical-center"
       >
         <div class="content-body">
           <div>
@@ -421,11 +419,11 @@
                     alt=""
                   />
                 </div>
-                <div class="button-center">
+                <div class="button-center go">
                   <a
                     class="btn btn-primary button-center button-light"
                     href="docs.html#quickstart"
-                    >GO!</a
+                    >GO</a
                   >
                 </div>
               </div>
@@ -436,13 +434,13 @@
                 <p class="card-text">
                   Get Purr on docker hub and start transfering documents.
                 </p>
-                <div class="image-center">
+                <div class="image-center ">
                   <img class="image" src="images/docker.png" alt="" />
                 </div>
 
-                <div class="button-center">
+                <div class="button-center go">
                   <a class="btn btn-primary button-center button-light" href="#"
-                    >GO!</a
+                    >TRY</a
                   >
                 </div>
               </div>
@@ -460,9 +458,9 @@
                     alt=""
                   />
                 </div>
-                <div class=" button-center">
+                <div class=" button-center go">
                   <a class="btn btn-primary button-center button-light" href="#"
-                    >GO!</a
+                    >READ</a
                   >
                 </div>
               </div>
@@ -502,27 +500,23 @@
                   <span class="link"> <a href="#">Guidlines</a></span> on how to
                   contribute.
                 </p>
-                <!-- <p>
-                  Check out our documentation on
-                  <span class="link">
-                      <a href="#">Doxygen</a>.
-                  </span>
-                </p> -->
+                <h4>
+                  Contributors
+                </h4>
+                <p>
+                  By improving Purr you will hold a special place in our hearts
+                  but we also keep a spot on our page for those who contribute
+                  the most. Click <a href="contributors">here</a> to meet the
+                  contributors. We hope that you are the next we can add here!
+                </p>
               </div>
               <div class="row-contribute issues">
                 <h4>Found any issues?</h4>
                 <p>
-                  Purr is actively maintained by Booster. Head over to
-                  <a href="#">Github</a> and help the community by opening an
+                  Purr is actively maintained by
+                  <a href="https://www.trybooster.com/">Booster</a>. Head over
+                  to <a href="#">Github</a> and help the community by opening an
                   issue.
-                </p>
-              </div>
-              <div class="row-contribute ideas">
-                <h4>Got an idea on how to improve Purr?</h4>
-                <p>
-                  We are always open to new ideas and suggestions which can help
-                  us become better and more efficient.
-                  <span>Don't hesitate to <a href="#">contact us</a>!</span>
                 </p>
               </div>
             </div>
@@ -541,7 +535,7 @@
               Contact
             </h2>
             <!-- <div class="row row-contribute ideas "> -->
-            <div class="col-md-6">
+            <div class="col-md-6 idea">
               <h4>Got an idea on how to improve Purr?</h4>
               <p>
                 We are always open to new ideas and suggestions which can help
@@ -593,7 +587,8 @@
         </div>
       </div>
     </div>
-    <div>
+
+    <div class="footer">
       <p>2019 <span>Booster Fuels</span>, Inc., All Rights Reserved</p>
     </div>
   </body>
