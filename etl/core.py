@@ -42,7 +42,7 @@ def start(settings, coll_config):
     pg = postgres.PgConnection(setup_pg["connection"])
     mongo = mongodb.MongoConnection(setup_mdb)
 
-    cm.create_coll_map_table(
+    cm.create_table(
         pg, setup_pg["schema_name"], coll_config)
 
     ex = extractor.Extractor(

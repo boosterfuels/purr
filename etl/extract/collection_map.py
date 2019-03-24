@@ -22,16 +22,14 @@ def get_query_update(def_coll, schema, table, attrs, row_id):
     for field in def_coll:
         tmp = (str(field).replace("'", '"').replace('None', 'null'))
         types.append("$$%s$$" % tmp)
-
     query = """
     UPDATE %s.%s SET types = ARRAY[%s]::JSONB[]
-    where id=%s;
+    WHERE id=%s;
     """ % (schema, table, ", ".join(types), row_id)
-
     return query
 
 
-def populate_coll_map_table(db, coll_map, schema, table, attrs):
+def populate_table(db, coll_map, schema, table, attrs):
     collection_map = collections.OrderedDict(coll_map)
     for coll_name, v in coll_map.items():
         row_id = list(collection_map).index(coll_name)
@@ -47,7 +45,7 @@ def populate_coll_map_table(db, coll_map, schema, table, attrs):
         row.upsert_transfer_info(db, schema, table, attrs, values)
 
 
-def get_coll_map_table(db, schema='public'):
+def get_table(db, schema='public'):
     cmd = """SELECT id, collection_name, relation_name,
     types FROM %s.purr_collection_map ORDER BY id""" % (
         schema)
@@ -63,7 +61,7 @@ def get_coll_map_table(db, schema='public'):
         )
 
 
-def create_coll_map_table(db, schema, coll_map):
+def create_table(db, schema, coll_map):
     """
   Adds primary key to a PostgreSQL table.
   Parameters
@@ -91,7 +89,7 @@ def create_coll_map_table(db, schema, coll_map):
             [TRANSFER_INFO] Failed to create table %s.%s: %s
             """ % (schema, table_name, ex))
 
-    populate_coll_map_table(db, coll_map, schema, table_name, attrs)
+    populate_table(db, coll_map, schema, table_name, attrs)
     procedure_name = 'notify_type'
     procedure.drop_type_notification(db, procedure_name)
     procedure.create_type_notification(db, procedure_name)
@@ -126,9 +124,18 @@ def determine_types(mongo, name_db):
         logger.info("%s Reading samples..." % (CURR_FILE))
 
         for doc in docs:
+            fields = []
             for k, v in doc.items():
+                name_column = tc.snake_case(k)
+                if name_column in fields:
+                    logger.warn("%s Column %s cannot appear twice. Skipping..." % (CURR_FILE, k))
+                    continue
+                else:
+                    fields.append(name_column)
+
                 if k not in types.keys():
                     types[k] = {}
+
                 value_new, type_pg = tc.get_type_pg(v)
                 if type_pg in types[k].keys():
                     types[k][type_pg] += 1
