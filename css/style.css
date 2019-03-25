@@ -138,10 +138,7 @@ ul li a {
     .content .try {
       width: 100%; }
       .content .try a {
-        width: 50%; }
-    .content .vertical-center {
-      display: block;
-      align-items: center; } }
+        width: 50%; } }
   @media (max-width: 425px) {
     .content .try {
       width: 100%; } }
@@ -186,28 +183,6 @@ ul li a {
     height: 100% !important; }
   .content .contribute h2 {
     margin-bottom: 30px; }
-  .content .get-started-now .go a {
-    width: 50%; }
-  .content .get-started-now div {
-    text-align: center;
-    margin-bottom: 60px; }
-    .content .get-started-now div .desc {
-      color: #facfff; }
-  .content .get-started-now .card-deck {
-    display: block;
-    width: 70%;
-    margin: 30px auto; }
-    .content .get-started-now .card-deck .card {
-      width: 100%;
-      background: white;
-      border-radius: 5px;
-      color: grey;
-      padding: 10px;
-      flex: 1;
-      margin: 10px auto; }
-  .content .get-started-now .vertical-center {
-    display: block;
-    align-items: center; }
   @media (min-width: 768px) {
     .content .get-started-now .card-deck {
       display: flex;
@@ -225,7 +200,17 @@ ul li a {
     .content .get-started-now .card-deck .card {
       margin: 10px; }
     .content .get-started-now .card-deck .card:hover {
-      box-shadow: #62186e 1px 1px 40px 1px; } }
+      box-shadow: #f8f6fb 1px 1px 10px 1px; } }
+  .content .get-started-now .go a {
+    width: 50%; }
+  .content .get-started-now div {
+    text-align: center;
+    margin-bottom: 60px; }
+    .content .get-started-now div .desc {
+      color: #facfff; }
+  .content .get-started-now .vertical-center {
+    display: block;
+    align-items: center; }
   .content .get-started-now .card-deck .card .card-body .card-title {
     text-align: center;
     color: orange; }
@@ -342,7 +327,7 @@ pre {
   padding: 2px 4px;
   padding-top: 20px;
   font-size: 90%;
-  border-radius: 4px; }
+  border-radius: 5px; }
 
 code {
   background: #f8f6fc;
@@ -350,3 +335,70 @@ code {
 
 .font-middle {
   font-size: 50%; }
+
+.card-deck {
+  display: block;
+  width: 70%;
+  margin: 30px auto; }
+  .card-deck .card {
+    width: 100%;
+    background: white;
+    border-radius: 5px;
+    color: grey;
+    padding: 10px;
+    flex: 1;
+    margin: 10px auto; }
+
+@media (min-width: 768px) {
+  .contributors .card-deck {
+    display: flex;
+    width: 100%; }
+  .contributors div {
+    text-align: center;
+    margin-bottom: 30px; } }
+
+@media (max-width: 768px) {
+  .contributors .card-deck .card {
+    margin-bottom: 30px; }
+  .contributors div {
+    text-align: center;
+    margin-bottom: 30px; } }
+
+@media (min-width: 768px) {
+  .contributors .card-deck .card {
+    margin: 10px; }
+  .contributors .card-deck .card:hover {
+    box-shadow: #b295b5 1px 1px 10px 1px; } }
+
+.contributors {
+  border-radius: 5px; }
+  .contributors .go a {
+    width: 50%; }
+  .contributors div {
+    text-align: center; }
+    .contributors div .desc {
+      color: #facfff; }
+  .contributors .vertical-center {
+    display: block;
+    align-items: center; }
+  .contributors .card-deck .card {
+    background: #f8f6fc; }
+    .contributors .card-deck .card .card-body .card-title {
+      text-align: center;
+      color: orange; }
+    .contributors .card-deck .card .card-body .card-text {
+      height: 50px;
+      text-align: center; }
+    .contributors .card-deck .card .card-body .image-center {
+      position: relative;
+      margin: 0 auto;
+      border: none; }
+    .contributors .card-deck .card .card-body .image-center {
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      margin: auto; }
+      .contributors .card-deck .card .card-body .image-center img {
+        width: 75%;
+        min-width: 50px; }

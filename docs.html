@@ -107,14 +107,25 @@
                 <ul>
                   <li>Data types</li>
                   <li>Extra properties</li>
+                  <li>Generating the map</li>
+                  <li>Updating the map</li>
                 </ul>
               </li>
               <li>Tailing</li>
-              <li>Errors</li>
+              <li>Output</li>
               <li>
                 <a href="#">Contribute</a>
                 <ul>
-                  <li>Guidelines</li>
+                  <li>Contributors</li>
+                  <li>
+                    <a href="#">Guidelines</a>
+                    <ul>
+                      <li>Style guide</li>
+                      <li>Unused code</li>
+                      <li>Git commit guidelines</li>
+                      <li>Documentation</li>
+                    </ul>
+                  </li>
                 </ul>
               </li>
             </ul>
@@ -188,7 +199,6 @@
                 <li>
                   Start Mongo as a replica set
                 </li>
-
                 <li>
                   <p>
                     You will need a collection map to describe your schema.
@@ -217,9 +227,7 @@
                 your Postgres database.
               </p>
             </div>
-            <!-- <h2>
-              Usage
-            </h2>
+            <h2>Setup</h2>
             <p>
               After installing Purr, you will need a collection map to describe
               your schema. Without the collection map you can not start Purr.
@@ -228,8 +236,7 @@
               You can start Purr using command line options or you can create
               another YAML file to organize your settings. The collection map
               and the setup file should not be mixed.
-            </p> -->
-            <h2>Setup</h2>
+            </p>
             <h3>Setup file</h3>
             <p>
               <code>-h, --help </code>show help message
@@ -490,59 +497,61 @@
             </p>
             <!-- wtf: -->
             <!-- rows = A columns = B converting A to B -->
-            <table class="table">
-              <tr>
-                <th></th>
-                <th>boolean</th>
-                <th>double precision</th>
-                <th>text</th>
-                <th>timestamp</th>
-                <th>jsonb</th>
-              </tr>
-              <tbody>
+            <div class="table-responsive">
+              <table class="table">
                 <tr>
-                  <td>boolean</td>
-                  <td>✓</td>
-                  <td></td>
-                  <td>✓</td>
-                  <td></td>
-                  <td>✓</td>
+                  <th></th>
+                  <th>boolean</th>
+                  <th>double precision</th>
+                  <th>text</th>
+                  <th>timestamp</th>
+                  <th>jsonb</th>
                 </tr>
-                <tr>
-                  <td>double precision</td>
-                  <td></td>
-                  <td>✓</td>
-                  <td>✓</td>
-                  <td></td>
-                  <td>✓</td>
-                </tr>
-                <tr>
-                  <td>text</td>
-                  <td></td>
-                  <td></td>
-                  <td>✓</td>
-                  <td></td>
-                  <td>✓</td>
-                </tr>
-                <tr>
-                  <td>timestamp</td>
-                  <td></td>
-                  <td></td>
-                  <td>✓</td>
-                  <td>✓</td>
-                  <td>✓</td>
-                </tr>
+                <tbody>
+                  <tr>
+                    <td>boolean</td>
+                    <td>✓</td>
+                    <td></td>
+                    <td>✓</td>
+                    <td></td>
+                    <td>✓</td>
+                  </tr>
+                  <tr>
+                    <td>double precision</td>
+                    <td></td>
+                    <td>✓</td>
+                    <td>✓</td>
+                    <td></td>
+                    <td>✓</td>
+                  </tr>
+                  <tr>
+                    <td>text</td>
+                    <td></td>
+                    <td></td>
+                    <td>✓</td>
+                    <td></td>
+                    <td>✓</td>
+                  </tr>
+                  <tr>
+                    <td>timestamp</td>
+                    <td></td>
+                    <td></td>
+                    <td>✓</td>
+                    <td>✓</td>
+                    <td>✓</td>
+                  </tr>
 
-                <tr>
-                  <td>jsonb</td>
-                  <td></td>
-                  <td></td>
-                  <td>✓</td>
-                  <td></td>
-                  <td>✓</td>
-                </tr>
-              </tbody>
-            </table>
+                  <tr>
+                    <td>jsonb</td>
+                    <td></td>
+                    <td></td>
+                    <td>✓</td>
+                    <td></td>
+                    <td>✓</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
 
             <p>
               Conversions that have ✔, can be easily handled by Postgres. When
@@ -631,53 +640,8 @@
               Mongo as a replicaset.
             </p>
 
-            <h2>Updating the Collection Map</h2>
-            <p>
-              Sooner or later you will need to change your collection map. If
-              you restart Purr and keep your existing schema, your tables'
-              fields in PG will be compared to the ones in your collection map.
-            </p>
-            <ul>
-              <li>
-                Adding a new attribute will make Purr update your entire
-                collection.
-              </li>
-              <li>Removing an attribute drops the column.</li>
-              <li>
-                Changing a column name will drop the old column, create the new
-                one and update your entire collection.
-              </li>
-              <li>
-                Changing a column type will result with an attempt to ALTER the
-                column. If the attempt was unsuccessful, Purr will try to
-                convert your data to JSONB.
-              </li>
-            </ul>
-            <p>
-              What about the tables in my Postgres database that were in the
-              schema before using Purr?
-            </p>
-            <p>
-              If you have any existing tables in your schema that you want to be
-              left alone, make sure that you
-            </p>
-            <ul>
-              <li>
-                don't include those tables in your collection map as a target
-                (:meta: :table: cat)
-              </li>
-              <li>
-                set schema_reset to false
-              </li>
-              <li>
-                set table_drop to false
-              </li>
-              <li>
-                set table_truncate to false
-              </li>
-            </ul>
             <h2>
-              Generating the Collection Map
+              Generating the map
               <span class="label label-success font-middle">NEW</span>
             </h2>
             <p>
@@ -751,6 +715,55 @@
               After generating the collection map, start the data tranfer as
               explained <a href="">earlier</a>.
             </p>
+            <hr />
+
+            <h2>Updating the map</h2>
+            <p>
+              Sooner or later you will need to change your collection map. If
+              you restart Purr and keep your existing schema, your tables'
+              fields in PG will be compared to the ones in your collection map.
+            </p>
+            <ul>
+              <li>
+                Adding a new attribute will make Purr update your entire
+                collection.
+              </li>
+              <li>Removing an attribute drops the column.</li>
+              <li>
+                Changing a column name will drop the old column, create the new
+                one and update your entire collection.
+              </li>
+              <li>
+                Changing a column type will result with an attempt to ALTER the
+                column. If the attempt was unsuccessful, Purr will try to
+                convert your data to JSONB.
+              </li>
+            </ul>
+            <p>
+              What about the tables in my Postgres database that were in the
+              schema before using Purr?
+            </p>
+            <p>
+              If you have any existing tables in your schema that you want to be
+              left alone, make sure that you
+            </p>
+            <ul>
+              <li>
+                don't include those tables in your collection map as a target
+                (:meta: :table: cat)
+              </li>
+              <li>
+                set schema_reset to false
+              </li>
+              <li>
+                set table_drop to false
+              </li>
+              <li>
+                set table_truncate to false
+              </li>
+            </ul>
+
+            <hr />
             <h2>Tailing</h2>
             <p>There are two types of tailing:</p>
             <ul>
@@ -814,6 +827,73 @@
             </h3>
             Purr is an open-source project that was built using Python3. If you
             would like to contribute, check out our guidelines
+            <h4>Our most valuable contributors</h4>
+            <div id="contributors" class="row contributors vertical-center">
+              <div class="content-body">
+                <div>
+                  <!-- <h5 class="title">
+                    Our most valuable contributors
+                  </h5> -->
+                  <!-- <p class="desc">
+                    Meet the people developing on Purr
+                  </p> -->
+                </div>
+                <div class="card-deck">
+                  <div class="card grow">
+                    <div class="card-body">
+                      <h4 class="card-title">Towelie</h4>
+                      <p class="card-text">
+                        helps us think out of the box
+                      </p>
+                      <div class="image-center ">
+                        <img src="images/towelie.png" />
+                      </div>
+                      <div class="button-center go">
+                        <a class="btn btn-primary button-center button-light"
+                          >BIO</a
+                        >
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card grow">
+                    <div class="card-body">
+                      <h4 class="card-title">Kenny McCormick</h4>
+                      <p class="card-text">
+                        specializes in removing dead code
+                      </p>
+                      <div class="image-center ">
+                        <img src="images/kenny.png" />
+                      </div>
+
+                      <div class="button-center go">
+                        <a class="btn btn-primary button-center button-light"
+                          >BIO</a
+                        >
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card grow">
+                    <div class="card-body">
+                      <h4 class="card-title">Kyle Broflovski</h4>
+                      <p class="card-text">
+                        makes sure we learn something every day
+                      </p>
+                      <div class="image-center ">
+                        <img class="" src="images/kyle.png" alt="" />
+                      </div>
+                      <div class=" button-center go">
+                        <a
+                          class="btn btn-primary button-center button-light"
+                          href="docs.html"
+                          >BIO</a
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <h4>Guidelines</h4>
             <p>
               Contributing to Purr is a great way to learn more about MongoDB,
@@ -828,17 +908,23 @@
             </p>
             <h5>Unused Code</h5>
             <p>
-              We like to clean up a little every now and then so the code can be
+              We like to clean up our code to make sure that no unused functions
+              were left behind. We expect you to do the same so the code can be
               cleaner, easier to understand and also easier to maintain.
               <a href="https://pypi.org/project/vulture/">Vulture</a> is a great
               tool to eliminate unused code. Remember, YAGNI :)
             </p>
-
             <pre>
                 def unused_function():
                   print("Please delete me!")                     
                   <img class="cleanup" src="images/cat_on_broom.png" alt="" />
             </pre>
+            <h5>Commit Guidelines</h5>
+            <p>
+              A good practice
+              <a href="https://pypi.org/project/vulture/">Vulture</a> is a great
+              tool to eliminate unused code. Remember, YAGNI :)
+            </p>
           </div>
         </div>
         <div class="col-md-1"></div>
