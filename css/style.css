@@ -49,6 +49,8 @@ ul li a {
   .content .row-light .team {
     text-align: center;
     margin: 30px 0; }
+    .content .row-light .team img {
+      max-width: 100%; }
   .content .row-dark .image-center,
   .content .row-light .image-center {
     width: 150px;
