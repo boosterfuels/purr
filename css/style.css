@@ -308,17 +308,19 @@ ul li a {
       cursor: pointer; }
     .content #docs .menu ul:hover a {
       text-decoration: none; }
-    .content #docs .docs-text h1,
-    .content #docs .docs-text h2,
-    .content #docs .docs-text h3,
-    .content #docs .docs-text h4,
-    .content #docs .docs-text h5,
-    .content #docs .docs-text h6 {
-      color: orange;
-      margin: 50px 0 20px 0; }
-    .content #docs .docs-text p {
-      color: #6e6969;
-      margin: 10px 0 10px 0; }
+  .content .docs-text h1,
+  .content .docs-text h2,
+  .content .docs-text h3,
+  .content .docs-text h4,
+  .content .docs-text h5,
+  .content .docs-text h6 {
+    color: orange;
+    margin: 50px 0 20px 0; }
+  .content .docs-text p {
+    color: #6e6969;
+    margin: 10px 0 10px 0; }
+  .content .docs-text .cleanup {
+    width: 100px; }
 
 .footer {
   padding: 20px;

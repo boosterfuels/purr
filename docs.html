@@ -6,7 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base href="." />
     <link rel=icon href=/images/cat_sitting.png>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+      integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+      crossorigin="anonymous"
+    />
 
     <!--[htmlclean-protect]-->
     <!-- inject:css -->
@@ -25,12 +30,10 @@
     <nav class="nav nav-pills">
       <div class="container-fluid">
         <div class="navbar-header">
-          <img class="logo" src="images/logo_purr.png"  alt="" />
+          <img class="logo" src="images/logo_purr.png" alt="" />
           <a class="navbar-brand" href="#">Purr</a>
-
         </div>
-        <ul class="nav navbar-nav">
-        </ul>
+        <ul class="nav navbar-nav"></ul>
         <ul class="nav navbar-nav navbar-right">
           <li class="nav-item">
             <a data-scroll="" href="#" class="nav-link">Home</a>
@@ -267,18 +270,6 @@
                 transfer is finished
               </li>
               <li>
-                <code>typecheck_auto</code>:
-                <ul>
-                  <li>
-                    true: let Purr decide the data type for each field
-                  </li>
-                  <li>
-                    false: use a YAML file to describe collection types
-                    (<code>-cf</code>)
-                  </li>
-                </ul>
-              </li>
-              <li>
                 <code>include_extra_props</code>: include properties which are
                 not described in the collection map
               </li>
@@ -341,10 +332,6 @@
                 <code>-tsdb</code> or <code>--start-from-tsdb</code>: equivalent
                 of tailing_from_db; defaults to false
               </li>
-              <li>
-                <code>-ta</code> or <code>--typecheck-auto</code>: defaults to
-                false
-              </li>
 
               <li>
                 <code>-ex</code> or <code>--include-extra-properties</code>:
@@ -376,7 +363,6 @@
                   db_name: my_mongo_database
                   connection: mongodb://localhost:27017
                tailing: true
-               typecheck_auto: false
                include_extra_props: true
               </pre
             >
@@ -489,14 +475,15 @@
             </p>
             <!-- wtf: -->
             <!-- rows = A columns = B converting A to B -->
-
             <table class="table">
-              <th></th>
-              <th>boolean</th>
-              <th>double precision</th>
-              <th>text</th>
-              <th>timestamp</th>
-              <th>jsonb</th>
+              <tr>
+                <th></th>
+                <th>boolean</th>
+                <th>double precision</th>
+                <th>text</th>
+                <th>timestamp</th>
+                <th>jsonb</th>
+              </tr>
               <tbody>
                 <tr>
                   <td>boolean</td>
@@ -629,26 +616,29 @@
               Mongo as a replicaset.
             </p>
 
-            <h2>Changing the Collection Map</h2>
+            <h2>Updating the Collection Map</h2>
             <p>
               Sooner or later you will need to change your collection map. If
               you restart Purr and keep your existing schema, your tables'
               fields in PG will be compared to the ones in your collection map.
             </p>
-            <li>
-              Adding a new attribute will make Purr update your entire
-              collection.
-            </li>
-            <li>Removing an attribute drops the column.</li>
-            <li>
-              Changing a column name will drop the old column, create the new
-              one and update your entire collection.
-            </li>
-            <li>
-              Changing a column type will result with an attempt to ALTER the
-              column. If the attempt was unsuccessful, Purr will try to convert
-              your data to JSONB.
-            </li>
+            <ul>
+              <li>
+                Adding a new attribute will make Purr update your entire
+                collection.
+              </li>
+              <li>Removing an attribute drops the column.</li>
+              <li>
+                Changing a column name will drop the old column, create the new
+                one and update your entire collection.
+              </li>
+              <li>
+                Changing a column type will result with an attempt to ALTER the
+                column. If the attempt was unsuccessful, Purr will try to
+                convert your data to JSONB.
+              </li>
+            </ul>
+
             <p>
               What about the tables in my Postgres database that were in the
               schema before using Purr?
@@ -672,7 +662,13 @@
                 set table_truncate to false
               </li>
             </ul>
-
+            <h2>Generating the Collection Map</h2>
+            <p>
+              Writing your own collection map might be exhausting, especially
+              when you have lots of collections. Generating the collection map
+              saves you time because it generates a similar output just like
+              above and
+            </p>
             <h2>Tailing</h2>
             <p>There are two types of tailing:</p>
             <ul>
@@ -731,17 +727,29 @@
               Purr first checks purr_info for the latest timestamp it managed to
               save and continues tailing from there.
             </p>
-            <h4>
+            <h3>
               Contribute
-            </h4>
+            </h3>
             Purr is an open-source project that was built using Python3. If you
             would like to contribute, check out our guidelines
-            <h3>Guidelines</h3>
+            <h4>Guidelines</h4>
             <p>
               Contributing to Purr is a great way to learn more about MongoDB,
               Python and PostgreSQL
             </p>
-            <hr />
+            <h5>PEP 8 Conventions</h5>
+            <p>
+              To make sure you follow PEP 8, use
+              <a href="https://pypi.org/project/pycodestyle/">pycodestyle</a>
+              (previously <code>pep8</code>`). Pycodestyle is a tool that checks
+              your code against style conventions in PEP 8.
+            </p>
+            <h5>Unused Code</h5>
+            <p>
+              <a href="https://pypi.org/project/vulture/">Vulture</a> is a great
+              tool to eliminate unused code.
+              <img class="cleanup" src="images/cat_on_broom.png" alt="" />
+            </p>
           </div>
         </div>
         <div class="col-md-1"></div>
