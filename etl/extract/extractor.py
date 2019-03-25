@@ -155,8 +155,6 @@ class Extractor():
 
         for coll in colls_to_remove:
             self.coll_def.pop(coll, None)
-        # TODO: what to do? drop or just stop tracking?
-        # table.drop(self.pg, self.schema, tables_to_drop)
 
     def update_coll_map(self):
         # TODO: get types from pg
@@ -205,8 +203,12 @@ class Extractor():
             logger.info('[EXTRACTOR] No collections.')
             return
 
+        relation_names = []
+        for coll in coll_names:
+            relation_names.append(tc.snake_case(coll))
+
         if self.drop:
-            table.drop(self.pg, self.schema, coll_names)
+            table.drop(self.pg, self.schema, relation_names)
         elif self.truncate:
             table.truncate(self.pg, self.schema, coll_names)
 
@@ -494,7 +496,7 @@ class Extractor():
                 type_new = self.attrs_details[name_mdb]["type_conf"].lower()
                 self.attrs_details[name_mdb]["type_conf"] = type_orig
                 logger.warn("""
-                [EXTRACTOR] Type conversion failed for column '%s'.
+                [EXTRACTOR] Type conversion is not possible for column '%s'.
                 Skipping conversion %s -> %s.""" %
                             (name_pg, type_orig, type_new))
 

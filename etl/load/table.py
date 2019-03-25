@@ -92,11 +92,12 @@ def drop(db, schema, tables):
 
     Parameters
     ----------
+    schema : string
     tables : list
 
     Example
     -------
-    drop(['Hufflepuff', 'test'])
+    drop(pg, 'public', ['my_table'])
 
     Todo
     ----
@@ -105,7 +106,7 @@ def drop(db, schema, tables):
     tables_cmd = []
     for t in tables:
         tables_cmd.append('%s.%s' % (schema, t.lower()))
-    tables_cmd = ','.join(tables_cmd)
+    tables_cmd = ', '.join(tables_cmd)
 
     cmd = "DROP TABLE IF EXISTS %s" % (tables_cmd)
     try:
