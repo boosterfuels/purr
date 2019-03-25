@@ -54,11 +54,8 @@ class TransferThread(Thread):
 
             transfer_info.create_stat_table(self.pg, setup_pg["schema_name"])
 
-        # Skip collection transfer if started in tailing mode.
-            if self.extractor.typecheck_auto is True:
-                self.extractor.transfer_auto(collections)
-            else:
-                self.extractor.transfer_conf(collections)
+            # Skip collection transfer if started in tailing mode.
+            self.extractor.transfer(collections)
         self.tail(start_date_time)
 
     def stop(self):

@@ -280,7 +280,7 @@ class Relation():
             if attr in reserved:
                 attr = '_' + attr
 
-            (value, column_type) = type_checker.get_pg_type(doc[attr])
+            (value, column_type) = type_checker.get_type_pg(doc[attr])
 
             # Jump over nulls because there is no point to add a type
             # until a value exists. We need a value to determine the type and

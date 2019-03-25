@@ -2,6 +2,7 @@ import pymongo
 import time
 
 from etl.extract import collection, transfer_info
+from etl.extract import collection_map as cm
 from etl.load import table, row, constraint, schema
 from etl.monitor import logger
 
@@ -25,7 +26,6 @@ class Extractor():
 
         self.pg = pg
         self.mdb = mdb
-        self.typecheck_auto = settings_general['typecheck_auto']
         self.include_extra_props = settings_general['include_extra_props']
         try:
             self.include_extra_props = settings_general['include_extra_props']
@@ -37,7 +37,7 @@ class Extractor():
         self.coll_def = coll_def
         self.tailing_from = settings_general['tailing_from']
         self.tailing_from_db = settings_general['tailing_from_db']
-        self.coll_map_cur = transfer_info.get_coll_map_table(self.pg)
+        self.coll_map_cur = cm.get_table(self.pg)
         self.attrs_details = {}
 
     def update_table_def(self, coll_map_cur, coll_map_new):
@@ -135,7 +135,7 @@ class Extractor():
                 ':table': name_rel,
                 ':extra_props': type_extra_prop
             }
-            
+
             self.coll_def[name_coll] = {
                 ':columns': columns,
                 ':meta': meta,
@@ -163,7 +163,7 @@ class Extractor():
         logger.info("[EXTRACTOR] Updating schema from purr_collection_map")
 
         coll_map_cur = self.coll_map_cur
-        coll_map_new = transfer_info.get_coll_map_table(self.pg)
+        coll_map_new = cm.get_table(self.pg)
 
         if coll_map_cur == coll_map_new:
             logger.info("[EXTRACTOR] Schema is not changed")
@@ -186,41 +186,7 @@ class Extractor():
         # restart transfer
         # update schema
 
-    def transfer_auto(self, coll_names):
-        """
-        Transfers documents or whole collections if the number of fields
-        is less than 30 000 (batch_size).
-        Types of attributes are determined using auto typechecking.
-        """
-        if collection.check(self.mdb, coll_names) is False:
-            return
-
-        if self.drop:
-            table.drop(self.pg, self.schema, coll_names)
-        elif self.truncate:
-            table.truncate(self.pg, self.schema, coll_names)
-
-        schema.create(self.pg, self.schema)
-
-        for coll in coll_names:
-            r = relation.Relation(self.pg, self.schema, coll)
-            table.create(self.pg, self.schema, coll)
-            docs = collection.get_by_name(self.mdb, coll)
-            nr_of_docs = docs.count()
-            for i in range(nr_of_docs):
-                doc = docs[i]
-                if (i+1) % 10000 == 0 and i+1 >= 10000:
-                    logger.info("""[EXTRACTOR] Transferred %d documents
-                        from collection %s. (%s s)""" % (i + 1, coll))
-                if i+1 == nr_of_docs:
-                    logger.info(
-                        "[EXTRACTOR] Finished collection %s: %d docs"
-                        % (coll, i+1))
-                r.insert(doc)
-                if r.has_pk is False and doc['_id']:
-                    r.add_pk('_id')
-
-    def transfer_conf(self, coll_names_in_config):
+    def transfer(self, coll_names_in_config):
         """
         Transfers documents or whole collections if the number of fields
         is less than 30 000 (batch_size).

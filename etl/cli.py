@@ -56,6 +56,8 @@ def main():
                         dest='mongo_db_name', default='', help='')
     parser.add_argument('-t', '--tail', action='store_true',
                         dest='tail', default=False, help='')
+    parser.add_argument('-m', '--map', action='store_true',
+                        dest='map', help='Generate a collection map')
     parser.add_argument("-s",
                         "--start",
                         dest="timestamp",
@@ -87,40 +89,47 @@ def main():
 
     setup_file = {}
     coll_file = {}
-    if args.path_collection_file:
-        coll_file = config_parser.config_collections(args.path_collection_file)
-    if args.pg_connection and args.mongo_connection and args.mongo_db_name:
-        setup = {
-            'postgres':
-            {
-                'connection': args.pg_connection,
-                'schema_name': args.schema_name,
-                'schema_reset': args.schema_reset,
-                'table_truncate': args.table_truncate,
-                'table_drop': args.table_drop
-            },
-            'mongo':
-            {
-                'connection': args.mongo_connection,
-                'db_name': args.mongo_db_name
-            },
-            'tailing': args.tail,
-            'tailing_from': args.timestamp,
-            'tailing_from_db': args.timestamp_db,
-            'typecheck_auto': args.typecheck_auto,
-            'include_extra_props': args.include_extra_props
-        }
-
-        # TODO this is bad ↓ merge tailing
-        tailing_from_ts = setup["tailing_from"] or setup["tailing_from_db"]
-        if setup["tailing"] and tailing_from_ts:
-            print("\nOnly one tailing option is allowed.")
-            raise SystemExit()
-        etl.core.start(setup, coll_file)
-
-    elif args.path_setup_file:
-        setup_file = config_parser.config_basic(args.path_setup_file)
-        if setup_file and coll_file:
-            etl.core.start(setup_file, coll_file)
+    if args.map is True and args.mongo_connection and args.mongo_db_name:
+        etl.core.generate_collection_map({
+            'connection': args.mongo_connection,
+            'db_name': args.mongo_db_name
+        })
     else:
-        print("Check your input...")
+        if args.path_collection_file:
+            coll_file = config_parser.config_collections(
+                args.path_collection_file)
+        if args.pg_connection and args.mongo_connection and args.mongo_db_name:
+            setup = {
+                'postgres':
+                {
+                    'connection': args.pg_connection,
+                    'schema_name': args.schema_name,
+                    'schema_reset': args.schema_reset,
+                    'table_truncate': args.table_truncate,
+                    'table_drop': args.table_drop
+                },
+                'mongo':
+                {
+                    'connection': args.mongo_connection,
+                    'db_name': args.mongo_db_name
+                },
+                'tailing': args.tail,
+                'tailing_from': args.timestamp,
+                'tailing_from_db': args.timestamp_db,
+                'typecheck_auto': args.typecheck_auto,
+                'include_extra_props': args.include_extra_props
+            }
+
+            # TODO this is bad ↓ merge tailing
+            tailing_from_ts = setup["tailing_from"] or setup["tailing_from_db"]
+            if setup["tailing"] and tailing_from_ts:
+                print("\nOnly one tailing option is allowed.")
+                raise SystemExit()
+            etl.core.start(setup, coll_file)
+
+        elif args.path_setup_file:
+            setup_file = config_parser.config_basic(args.path_setup_file)
+            if setup_file and coll_file:
+                etl.core.start(setup_file, coll_file)
+        else:
+            print("Check your input...")
