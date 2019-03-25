@@ -79,4 +79,3 @@ def update_latest_successful_ts(db, schema, dt):
             of the latest successful transfer: %s"""
             % (ex)
         )
-

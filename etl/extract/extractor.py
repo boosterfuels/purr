@@ -8,7 +8,7 @@ from etl.monitor import logger
 
 from etl.transform import relation, type_checker as tc, config_parser as cp
 
-from datetime import datetime, timedelta
+from datetime import datetime
 from bson import Timestamp
 import json
 

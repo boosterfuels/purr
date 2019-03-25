@@ -39,7 +39,7 @@ def get_type_pg(item):
         pg_type = 'jsonb'
 
     elif item_type is list:
-        pg_type = 'jsonb'
+        pg_type = 'jsonb[]'
         # we will use it in the future
         # pg_type = get_list_type(item)
 
@@ -50,27 +50,6 @@ def get_type_pg(item):
         pg_type = 'jsonb'
 
     return item, pg_type
-
-
-def get_list_type(curr_list):
-    """
-    Determines the type of the elements in the array.
-    Default is jsonb[].
-    integer[]
-    """
-    lt = None
-    if len(curr_list) > 0:
-        curr = curr_list[0]
-        curr_type = type(curr)
-        if curr_type is str or curr_type is ObjectId:
-            lt = 'text[]'
-        elif curr_type is int:
-            lt = 'integer[]'
-        elif curr_type is float:
-            lt = 'float[]'
-        elif curr_type is dict:
-            lt = 'jsonb[]'
-    return lt
 
 
 def rename(name_old, type_orig, type_new):
@@ -138,4 +117,3 @@ def is_convertable(type_old, type_new):
 
 def snake_case(word):
     return re.sub('([A-Z]+)', r'_\1', word).lower().strip("_")
-

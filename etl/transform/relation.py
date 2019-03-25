@@ -17,7 +17,6 @@ class Relation():
         self.relation_name = relation
         self.column_names = []
         self.column_types = []
-        self.has_pk = False
         self.created = created
         self.db = pg
         self.schema = schema
@@ -336,7 +335,6 @@ class Relation():
 
     def add_pk(self, attr):
         constraint.add_pk(self.db, self.schema, self.relation_name, attr)
-        self.has_pk = True
 
     def udpate_types(self, attrs_types_conf):
         """

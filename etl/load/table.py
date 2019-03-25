@@ -215,36 +215,6 @@ def column_change_type(db, schema, table, column_name, column_type):
         logger.error('[TABLE] %s when executing command %s.' % (ex, cmd))
 
 
-def column_rename(db, schema, table, name_old, name_new=None):
-    """
-    Change a column's name.
-    Parameters
-    ----------
-    schema : str
-    table : str
-    name_old : str
-    name_new : str
-
-    Example
-    -------
-    column_rename(pg.db, 'public', 'note', 'title', 'new_title')
-    """
-    if name_new is None:
-        name_new = name_old + '_tmp'
-
-    cmd = "ALTER TABLE %s.%s RENAME %s TO %s;" % (
-        schema, table.lower(), name_old, name_new)
-    logger.warn("""
-    [TABLE] Changing table %s: renaming column '%s' to '%s'
-    """ % (
-        table.lower(), name_old, name_new))
-
-    try:
-        db.execute_cmd(cmd)
-    except Exception as ex:
-        logger.error('[TABLE] %s when executing command %s.' % (ex, cmd))
-
-
 def remove_column(db, schema, table, column_name):
     """
     Remove a column from a table.

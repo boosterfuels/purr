@@ -1,7 +1,7 @@
 # here comes everything with the oplog
 import pymongo
 import time
-from datetime import datetime, timedelta
+from datetime import datetime
 from bson import Timestamp
 
 from etl.transform import relation
@@ -212,11 +212,6 @@ class Tailer(extractor.Extractor):
         """
         if dt is None:
             start = datetime.utcnow()
-            now = start - timedelta(
-                minutes=0, seconds=30, microseconds=start.microsecond
-            )
-        else:
-            now = dt
 
         client = self.mdb.client
         oplog = client.local.oplog.rs

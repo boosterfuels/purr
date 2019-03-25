@@ -116,6 +116,7 @@ def upsert_bulk(db, schema, table, attrs, rows):
     cmd = "INSERT INTO %s.%s (%s) VALUES (%s) ON CONFLICT ON CONSTRAINT %s
     DO UPDATE SET (%s) = ROW(%s);"
     """
+    NR_OF_ROWS_TO_DISPLAY = 20
     temp = []
     for v in rows[0]:
         if type(v) is str and v.startswith("[{"):
@@ -148,8 +149,9 @@ def upsert_bulk(db, schema, table, attrs, rows):
         db.conn.commit()
     except Exception as ex:
         logger.error("[ROW] UPSERT failed: %s" % ex)
-        logger.error("[ROW] CMD:\n %s" % cmd)
-        logger.error("[ROW] VALUES:\n %s" % rows)
+        if len(rows) <= NR_OF_ROWS_TO_DISPLAY:
+            logger.error("[ROW] CMD:\n %s" % cmd, db.cur.mogrify())
+            logger.error("[ROW] VALUES:\n %s" % rows)
 
 
 def upsert_bulk_tail(db, schema, table, attrs, rows):
