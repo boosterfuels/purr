@@ -21,10 +21,10 @@ def get_type_pg(item):
         pg_type = 'boolean'
 
     elif item_type is int:
-        pg_type = 'integer'
+        pg_type = 'double precision'
 
     elif item_type is float:
-        pg_type = 'float'
+        pg_type = 'double precision'
 
     elif item_type is str:
         pg_type = 'text'
