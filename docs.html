@@ -89,31 +89,34 @@
         <div class="col-md-10">
           <div class="col-md-4 menu">
             <ul class="bullet">
-              <li><a href="#">Getting started</a></li>
+              <!-- <li><a href="#">Getting started</a></li> -->
               <li><a href="#">Introduction</a></li>
-              <li><a href="#">Requirements</a></li>
               <li><a href="#">Download</a></li>
               <li><a href="#">Support</a></li>
               <li><a href="docs.html#quickstart">Quickstart</a></li>
               <li>
-                <a href="#">v1</a>
+                Setup
                 <ul>
-                  <li>Setup file</li>
-                  <li>Command line options</li>
-                  <li>Collection Map</li>
-                  <li>Data types</li>
-                  <li>Extra properties</li>
-                  <li>Tailing</li>
-                  <li>Errors</li>
+                  <li>General</li>
+                  <li>Postgres</li>
+                  <li>MongoDB</li>
                 </ul>
               </li>
+              <li>
+                Collection Map
+                <ul>
+                  <li>Data types</li>
+                  <li>Extra properties</li>
+                </ul>
+              </li>
+              <li>Tailing</li>
+              <li>Errors</li>
               <li>
                 <a href="#">Contribute</a>
                 <ul>
                   <li>Guidelines</li>
                 </ul>
               </li>
-              <li><a href="#">FAQ</a></li>
             </ul>
           </div>
           <div class="col-md-8 docs-text">
@@ -124,15 +127,22 @@
               Purr is an open-source ETL tool which transfers data from MongoDB
               to PostgreSQL.
             </p>
+            <p>Purr is the right choice if you want to</p>
+            <ul>
+              <li>migrate from MongoDB to PostgreSQL</li>
+              <li>
+                use BI tools like Periscope but stay keep using MongoDB at the
+                same time
+              </li>
+            </ul>
             <!-- Purr is written using the Python programming language.  -->
             <p>
               Purr is released under the terms of the [...] License, allowing
-              use from both free and proprietary software.
+              [...]
+              <!-- use from both free and proprietary software. -->
             </p>
             <p>
-              Check the features list to see what Purr offers Read the Psycopg
-              documentation. Be sure to check the
-              <a>Frequently Asked Questions</a>
+              Check the features list to see what Purr offers.
             </p>
             <hr />
 
@@ -151,46 +161,48 @@
             </p>
             <p>The current stable Purr release is 1.0.0</p>
 
-            <p>Install requirements locally:</p>
-            <code>pip install -r requirements.txt</code>
-            <p>Install Purr:</p>
             <code>
-              python setup.py install
+              pip install purr
             </code>
-            <h2>
-              Requirements
-            </h2>
-            <p>
-              Install requirements locally:
-            </p>
-            <code>
-              pip install -r requirements.txt
-            </code>
-            <p>
-              Install Purr:
-            </p>
-            <div></div>
-            <code>
-              python setup.py install
-            </code>
+            <hr />
 
-            <h2>Support</h2>
+            <h3>Support</h3>
             <p>MongoDB 3.4</p>
             <p>PostgreSQL 9.6</p>
+            <hr />
 
             <h2 id="quickstart">Quickstart</h2>
             <div>
+              <!-- Once you created your collection map, you should have a running
+                MongoDB instance as a source and Postgres as a target database.
+                You can start Purr using command line options or you can create
+                another YAML file to organize your settings. The collection map
+                and the setup file should not be mixed. -->
               <ol>
-                <li>Install requirements and Purr</li>
-                <li>Create a YAML file which contains the collection map</li>
-                <li>start Mongo as a replica set</li>
-                <li>start Postgres as a replica set</li>
+                <li>
+                  <p>Install Purr using <b>pip</b>:</p>
+                  <code>
+                    pip install purr
+                  </code>
+                </li>
+                <li>
+                  Start Mongo as a replica set
+                </li>
+
+                <li>
+                  <p>
+                    You will need a collection map to describe your schema.
+                  </p>
+                  <p>Generate the collection map:</p>
+                  <code>purr -m -mdb mongodb://localhost:27017 -n db_name</code>
+                </li>
+                <li>start Postgres</li>
                 <li>
                   <p>
                     On the command line type:
                   </p>
                   <code>
-                    purr -cf path/to/collections.yml -pg
+                    purr -cf collections.yml -pg
                     postgres://127.0.0.1:5432/postgres -mdb
                     mongodb://localhost:27017 -n db_name -t
                   </code>
@@ -205,7 +217,7 @@
                 your Postgres database.
               </p>
             </div>
-            <h2>
+            <!-- <h2>
               Usage
             </h2>
             <p>
@@ -216,7 +228,8 @@
               You can start Purr using command line options or you can create
               another YAML file to organize your settings. The collection map
               and the setup file should not be mixed.
-            </p>
+            </p> -->
+            <h2>Setup</h2>
             <h3>Setup file</h3>
             <p>
               <code>-h, --help </code>show help message
@@ -462,16 +475,18 @@
             </ul>
 
             <h5>
-              Conversion
+              Type Conversion
             </h5>
             <p>
-              When you already have a schema and decide to re-run Purr with a
-              changed collection map, you will have to keep a couple of things
-              in mind.
+              Restarting Purr after changing the types in a collection map: When
+              Purr reads the new collection map, it compares it to the old one
+              and tries to update the column types. Sometimes it is not possible
+              because Postgres cannot cast all the values. In that case, Purr
+              will log an error.
             </p>
             <p>
-              The following table shows what happens when a schema change
-              happens
+              The following table shows which conversions can happen without an
+              error
             </p>
             <!-- wtf: -->
             <!-- rows = A columns = B converting A to B -->
@@ -638,7 +653,6 @@
                 convert your data to JSONB.
               </li>
             </ul>
-
             <p>
               What about the tables in my Postgres database that were in the
               schema before using Purr?
@@ -662,12 +676,80 @@
                 set table_truncate to false
               </li>
             </ul>
-            <h2>Generating the Collection Map</h2>
+            <h2>
+              Generating the Collection Map
+              <span class="label label-success font-middle">NEW</span>
+            </h2>
             <p>
-              Writing your own collection map might be exhausting, especially
-              when you have lots of collections. Generating the collection map
-              saves you time because it generates a similar output just like
-              above and
+              Writing a collection map might be exhausting, especially when
+              there are lots of collections to transfer. Generating the
+              collection map can save a lot of time. Here is how it works:
+            </p>
+
+            <p>
+              When starting Purr, by adding the flag
+              <code>-m</code> (<code>--map</code>) and the Mongo connection
+              information:
+            </p>
+            <code>purr -m -mdb mongodb://localhost:27017 -n db_name</code>
+            <p>
+              Purr generates the YAML file with the collection definitions. In
+              case the data file can be changed before starting the data
+              transfer Here are some things to keep in mind for generating a
+              collection map:
+            </p>
+            <ul>
+              <li>
+                Purr expects collection and field names in camelCase and outputs
+                them in snake_case. This may cause some issues when a document
+                has <code>_id</code> and <code>id</code> fields, both will be
+                converted to <code>id</code>. Having two columns with the same
+                name is not possible in Postgres, therefore duplicates are not
+                allowed in the collection map and any reoccurences of the same
+                column names will be ignored.
+                <pre>
+                    name_db:
+                      name_coll:
+                        :columns:
+                        - :source: _id
+                          :type: TEXT
+                          id: null
+                        - :source: jellyFish
+                          :type: TEXT
+                          jelly_fish: null
+                  </pre
+                >
+              </li>
+              <li>
+                there is no output for extra properties
+                <p class="note">Note: we may add them later</p>
+              </li>
+              <li>
+                a generated collection map will have a column name equal to
+                <code>null</code> which can be left out when writing the
+                collection map alone:
+                <pre>
+                  name_db:
+                    name_coll:
+                      :columns:
+                      - :source: _id
+                        :type: TEXT
+                        <b>id: null</b>
+                </pre>
+              </li>
+              <li>collections with no documents are skipped</li>
+              <li>
+                Purr takes a collection sample which consists of the last 100
+                documents of each collection and checks each key and value it
+                finds. After that, it determines the type for each value in a
+                document and records it. If inconsistent data was found and
+                values with different types belong to the same key, Purr will
+                choose the type which occured the most frequently.
+              </li>
+            </ul>
+            <p>
+              After generating the collection map, start the data tranfer as
+              explained <a href="">earlier</a>.
             </p>
             <h2>Tailing</h2>
             <p>There are two types of tailing:</p>
@@ -746,10 +828,17 @@
             </p>
             <h5>Unused Code</h5>
             <p>
+              We like to clean up a little every now and then so the code can be
+              cleaner, easier to understand and also easier to maintain.
               <a href="https://pypi.org/project/vulture/">Vulture</a> is a great
-              tool to eliminate unused code.
-              <img class="cleanup" src="images/cat_on_broom.png" alt="" />
+              tool to eliminate unused code. Remember, YAGNI :)
             </p>
+
+            <pre>
+                def unused_function():
+                  print("Please delete me!")                     
+                  <img class="cleanup" src="images/cat_on_broom.png" alt="" />
+            </pre>
           </div>
         </div>
         <div class="col-md-1"></div>

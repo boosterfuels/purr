@@ -320,7 +320,8 @@ ul li a {
     color: #6e6969;
     margin: 10px 0 10px 0; }
   .content .docs-text .cleanup {
-    width: 100px; }
+    width: 100px;
+    position: absolute; }
 
 .footer {
   padding: 20px;
@@ -346,3 +347,6 @@ pre {
 code {
   background: #f8f6fc;
   color: #600260; }
+
+.font-middle {
+  font-size: 50%; }
