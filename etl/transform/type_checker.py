@@ -39,7 +39,7 @@ def get_type_pg(item):
         pg_type = 'jsonb'
 
     elif item_type is list:
-        pg_type = 'jsonb[]'
+        pg_type = 'jsonb'
         # we will use it in the future
         # pg_type = get_list_type(item)
 
@@ -70,7 +70,7 @@ def rename(name_old, type_orig, type_new):
 
 def type_equal(old, new):
     equal_char = ('char' in old and 'char' in new)
-    equal_array = (old == 'array' and new == 'jsonb[]')
+    equal_array = (old == 'array' and new == 'jsonb')
     equal_float = (old == 'double precision' and new == 'float')
     if equal_char or equal_array or equal_float:
         return True
