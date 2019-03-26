@@ -119,10 +119,7 @@ def upsert_bulk(db, schema, table, attrs, rows):
     NR_OF_ROWS_TO_DISPLAY = 20
     temp = []
     for v in rows[0]:
-        if type(v) is str and v.startswith("[{"):
-            temp.append('array[%s]::jsonb[]')
-        else:
-            temp.append('%s')
+        temp.append('%s')
 
     temp = ', '.join(temp)
 
