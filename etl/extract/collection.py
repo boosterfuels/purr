@@ -1,33 +1,6 @@
 from etl.monitor import logger
 from etl.extract import init_mongo
 import pymongo
-from bson.code import Code
-
-
-def get_keys(db, coll):
-    """
-    Get keys of a collection in the database.
-
-    Parameters
-    ----------
-    db : pymongo.database.Database
-      Database connection and name
-    coll : string
-      collection name
-
-    Returns
-    -------
-    result : list
-      All fields of a collection.
-
-    Example
-    -------
-    get_keys(db, 'Customer']
-    """
-    map = Code("function() { for (var key in this) { emit(key, null); } }")
-    reduce = Code("function(key, stuff) { return null; }")
-    result = db[coll].map_reduce(map, reduce, "myresults")
-    return result.distinct('_id')
 
 
 def check(db, colls_requested):

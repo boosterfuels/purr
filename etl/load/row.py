@@ -249,59 +249,6 @@ def upsert_transfer_info(db, schema, table, attrs, row):
         raise SystemExit()
 
 
-def update(db, schema, table_name, attrs, values):
-    """
-    Updates a row in a specific table of the PG database.
-
-    Parameters
-    ----------
-    table_name : string
-    attrs :     string[]
-    values :    string[]
-
-    Returns
-    -------
-    -
-
-    Example
-    -------
-    update('audience', [attributes], [values])
-
-    """
-    attr_val_pairs = []
-
-    oid = ""
-    nr_of_attrs = len(attrs)
-
-    if nr_of_attrs < 2:
-        return
-    for i in range(len(attrs)):
-        pair = ""
-        if attrs[i] == "id":
-            oid = "'%s'" % str(values[i])
-            continue
-        if values[i] is None:
-            pair = "%s = null" % (attrs[i])
-        elif type(values[i]) is datetime.datetime:
-            pair = "%s = '%s'" % (attrs[i], values[i])
-        elif type(values[i]) is str:
-            if values[i].startswith("{") is True:
-                pair = "%s = '%s'" % (attrs[i], values[i])
-            pair = "%s = '%s'" % (attrs[i], values[i])
-        else:
-            pair = "%s = %s" % (attrs[i], values[i])
-        attr_val_pairs.append(pair)
-
-    pairs = ", ".join(attr_val_pairs)
-    cmd = "UPDATE %s.%s SET %s WHERE id = %s;" % (
-        schema, table_name.lower(), pairs, oid)
-    logger.info("[ROW] %s" % cmd)
-    try:
-        db.execute_cmd(cmd)
-    except Exception as ex:
-        logger.error('[ROW] Update failed: %s' % ex)
-
-
 def delete(db, schema, table_name, ids):
     """
     Deletes a row in a specific table of the PG database.

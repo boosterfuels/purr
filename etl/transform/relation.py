@@ -242,11 +242,6 @@ class Relation():
             row.insert_bulk(self.db, self.schema,
                             self.relation_name, attrs_pg, result)
 
-    def update(self, doc):
-        attributes = list(doc.keys())
-        (reduced_attributes, values) = self.get_attrs_and_vals(attributes, doc)
-        row.update(self.db, self.schema, self.relation_name,
-                   reduced_attributes, values)
 
     def delete(self, docs):
         ids = []
