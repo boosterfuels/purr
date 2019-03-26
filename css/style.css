@@ -85,14 +85,11 @@ ul li a {
     margin: 0 auto; }
   .content .row-light {
     color: dimgrey; }
-  .content .row-light .image-center {
-    margin: 2% auto; }
-  @media (max-width: 599px) {
     .content .row-light .image-center {
-      width: 33%; } }
-  .content .row-light .content-body {
-    max-width: 768px;
-    margin: 0 auto; }
+      margin: 2% auto; }
+    .content .row-light .content-body {
+      max-width: 768px;
+      margin: 0 auto; }
   .content .button-center {
     text-align: center;
     margin: 0 auto; }
