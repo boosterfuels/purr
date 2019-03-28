@@ -399,3 +399,10 @@ code {
       .contributors .card-deck .card .card-body .image-center img {
         width: 75%;
         min-width: 50px; }
+
+.rocket {
+  -ms-transform: rotate(20deg);
+  /* IE 9 */
+  -webkit-transform: rotate(20deg);
+  /* Safari 3-8 */
+  transform: rotate(15deg); }
