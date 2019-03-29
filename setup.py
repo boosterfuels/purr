@@ -2,9 +2,9 @@ from setuptools import setup, find_packages
 
 with open('requirements.txt') as f:
     requirements = f.read().splitlines()
-version = '0.1.13'
+version = '0.1.14'
 
-setup(name='purr-etl',
+setup(name='purr',
       version=version,
       author='Anett Balázsics',
       email='anett.balazsics@digihey.com',
