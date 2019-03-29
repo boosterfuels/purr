@@ -27,6 +27,9 @@
     <script src="js/script.js"></script>
     <!-- endinject -->
     <!--[/htmlclean-protect]-->
+    <button onclick="topFunction()" id="btn-sticky" title="Go to top">
+      <span class="glyphicon glyphicon-chevron-up" aria-hidden="true"></span>
+    </button>
     <nav class="nav nav-pills">
       <div class="container-fluid">
         <div class="navbar-header">
@@ -90,12 +93,12 @@
           <div class="col-md-4 menu">
             <ul class="bullet">
               <!-- <li><a href="#">Getting started</a></li> -->
-              <li><a href="#">Introduction</a></li>
-              <li><a href="#">Download</a></li>
-              <li><a href="#">Support</a></li>
+              <li><a href="docs.html#introduction">Introduction</a></li>
+              <li><a href="docs.html#download">Download</a></li>
+              <li><a href="docs.html#support">Support</a></li>
               <li><a href="docs.html#quickstart">Quickstart</a></li>
               <li>
-                Setup
+                <a href="docs.html#setup">Setup</a>
                 <ul>
                   <li>General</li>
                   <li>Postgres</li>
@@ -103,22 +106,26 @@
                 </ul>
               </li>
               <li>
-                Collection Map
+                <a href="docs.html#collmap">Collection Map</a>
                 <ul>
-                  <li>Data types</li>
-                  <li>Extra properties</li>
-                  <li>Generating the map</li>
-                  <li>Updating the map</li>
+                  <li><a href="docs.html#datatypes">Data types</a></li>
+                  <li><a href="docs.html#extraprops">Extra properties</a></li>
+                  <li>
+                    <a href="docs.html#generate_collmap">Generating the map</a>
+                  </li>
+                  <li>
+                    <a href="docs.html#update_collmap">Updating the map</a>
+                  </li>
                 </ul>
               </li>
-              <li>Tailing</li>
-              <li>Output</li>
+              <li><a href="docs.html#tailing">Tailing</a></li>
+              <li><a href="docs.html#output">Output</a></li>
               <li>
-                <a href="#">Contribute</a>
+                <a href="docs.html#contribute">Contribute</a>
                 <ul>
-                  <li>Contributors</li>
+                  <li><a href="docs.html#contributor_list">Contributors</a></li>
                   <li>
-                    <a href="#">Guidelines</a>
+                    <a href="docs.html#guidelines">Guidelines</a>
                     <ul>
                       <li>Style guide</li>
                       <li>Unused code</li>
@@ -131,8 +138,8 @@
             </ul>
           </div>
           <div class="col-md-8 docs-text">
-            <h2>
-              Introduction
+              <h2 id="introduction">
+                  Introduction
             </h2>
             <p>
               Purr is an open-source ETL tool which transfers data from MongoDB
@@ -157,7 +164,8 @@
             </p>
             <hr />
 
-            <h2>
+            <h2 id="download">
+
               Download
             </h2>
             <!-- http://initd.org/psycopg/download/ -->
@@ -177,7 +185,7 @@
             </code>
             <hr />
 
-            <h3>Support</h3>
+            <h3 id="support">Support</h3>
             <p>MongoDB 3.4</p>
             <p>PostgreSQL 9.6</p>
             <hr />
@@ -387,7 +395,7 @@
               </pre
             >
             <hr />
-            <h2>Collection Map</h2>
+            <h2 id="collmap">Collection Map</h2>
             <code>
               -cf, --collection-file
             </code>
@@ -466,7 +474,8 @@
               created_at: text
               extra_props: jsonb
             </pre>
-            <h4>
+            <h4 id="datatypes">
+
               Data Types
             </h4>
 
@@ -717,7 +726,8 @@
             </p>
             <hr />
 
-            <h2>Updating the map</h2>
+            <h2 id="update_collmap">Updating the map</h2>
+
             <p>
               Sooner or later you will need to change your collection map. If
               you restart Purr and keep your existing schema, your tables'
@@ -764,7 +774,8 @@
             </ul>
 
             <hr />
-            <h2>Tailing</h2>
+            <h2 id="tailing">Tailing</h2>
+
             <p>There are two types of tailing:</p>
             <ul>
               <li>
@@ -822,14 +833,15 @@
               Purr first checks purr_info for the latest timestamp it managed to
               save and continues tailing from there.
             </p>
-            <h3>
+            <h3 id="contribute">
+
               Contribute
             </h3>
             Purr is an open-source project that was built using Python3. If you
             would like to contribute, check out our guidelines
             <h4>Our most valuable contributors</h4>
             <div id="contributors" class="row contributors vertical-center">
-              <div class="content-body">
+                <div class="content-body">
                 <div>
                   <!-- <h5 class="title">
                     Our most valuable contributors
@@ -894,7 +906,7 @@
               </div>
             </div>
 
-            <h4>Guidelines</h4>
+            <h4 id="guidelines">Guidelines</h4>
             <p>
               Contributing to Purr is a great way to learn more about MongoDB,
               Python and PostgreSQL
@@ -916,7 +928,7 @@
             </p>
             <pre>
                 def unused_function():
-                  print("Please delete me!")                     
+                  print("Delete me!")                     
                   <img class="cleanup" src="images/cat_on_broom.png" alt="" />
             </pre>
             <h5>Commit Guidelines</h5>

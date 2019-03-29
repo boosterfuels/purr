@@ -380,3 +380,21 @@ code {
     display: none; }
   .home h3 {
     text-align: center; } }
+
+#btn-sticky {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  right: 30px;
+  z-index: 99;
+  font-size: 18px;
+  border: none;
+  outline: none;
+  background-color: orange;
+  color: white;
+  cursor: pointer;
+  padding: 1vh 1.35vh;
+  border-radius: 50px; }
+
+#btn-sticky:hover {
+  background-color: #555; }
