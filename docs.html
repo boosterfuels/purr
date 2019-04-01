@@ -20,7 +20,7 @@
     <!--[/htmlclean-protect]-->
   </head>
 
-  <body>
+  <body class="documentation">
     <!--[htmlclean-protect]-->
     <!-- inject:js -->
     <script src="gulpfile.js"></script>
@@ -68,7 +68,7 @@
           <h1>
             Documentation
           </h1>
-          <h3>Purr v1.0</h3>
+          <h3>purr v1.0</h3>
         </div>
         <div class="col-md-1"></div>
       </div>
@@ -91,7 +91,7 @@
         <div class="col-md-1"></div>
         <div class="col-md-10">
           <div class="col-md-4 menu">
-            <ul class="bullet">
+            <ol class="bullet">
               <!-- <li><a href="#">Getting started</a></li> -->
               <li><a href="docs.html#introduction">Introduction</a></li>
               <li><a href="docs.html#download">Download</a></li>
@@ -135,14 +135,14 @@
                   </li>
                 </ul>
               </li>
-            </ul>
+            </ol>
           </div>
           <div class="col-md-8 docs-text">
-              <h2 id="introduction">
-                  Introduction
+            <h2 id="introduction">
+              1. Introduction
             </h2>
             <p>
-              Purr is an open-source ETL tool which transfers data from MongoDB
+              Purr is an easy to use, open-source ETL tool which transfers data from MongoDB
               to PostgreSQL.
             </p>
             <p>Purr is the right choice if you want to</p>
@@ -155,18 +155,47 @@
             </ul>
             <!-- Purr is written using the Python programming language.  -->
             <p>
-              Purr is released under the terms of the [...] License, allowing
-              [...]
+              Purr is released under the terms of the
+              <a href="https://github.com/boosterfuels/purr/blob/master/LICENCE"
+                >MIT License</a
+              >.
               <!-- use from both free and proprietary software. -->
             </p>
             <p>
-              Check the features list to see what Purr offers.
+              Check the features list to see what Purr offers:
             </p>
-            <hr />
-
+            <ul>
+              <li>
+                generate the schema based on existing MongoDB collections
+              </li>
+              <li>
+                create a custom schema
+              </li>
+              <li>
+                update the schema while Purr is tailing
+              </li>
+              <li>after data transfer continue syncing with MongoDB</li>
+              <li>
+                transfer data to a custom schema in Postgres
+              </li>
+              <li>
+                when restarting, update, drop or trucate the existing tables,
+                create or empty the whole schema etc.
+              </li>
+            </ul>
+            <div class="row vertical-center">
+              <div class="col-md">
+                <div class="cat-mobile">
+                  <img
+                    class="center-block hr-cat"
+                    src="images/cats/cat_6.png"
+                    alt=""
+                  />
+                </div>
+              </div>
+            </div>
             <h2 id="download">
-
-              Download
+              2. Download
             </h2>
             <!-- http://initd.org/psycopg/download/ -->
             <p>
@@ -183,26 +212,45 @@
             <code>
               pip install purr
             </code>
-            <hr />
+            <div class="row vertical-center">
+              <div class="col-md">
+                <div class="cat-mobile">
+                  <img
+                    class="center-block hr-cat"
+                    src="images/cats/cat_1.png"
+                    alt=""
+                  />
+                </div>
+              </div>
+            </div>
 
-            <h3 id="support">Support</h3>
+            <h2 id="support">3. Support</h2>
             <p>MongoDB 3.4</p>
             <p>PostgreSQL 9.6</p>
-            <hr />
+            <div class="row vertical-center">
+              <div class="col-md">
+                <div class="cat-mobile">
+                  <img
+                    class="center-block hr-cat"
+                    src="images/cats/cat_2.png"
+                    alt=""
+                  />
+                </div>
+              </div>
+            </div>
 
-            <h2 id="quickstart">Quickstart</h2>
+            <h2 id="quickstart">4. Quickstart</h2>
             <div>
               <!-- Once you created your collection map, you should have a running
                 MongoDB instance as a source and Postgres as a target database.
                 You can start Purr using command line options or you can create
                 another YAML file to organize your settings. The collection map
                 and the setup file should not be mixed. -->
-                If you have Docker installed, check out our <a href="https://github.com/boosterfuels/purr-examples">example</a>.
-              
-                `docker compose up`
-                `docker compose down`
+              If you have Docker installed, check out our
+              <a href="https://github.com/boosterfuels/purr-examples">example</a
+              >. `docker compose up` `docker compose down`
 
-                <ol>
+              <ol>
                 <li>
                   <p>Install Purr using <b>pip</b>:</p>
                   <code>
@@ -213,7 +261,9 @@
                   Start Mongo as a replica set
                 </li>
                 <li>
-                  <p>Generate the collection map that will describe the schema:</p>
+                  <p>
+                    Generate the collection map that will describe the schema:
+                  </p>
                   <code>purr -m -mdb mongodb://localhost:27017 -n db_name</code>
                 </li>
                 <li>start Postgres</li>
@@ -233,19 +283,31 @@
                 tailing the oplog.
               </p>
               <p>
-                Make changes to any documents and see what happens in
-                Postgres.
+                Make changes to any documents and see what happens in Postgres.
               </p>
             </div>
-            <h2>Setup</h2>
+
+            <div class="row vertical-center">
+              <div class="col-md">
+                <div class="cat-mobile">
+                  <img
+                    class="center-block hr-cat"
+                    src="images/cats/cat_3.png"
+                    alt=""
+                  />
+                </div>
+              </div>
+            </div>
+
+            <h2>5. Setup</h2>
             <p>
               After installing Purr, you will need a collection map to describe
               the schema. Without the collection map Purr cannot be started.
-              Once the collection map is created, the data transfer can start. 
-              This requires a source (MongoDB) and a target(PostgreSQL) database.
-              You can start Purr using command line options or you can create
-              another YAML file to organize your settings. The collection map
-              and the setup file should not be mixed.
+              Once the collection map is created, the data transfer can start.
+              This requires a source (MongoDB) and a target(PostgreSQL)
+              database. You can start Purr using command line options or you can
+              create another YAML file to organize your settings. The collection
+              map and the setup file should not be mixed.
             </p>
             <h3>Setup file</h3>
             <p>
@@ -396,8 +458,18 @@
                include_extra_props: true
               </pre
             >
-            <hr />
-            <h2 id="collmap">Collection Map</h2>
+            <div class="row vertical-center">
+              <div class="col-md">
+                <div class="cat-mobile">
+                  <img
+                    class="center-block hr-cat"
+                    src="images/cats/cat_4.png"
+                    alt=""
+                  />
+                </div>
+              </div>
+            </div>
+            <h2 id="collmap">6. Collection Map</h2>
             <code>
               -cf, --collection-file
             </code>
@@ -477,7 +549,6 @@
               extra_props: jsonb
             </pre>
             <h4 id="datatypes">
-
               Data Types
             </h4>
 
@@ -726,7 +797,6 @@
               After generating the collection map, start the data tranfer as
               explained <a href="">earlier</a>.
             </p>
-            <hr />
 
             <h2 id="update_collmap">Updating the map</h2>
 
@@ -775,8 +845,18 @@
               </li>
             </ul>
 
-            <hr />
-            <h2 id="tailing">Tailing</h2>
+            <div class="row vertical-center">
+              <div class="col-md">
+                <div class="cat-mobile">
+                  <img
+                    class="center-block hr-cat"
+                    src="images/cats/cat_5.png"
+                    alt=""
+                  />
+                </div>
+              </div>
+            </div>
+            <h2 id="tailing">7. Tailing</h2>
 
             <p>There are two types of tailing:</p>
             <ul>
@@ -818,7 +898,18 @@
               <li>the latest timestamp will be inserted into purr_info</li>
             </ul>
 
-            <h2>Output</h2>
+            <div class="row vertical-center">
+              <div class="col-md">
+                <div class="cat-mobile">
+                  <img
+                    class="center-block hr-cat"
+                    src="images/cats/cat_7.png"
+                    alt=""
+                  />
+                </div>
+              </div>
+            </div>
+            <h2 id="output">8. Output</h2>
             <p>
               Purr will log a warning if it could not transfer a document.
             </p>
@@ -835,15 +926,25 @@
               Purr first checks purr_info for the latest timestamp it managed to
               save and continues tailing from there.
             </p>
-            <h3 id="contribute">
-
-              Contribute
-            </h3>
+            <div class="row vertical-center">
+              <div class="col-md">
+                <div class="cat-mobile">
+                  <img
+                    class="center-block hr-cat"
+                    src="images/cats/cat_6.png"
+                    alt=""
+                  />
+                </div>
+              </div>
+            </div>
+            <h2 id="contribute">
+              9. Contribute
+            </h2>
             Purr is an open-source project that was built using Python3. If you
             would like to contribute, check out our guidelines
             <h4>Our most valuable contributors</h4>
             <div id="contributors" class="row contributors vertical-center">
-                <div class="content-body">
+              <div class="content-body">
                 <div>
                   <!-- <h5 class="title">
                     Our most valuable contributors
@@ -940,7 +1041,9 @@
               tool to eliminate unused code. Remember, YAGNI :)
             </p>
             <h5>Plans</h5>
-            <p>In the future, we would like to add some new features to Purr.</p>
+            <p>
+              In the future, we would like to add some new features to Purr.
+            </p>
             <ul>
               <li>slack integration</li>
               <li>exposing an API</li>

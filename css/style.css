@@ -397,3 +397,17 @@ code {
 
 #btn-sticky:hover {
   background-color: #555; }
+
+.documentation #introduction {
+  margin-top: 0; }
+
+.documentation a {
+  cursor: pointer;
+  text-decoration: none; }
+
+.documentation hr {
+  margin: 10px 0; }
+
+.documentation .hr-cat {
+  max-width: 30px;
+  max-height: 30px; }
