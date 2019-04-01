@@ -197,21 +197,23 @@
                 You can start Purr using command line options or you can create
                 another YAML file to organize your settings. The collection map
                 and the setup file should not be mixed. -->
-              <ol>
+                If you have Docker installed, check out our <a href="https://github.com/boosterfuels/purr-examples">example</a>.
+              
+                `docker compose up`
+                `docker compose down`
+
+                <ol>
                 <li>
                   <p>Install Purr using <b>pip</b>:</p>
                   <code>
-                    pip install purr
+                    pip install purrito
                   </code>
                 </li>
                 <li>
                   Start Mongo as a replica set
                 </li>
                 <li>
-                  <p>
-                    You will need a collection map to describe your schema.
-                  </p>
-                  <p>Generate the collection map:</p>
+                  <p>Generate the collection map that will describe the schema:</p>
                   <code>purr -m -mdb mongodb://localhost:27017 -n db_name</code>
                 </li>
                 <li>start Postgres</li>
@@ -221,7 +223,7 @@
                   </p>
                   <code>
                     purr -cf collections.yml -pg
-                    postgres://127.0.0.1:5432/postgres -mdb
+                    postgres://localhost:5432/postgres -mdb
                     mongodb://localhost:27017 -n db_name -t
                   </code>
                 </li>
@@ -231,16 +233,16 @@
                 tailing the oplog.
               </p>
               <p>
-                Make changes to any of your documents and check what happens in
-                your Postgres database.
+                Make changes to any documents and see what happens in
+                Postgres.
               </p>
             </div>
             <h2>Setup</h2>
             <p>
               After installing Purr, you will need a collection map to describe
-              your schema. Without the collection map you can not start Purr.
-              Once you created your collection map, you should have a running
-              MongoDB instance as a source and Postgres as a target database.
+              the schema. Without the collection map Purr cannot be started.
+              Once the collection map is created, the data transfer can start. 
+              This requires a source (MongoDB) and a target(PostgreSQL) database.
               You can start Purr using command line options or you can create
               another YAML file to organize your settings. The collection map
               and the setup file should not be mixed.
@@ -937,6 +939,13 @@
               <a href="https://pypi.org/project/vulture/">Vulture</a> is a great
               tool to eliminate unused code. Remember, YAGNI :)
             </p>
+            <h5>Plans</h5>
+            <p>In the future, we would like to add some new features to Purr.</p>
+            <ul>
+              <li>slack integration</li>
+              <li>exposing an API</li>
+              <li>...</li>
+            </ul>
           </div>
         </div>
         <div class="col-md-1"></div>
