@@ -162,6 +162,8 @@ ul li a {
       text-align: center;
       margin-bottom: 30px; } }
   @media (max-width: 768px) {
+    .content p {
+      font-weight: 500; }
     .content .get-started-now .card-deck .card {
       margin-bottom: 30px; }
     .content .get-started-now div {
