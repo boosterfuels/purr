@@ -162,8 +162,10 @@ ul li a {
       text-align: center;
       margin-bottom: 30px; } }
   @media (max-width: 768px) {
-    .content p {
-      font-weight: 500; }
+    .content p,
+    .content span,
+    .content li {
+      font-weight: 400; }
     .content .get-started-now .card-deck .card {
       margin-bottom: 30px; }
     .content .get-started-now div {
@@ -190,17 +192,22 @@ ul li a {
   .content .get-started-now .card-deck .card .card-body .card-text {
     height: 50px;
     text-align: center; }
-  .content .contact .col-md-4 {
-    border: 1px solid blue; }
-  .content .contact .button-light {
-    margin-bottom: 0; }
   .content .contact .idea {
-    margin-left: -15px;
-    margin-right: 15px; }
-  .content .contact .cat {
-    margin-top: 30px; }
-  .content .contact .content-body {
-    margin-bottom: 30px; }
+    margin: 0 15px 40px -15px; }
+    .content .contact .idea .cat {
+      margin-top: 30px; }
+  .content .contact .footer {
+    text-align: center; }
+    .content .contact .footer p {
+      margin: 0; }
+    .content .contact .footer .main {
+      padding: 0;
+      background-color: transparent;
+      text-align: center;
+      color: white; }
+  .content .contact a {
+    text-decoration: none;
+    color: orange; }
   .content .you-are-grey {
     -webkit-filter: grayscale(90%);
     -moz-filter: grayscale(100%);
@@ -271,16 +278,6 @@ ul li a {
   .content .docs-text .cleanup {
     width: 100px;
     position: absolute; }
-
-.footer {
-  text-align: center; }
-  .footer p {
-    margin: 0; }
-  .footer .main {
-    padding: 0;
-    background-color: transparent;
-    text-align: center;
-    color: white; }
 
 .note {
   font-size: smaller;
