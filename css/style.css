@@ -416,6 +416,9 @@ code {
     right: 10px;
     color: purple;
     font-weight: 400; }
+  .documentation .menu code {
+    padding: 0;
+    margin: 0; }
 
 .documentation #introduction {
   margin-top: 0; }

@@ -166,10 +166,7 @@
               >.
               <!-- use from both free and proprietary software. -->
             </p>
-
-            <p>
-              Check the features list to see what Purr offers:
-            </p>
+            <h4 id="features">1.1 Features</h4>
             <ul>
               <li>
                 generate the schema based on existing MongoDB collections
@@ -180,7 +177,10 @@
               <li>
                 update the schema while Purr is tailing
               </li>
-              <li>after data transfer continue syncing with MongoDB</li>
+              <li>
+                continue syncing with MongoDB after data transfer is finished
+              </li>
+
               <li>
                 transfer data to a custom schema in Postgres
               </li>
@@ -190,6 +190,9 @@
                   <li>update, drop or trucate the existing tables,</li>
                   <li>
                     create or empty the whole schema etc.
+                  </li>
+                  <li>
+                    start syncing with MongoDB from a specific timestamp
                   </li>
                 </ul>
               </li>
@@ -234,8 +237,26 @@
                   >repo</a
                 >
               </li>
-              <li>clone the repo</li>
-              <li>clone the repo</li>
+              <li>
+                <p>
+                  in the same folder where the setup.py file is type:
+                </p>
+                <code>python3 setup.py install</code>
+              </li>
+              <!-- <li>start MongoDB as a replica set and Postgres</li> -->
+              <!-- <li>
+                <p>
+                  generate the collection map
+                </p>
+                <code>purr -m -mdb mongodb://localhost:27017 -n booster</code>
+              </li>
+              <li>
+                <code>
+                  purr -cf ./collections.yml -pg
+                  postgres://127.0.0.1:5432/postgres -mdb mongodb
+                  ://localhost:27017 -n booster -t -td</code
+                >
+              </li> -->
             </ul>
             <div class="row vertical-center">
               <div class="col-md">
@@ -273,7 +294,8 @@
                 and the setup file should not be mixed. -->
               If you have Docker installed, check out our
               <a href="https://github.com/boosterfuels/purr-examples">example</a
-              >. `docker compose up` `docker compose down`
+              >.
+              <!-- `docker compose up` `docker compose down` -->
 
               <ol>
                 <li>
