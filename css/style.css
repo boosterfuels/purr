@@ -398,12 +398,32 @@ code {
 #btn-sticky:hover {
   background-color: #555; }
 
+.documentation .menu {
+  /* hide original list counter */
+  /* reset counter */
+  /* increment counter */ }
+  .documentation .menu ol li {
+    display: block; }
+  .documentation .menu ol > li:first-child {
+    counter-reset: item; }
+  .documentation .menu ol > li {
+    counter-increment: item;
+    position: relative; }
+  .documentation .menu ol > li:before {
+    content: counters(item, ".") ". ";
+    position: absolute;
+    margin-right: 100%;
+    right: 10px;
+    color: purple;
+    font-weight: 400; }
+
 .documentation #introduction {
   margin-top: 0; }
 
 .documentation a {
   cursor: pointer;
-  text-decoration: none; }
+  text-decoration: none;
+  color: purple; }
 
 .documentation hr {
   margin: 10px 0; }
@@ -411,3 +431,6 @@ code {
 .documentation .hr-cat {
   max-width: 30px;
   max-height: 30px; }
+
+.documentation .button-light {
+  padding: 5px 15px; }
