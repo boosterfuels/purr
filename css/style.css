@@ -392,7 +392,7 @@ code {
   background-color: orange;
   color: white;
   cursor: pointer;
-  padding: 1vh 1.35vh;
+  padding: 9px 15px;
   border-radius: 50px; }
 
 #btn-sticky:hover {
