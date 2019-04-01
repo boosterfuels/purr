@@ -286,6 +286,7 @@
             </div> -->
 
             <h2 id="quickstart">3. Quickstart</h2>
+            <h4>With Docker</h4>
             <div>
               <!-- Once you created your collection map, you should have a running
                 MongoDB instance as a source and Postgres as a target database.
@@ -296,6 +297,7 @@
               <a href="https://github.com/boosterfuels/purr-examples">example</a
               >.
               <!-- `docker compose up` `docker compose down` -->
+              <h4>Without Docker</h4>
 
               <ol>
                 <li>
@@ -305,7 +307,11 @@
                   </code>
                 </li>
                 <li>
-                  Start Mongo as a replica set
+                  Start MongoDB as a
+                  <a
+                    href="https://docs.mongodb.com/manual/tutorial/convert-standalone-to-replica-set/"
+                    >replica set</a
+                  >
                 </li>
                 <li>
                   <p>
@@ -313,7 +319,7 @@
                   </p>
                   <code>purr -m -mdb mongodb://localhost:27017 -n db_name</code>
                 </li>
-                <li>start Postgres</li>
+                <li>start PostgreSQL</li>
                 <li>
                   <p>
                     On the command line type:

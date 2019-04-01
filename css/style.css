@@ -416,6 +416,11 @@ code {
     right: 10px;
     color: purple;
     font-weight: 400; }
+  .documentation .menu a {
+    cursor: pointer;
+    text-decoration: none;
+    color: purple;
+    font-weight: 400; }
   .documentation .menu code {
     padding: 0;
     margin: 0; }
@@ -423,10 +428,10 @@ code {
 .documentation #introduction {
   margin-top: 0; }
 
-.documentation a {
+.documentation .docs-text a {
   cursor: pointer;
   text-decoration: none;
-  color: purple; }
+  color: orange; }
 
 .documentation hr {
   margin: 10px 0; }
