@@ -373,7 +373,8 @@ code {
   background-color: #555; }
 
 .documentation .footer p {
-  margin-bottom: 20px; }
+  margin-bottom: 20px;
+  color: #555; }
 
 .documentation .menu {
   /* hide original list counter */
