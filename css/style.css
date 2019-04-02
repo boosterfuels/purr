@@ -333,29 +333,6 @@ code {
   .contributors .card-deck .card:hover {
     box-shadow: #b295b5 1px 1px 10px 1px; } }
 
-.contributors {
-  border-radius: 5px; }
-  .contributors .go a {
-    width: 50%; }
-  .contributors div {
-    text-align: center; }
-    .contributors div .desc {
-      color: #facfff; }
-  .contributors .vertical-center {
-    display: block;
-    align-items: center; }
-  .contributors .card-deck .card {
-    background: #f8f6fc; }
-    .contributors .card-deck .card .card-body .card-title {
-      text-align: center;
-      color: #ff9612; }
-    .contributors .card-deck .card .card-body .card-text {
-      height: 50px;
-      text-align: center; }
-    .contributors .card-deck .card .card-body img {
-      width: 75%;
-      min-width: 50px; }
-
 .image-card img {
   width: 100% !important;
   max-height: 160px;
@@ -442,3 +419,26 @@ code {
 
 .documentation .button-light {
   padding: 5px 15px; }
+
+.documentation .contributors {
+  border-radius: 5px; }
+  .documentation .contributors .go a {
+    width: 50%; }
+  .documentation .contributors div {
+    text-align: center; }
+    .documentation .contributors div .desc {
+      color: #facfff; }
+  .documentation .contributors .vertical-center {
+    display: block;
+    align-items: center; }
+  .documentation .contributors .card-deck .card {
+    background: #f8f6fc; }
+    .documentation .contributors .card-deck .card .card-body .card-title {
+      text-align: center;
+      color: #ff9612; }
+    .documentation .contributors .card-deck .card .card-body .card-text {
+      height: 50px;
+      text-align: center; }
+    .documentation .contributors .card-deck .card .card-body img {
+      width: 75%;
+      min-width: 50px; }

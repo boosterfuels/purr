@@ -323,9 +323,9 @@
                   <code>purr -m -mdb mongodb://localhost:27017 -n db_name</code>
                 </li>
                 <li>Start PostgreSQL</li>
-                <li>
+                <li id="purr_start">
                   <p>
-                    On the command line type:
+                    To start the data transfer, type:
                   </p>
                   <code>
                     purr -cf collections.yml -pg
@@ -664,7 +664,8 @@
                 >
               </li>
               <li>
-                  there is no definition for extra properties when generating the map 
+                there is no definition for extra properties when generating the
+                map
                 <p class="note">Note: we may add them later</p>
               </li>
               <li>
@@ -692,7 +693,7 @@
             </ul>
             <p>
               After generating the collection map, start the data tranfer as
-              explained <a href="">earlier</a>.
+              explained <a href="docs.html#purr_start">earlier</a>.
             </p>
 
             <h2 id="update_collmap">Updating the map</h2>
