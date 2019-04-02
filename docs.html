@@ -94,14 +94,29 @@
             <ol class="bullet">
               <!-- <li><a href="#">Getting started</a></li> -->
               <li><a href="docs.html#introduction">Introduction</a></li>
-              <li><a href="docs.html#download">Download & Install</a></li>
+              <li>
+                <a href="docs.html#download">Download & Install</a>
+
+                <ol>
+                  <li><a href="docs.html#install_pip">Pip</a></li>
+                  <li>
+                    <a href="docs.html#install_github">Github</a>
+                  </li>
+                </ol>
+              </li>
+
               <!-- <li><a href="docs.html#support">Support</a></li> -->
               <li><a href="docs.html#quickstart">Quickstart</a></li>
               <li>
                 <a href="docs.html#collmap">Collection Map</a>
                 <ol>
-                  <li><a href="docs.html#datatypes">Data types</a></li>
-                  <li><a href="docs.html#extraprops">Extra properties</a></li>
+                  <li><a href="docs.html#structure">Structure</a></li>
+                  <ol>
+                    <li><a href="docs.html#datatypes">Data types</a></li>
+                    <li>
+                      <a href="docs.html#extraprops">Extra properties</a>
+                    </li>
+                  </ol>
                   <li>
                     <a href="docs.html#generate_collmap">Generating the map</a>
                   </li>
@@ -114,9 +129,17 @@
               <li>
                 <a href="docs.html#setup">Setup</a>
                 <ol>
-                  <li><a href="">General</a></li>
-                  <li><a href="">Postgres</a></li>
-                  <li><a href="">MongoDB</a></li>
+                  <li>
+                    <a href="docs.html#settings_general">General Settings</a>
+                  </li>
+                  <li>
+                    <a href="docs.html#settings_postgres"
+                      >Settings for PostgreSQL</a
+                    >
+                  </li>
+                  <li>
+                    <a href="docs.html#settings_mongo">Settings for MongoDB</a>
+                  </li>
                 </ol>
               </li>
 
@@ -209,14 +232,14 @@
             <h2 id="download">
               2. Download & Install
             </h2>
-            <!-- http://initd.org/psycopg/download/ -->
             <p>The current stable release is 1.0.0</p>
 
-            <h4>Install using pip</h4>
+            <h4 id="install_pip">Install using pip</h4>
             <p>
               Purr is available on
-              <a href="https://test.pypi.org/project/purr/">PyPI</a>. Make sure
-              to have an up-to-date pip:
+              <a href="https://test.pypi.org/project/purr/" target="_blank"
+                >PyPI</a
+              >. Make sure to have an up-to-date pip:
             </p>
             <code>
               pip install -U pip
@@ -227,7 +250,7 @@
             <code>
               pip install purrito
             </code>
-            <h4>Installing from source</h4>
+            <h4 id="install_github">Installing from source</h4>
 
             <p>
               You can also download Purr from Github and install from source:
@@ -619,10 +642,10 @@
               Mongo as a replicaset.
             </p> -->
 
-            <h2>
+            <h3>
               Generating the map
               <!-- <span class="label label-success font-middle">NEW</span> -->
-            </h2>
+            </h3>
             <p>
               Writing a collection map might be exhausting, especially when
               there are lots of collections to transfer. Generating the
@@ -696,7 +719,7 @@
               explained <a href="docs.html#purr_start">earlier</a>.
             </p>
 
-            <h2 id="update_collmap">Updating the map</h2>
+            <h3 id="update_collmap">Updating the map</h3>
 
             <p>
               Sooner or later you will need to change your collection map. If
@@ -779,12 +802,12 @@
               The setup file is a YAML file that contains:
             </p>
             <ul>
-              <li>settings for Postgres</li>
+              <li>settings for PostgreSQL</li>
               <li>settings for MongoDB</li>
               <li>general settings</li>
             </ul>
-            <h4>
-              Settings for Postgres:
+            <h4 id="settings_postgres">
+              Settings for PostgreSQL
             </h4>
             <ul>
               <li><code>db_name</code>: name of database</li>
@@ -812,14 +835,14 @@
                 transfer
               </li>
             </ul>
-            <h4>
+            <h4 id="settings_mongo">
               Settings for MongoDB
             </h4>
             <ul>
               <li><code>db_name</code>: name of database</li>
               <li><code>connection</code>: connection string to database</li>
             </ul>
-            <h4>General Settings</h4>
+            <h4 id="settings_general">General Settings</h4>
             <ul>
               <li>
                 <code>tailing</code>: keep tailing the oplog after collection
@@ -1018,9 +1041,9 @@
             <h2 id="contribute">
               8. Contribute
             </h2>
-            Purr is an open-source project that was built using Python3. If you
+            Purr is an open-source project that was built using Python. If you
             would like to contribute, check out our guidelines
-            <h4>Our most valuable contributors</h4>
+            <h3>Our most valuable contributors</h3>
             <div id="contributors" class="row contributors vertical-center">
               <div class="content-body">
                 <div>
@@ -1087,19 +1110,20 @@
               </div>
             </div>
 
-            <h4 id="guidelines">Guidelines</h4>
+            <h3 id="guidelines">Guidelines</h3>
             <p>
               Contributing to Purr is a great way to learn more about MongoDB,
               Python and PostgreSQL
             </p>
-            <h5>PEP 8 Conventions</h5>
+            <h4>PEP 8 Conventions</h4>
             <p>
               To make sure you follow PEP 8, use
               <a href="https://pypi.org/project/pycodestyle/">pycodestyle</a>
               (previously <code>pep8</code>`). Pycodestyle is a tool that checks
               your code against style conventions in PEP 8.
             </p>
-            <h5>Cleanup</h5>
+            <h4>Cleanup</h4>
+
             <p>
               We like to clean up our code to make sure that no unused functions
               were left behind. We expect you to do the same so the code can be
@@ -1110,15 +1134,22 @@
             <pre>
                 def unused_function():
                   print("Delete me!")                     
-                  <img class="cleanup" src="images/cat_on_broom.png" alt="" />
             </pre>
-            <h5>Commit Guidelines</h5>
+            <h4>Commit Guidelines</h4>
             <p>
-              A good practice
-              <a href="https://pypi.org/project/vulture/">Vulture</a> is a great
-              tool to eliminate unused code. Remember, YAGNI :)
+              When it comes to commit messages, we love to follow
+              <a
+                href="https://github.com/angular/angular/blob/master/CONTRIBUTING.md#commit"
+                >rules</a
+              >
+              defined by Angular so our commit messages make more sense and also
+              easier to read:
             </p>
-            <h5>Plans</h5>
+            <code>
+              feat(extractor): adding slack integration
+              test(tailer): updating test for checking types
+            </code>
+            <h3>Plans</h3>
             <p>
               In the future, we would like to add some new features to Purr.
             </p>
@@ -1132,9 +1163,9 @@
         </div>
         <div class="col-md-1"></div>
       </div>
-    </div>
-    <div class="footer">
-      <p>2019 <span>Booster Fuels</span>, Inc., All Rights Reserved</p>
+      <div class="footer">
+        <p>2019 <span>Booster Fuels</span>, Inc., All Rights Reserved</p>
+      </div>
     </div>
   </body>
 </html>

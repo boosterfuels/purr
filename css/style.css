@@ -192,19 +192,19 @@ ul li a {
   .content .get-started-now .card-deck .card .card-body .card-text {
     height: 50px;
     text-align: center; }
-  .content .contact .idea {
-    margin: 0 15px 40px -15px; }
-    .content .contact .idea .cat {
-      margin-top: 30px; }
-  .content .contact .footer {
+  .content .footer {
     text-align: center; }
-    .content .contact .footer p {
+    .content .footer p {
       margin: 0; }
-    .content .contact .footer .main {
+    .content .footer .main {
       padding: 0;
       background-color: transparent;
       text-align: center;
       color: white; }
+  .content .contact .idea {
+    margin: 0 15px 40px -15px; }
+    .content .contact .idea .cat {
+      margin-top: 30px; }
   .content .contact a {
     text-decoration: none;
     color: orange; }
@@ -275,9 +275,6 @@ ul li a {
   .content .docs-text p {
     color: #6e6969;
     margin: 10px 0 10px 0; }
-  .content .docs-text .cleanup {
-    width: 100px;
-    position: absolute; }
 
 .note {
   font-size: smaller;
@@ -374,6 +371,9 @@ code {
 
 #btn-sticky:hover {
   background-color: #555; }
+
+.documentation .footer p {
+  margin-bottom: 20px; }
 
 .documentation .menu {
   /* hide original list counter */
