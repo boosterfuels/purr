@@ -156,8 +156,8 @@
             <ul>
               <li>migrate from MongoDB to PostgreSQL</li>
               <li>
-                use BI tools like Periscope but want to keep using MongoDB at the
-                same time
+                use BI tools like Periscope but want to keep using MongoDB at
+                the same time
               </li>
             </ul>
             <!-- Purr is written using the Python programming language.  -->
@@ -213,9 +213,11 @@
             <p>The current stable release is 1.0.0</p>
 
             <h4>Install using pip</h4>
-            Purr is available on
-            <a href="https://test.pypi.org/project/purr/">PyPI</a>.
-            <p>Make sure to have an up-to-date pip:</p>
+            <p>
+              Purr is available on
+              <a href="https://test.pypi.org/project/purr/">PyPI</a>. Make sure
+              to have an up-to-date pip:
+            </p>
             <code>
               pip install -U pip
             </code>
@@ -240,7 +242,7 @@
               </li>
               <li>
                 <p>
-                  in the same folder where the setup.py file is type:
+                  in the same folder where the setup.py file is located, type:
                 </p>
                 <code>python3 setup.py install</code>
               </li>
@@ -309,8 +311,7 @@
                 </li>
                 <li>
                   Start MongoDB as a
-                  <a
-                    href="https://docs.mongodb.com/manual/replication"
+                  <a href="https://docs.mongodb.com/manual/replication"
                     >replica set</a
                   >
                 </li>
@@ -361,10 +362,12 @@
             </code>
             <p>
               The collection map is a YAML file which contains information about
-              the database and the collections that will be transferred. The collections that are not part of the map will be ignored when loading data into Postgres.
+              the database and the collections that will be transferred. The
+              collections that are not part of the map will be ignored when
+              loading data into Postgres.
             </p>
             <p>
-              The collection map should have the following structure:
+              The map should have the following structure:
             </p>
             <pre>
               mongo_database_name:
@@ -418,11 +421,11 @@
                     :extra_props: JSONB
             </pre>
             <p>
-              Explanation: When connecting to the Mongo instance, Purr looks for
-              the database name in the collection map
+              Explanation: When connecting to the MongoDB instance, Purr looks
+              for the database name in the collection map
               (<i>my_mongo_database</i>). Collection <i>Cat</i> will be
               transferred to table <i>cat</i> (described under :meta -> :table).
-              This table will have 6 columns with the following types
+              Table <i>cat</i> will have 6 columns with the following types:
             </p>
             <pre>
               id: text
@@ -432,7 +435,6 @@
               created_at: text
               extra_props: jsonb
             </pre>
-            <p>Extra properties consist of keys and their corresponding values appended into a specific data type: JSONB.</p>
             <h4 id="datatypes">
               Data Types
             </h4>
@@ -450,11 +452,17 @@
               Type Conversion
             </h5>
             <p>
-              Restarting Purr after changing the types in a collection map: When
-              Purr reads the new collection map, it compares it to the old one
-              and tries to update the column types. Sometimes it is not possible
-              because Postgres cannot cast all the values. In that case, Purr
-              will log an error.
+              When starting Purr, the collection map is inserted into a table
+              called <code>purr_transfer_info</code>. After changing any column
+              type in the map, Purr tries to apply the changes to the tables in
+              Postgres.
+              <!-- The old
+              collection map is located in the table
+              <code>purr_transfer_info</code> which is compared to the new one. -->
+              <!-- In case of updated column types Purr tries to update the column
+              definition.  -->
+              This is sometimes rejected by Postgres and in that case, an error
+              will be logged.
             </p>
             <p>
               The following table shows which conversions can happen without an
@@ -519,52 +527,62 @@
             </div>
 
             <p>
-              Conversions that have ✔, can be easily handled by Postgres. When
+              Conversions that have ✔, can be easily handled by Postgres.
+              <!-- When
               you assign a new type and your data is not castable to your new
               type, Purr will have to handle that situation on its own. Purr
               will rename your inconsistent column to column_name_old and create
               a new one with the new data type under column_name. This way we
               can make sure that you will not lose any data and you can continue
-              working on your new column. Purr will restart collection transfer
-              for that specific collection and will try to cast your values so
-              they fit into your new column. If casting cannot be done, you will
-              have NULLs instead of a value.
+              working on your new column. -->
+              <!-- Purr will restart collection transfer for that specific collection
+              and will try to cast your values so they fit into your new column.
+              If casting cannot be done, you will have NULLs instead of a value. -->
             </p>
 
-            <p>
-              Keeping the old version of your column gives you more control over
-              your data: you decide what to do with the values which could not
-              be casted and inserted into the new column. When you re-run Purr
-              again, your old column will be deleted since it's not part of the
-              collection map. Feel free to drop the old column at any moment (if
-              you are sure that you don't need it).
-            </p>
-            <p>
-              When you are tailing and a type change happens in your Mongo
-              database, Purr will try to cast your data to the current column's
-              type. If not succeeded, Purr will log a warning and continue
-              tailing.
-            </p>
+            <!-- Keeping the old version of a column gives more control over the
+              data: you decide what to do with the values which could not be
+              casted and inserted into the new column. When restarting Purr
+              again, the old column will not be deleted but they will not be
+              updated anymore so you can decide later what to do with it. since
+              it's not part of the collection map. Feel free to drop the old
+              column at any moment (if you are sure that you don't need it). -->
+            <!-- <p>
+              When Purr is tailing and a type change happens, Purr will try to
+              cast the data to the new type. If that is not successful, Purr
+              will log a warning and continue with the tailing.
+            </p> -->
 
             <h4>Extra properties</h4>
             <p>
-              Extra properties are properties of a document in MongoDB which do
-              not have their name, source and type in the collection map. Having
-              extra properties means that values which are not defined in the
-              collection map will be part of a column named extra_props with
-              type defined based on the collection map. Leaving out extra
-              properties from the collection map will make extra_props type
-              default to JSONB.
+              It is not necessary to have definition for every key in the
+              collection map. In that case, a column named
+              <code>_extra_properties</code> with type <code>JSONB</code> can be
+              created in PostgreSQL. Every key and value that lacks the
+              definition can be merged together forming a new value and inserted
+              into this column.
+
+              <!-- Having extra properties means that
+              values which are not defined in the collection map will be part of
+              a column named extra_props with type defined based on the
+              collection map.  -->
+              <!-- Extra properties consist of keys and their corresponding values
+              that have no type definition in the collection map. These values
+              are merged together to form a new attribute called -->
+              <!-- <code>extra_properties</code> with the <code>JSONB</code> data
+                type.  -->
+              Purr does not transfer extra properties by default because it
+              slows down the data transfer.
             </p>
             <p>
-              In case that you want to include extra properties you have to
-              start Purr with option -ex.
+              To include extra properties, start Purr with option
+              <code>-ex</code>.
             </p>
-            <p>
+            <!-- <p>
               If you already have an extra_props column but you restarted Purr
               without this option, all columns named extra_props one by one.
-            </p>
-            <ul>
+            </p> -->
+            <!-- <ul>
               <li>
                 drop column extra_props for Collection1
               </li>
@@ -572,13 +590,9 @@
               <li>
                 start transfer ... and so on for the other collections
               </li>
-            </ul>
-            <p>
-              Starting Purr without extra properties can be significantly
-              faster.
-            </p>
+            </ul> -->
 
-            <p>
+            <!-- <p>
               Example: start Purr using a setup file and collections described
               in collections.yml
             </p>
@@ -603,11 +617,11 @@
               write operations on a collection that was not yet transferred and
               therefore it's corresponding relation does not yet exist.Start
               Mongo as a replicaset.
-            </p>
+            </p> -->
 
             <h2>
               Generating the map
-              <span class="label label-success font-middle">NEW</span>
+              <!-- <span class="label label-success font-middle">NEW</span> -->
             </h2>
             <p>
               Writing a collection map might be exhausting, especially when
@@ -1109,6 +1123,7 @@
             </p>
             <ul>
               <li>slack integration</li>
+              <li>data transfer from multiple MongoDB instances</li>
               <li>exposing an API</li>
               <li>...</li>
             </ul>
