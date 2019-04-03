@@ -1,11 +1,15 @@
 import time
 import sys
 from datetime import datetime
-
-from etl.extract import collection, extractor, tailer, init_mongo as mongodb, transfer_info
+import os
+from etl.extract import collection, extractor, tailer, transfer
+from etl.extract import init_mongo as mongodb, transfer_info, notification
+from etl.extract import collection_map as cm
 from etl.load import schema, init_pg as postgres
 from etl.monitor import logger
-from etl.transform import config_parser as cp
+from etl.transform import config_parser as cp, type_checker as tc
+import pkg_resources
+
 
 def start(settings, coll_config):
     """
@@ -15,9 +19,10 @@ def start(settings, coll_config):
     -
 
     Parameters
-    ----------    
+    ----------
     settings : dict
-             : basic settings for both PG and MongoDB (connection strings, schema name)
+             : basic settings for both PG and MongoDB
+             (connection strings, schema name)
 
     coll_config : dict
                 : config file for collections
@@ -26,55 +31,70 @@ def start(settings, coll_config):
     ----
     - create table with attributes and types
     """
-    logger.info("Starting Purr...")
+    logger.info("Starting Purr v%s ..." %
+                pkg_resources.require("purr")[0].version)
+
+    logger.info("PID=%s" % os.getpid())
 
     setup_pg = settings["postgres"]
     setup_mdb = settings["mongo"]
-    # collections which will be transferred
-    collections = cp.config_collection_names(coll_config)
-    
-    if collections is None:
-        logger.error("[CORE] No collections found. Check your collection names in the setup file.")
-        return
 
     pg = postgres.PgConnection(setup_pg["connection"])
-    schema.create(pg, setup_pg["schema_name"])
-
     mongo = mongodb.MongoConnection(setup_mdb)
 
-    # initialize extractor
-    ex = extractor.Extractor(pg, mongo.conn, setup_pg, settings, coll_config)
+    cm.create_table(
+        pg, setup_pg["schema_name"], coll_config)
 
-    # after extracting all collections tailing will start from this timestamp
-    start_date_time = datetime.utcnow()
+    ex = extractor.Extractor(
+        pg, mongo.conn, setup_pg, settings, coll_config)
+    THREADS = []
+    try:
+        thr_notification = notification.NotificationThread(pg)
+        THREADS.append(thr_notification)
+        thr_notification.start()
+        thr_transfer = transfer.TransferThread(
+            settings, coll_config, pg, mongo, ex)
+        THREADS.append(thr_transfer)
+        thr_transfer.start()
+        while True:
+            time.sleep(2)
+            if thr_notification.new is True:
+                thr_transfer.tailing_stop()
 
-    if setup_pg["schema_reset"] is True:
-        schema.reset(pg, setup_pg["schema_name"])
+                thr_notification.new = False
+                thr_transfer.join(3)
 
-    transfer_info.create_stat_table(pg, setup_pg["schema_name"])
-    
-    # Skip collection transfer if started in tailing mode.
-    if settings["tailing_from_db"] is False and settings["tailing_from"] is None:
-        if ex.typecheck_auto is True:
-            ex.transfer_auto(collections)
-        else:
-            ex.prepare_transfer_conf(collections)
+                thr_transfer = transfer.TransferThread(
+                    settings, coll_config, pg, mongo, ex)
+                THREADS.append(thr_transfer)
+                thr_transfer.settings["tailing"] = False
+                thr_transfer.settings["tailing_from_db"] = True
+                thr_transfer.schema_update()
+                thr_transfer.start()
+        thr_notification.join(3)  # wait for 3 seconds
+        thr_transfer.join(3)
 
-    if settings["tailing"] is True:
-        t = tailer.Tailer(pg, mongo, setup_pg, settings, coll_config)
-        logger.info("Starting standard tailing.")
-        t.start(start_date_time)
-        
-    elif settings["tailing_from"] is not None:
-        logger.info("Starting tailing from provided timestamp.")
-        t = tailer.Tailer(pg, mongo, setup_pg, settings, coll_config)
-        t.start(settings["tailing_from"])
+    except (KeyboardInterrupt, SystemExit):
+        logger.error('[CORE] Stopping all threads.')
+        for t in THREADS:
+            t.stop()
+    except Exception as ex:
+        logger.error(
+            "[CORE] Unable to start listener thread. Details: %s" % ex)
+        raise SystemExit()
 
-    elif settings["tailing_from_db"] is True:
-        logger.info("Starting tailing from timestamp found in purr_info.")
-        t = tailer.Tailer(pg, mongo, setup_pg, settings, coll_config)
-        ts = transfer_info.get_latest_successful_ts(pg, 'public')
-        latest_ts = int((list(ts)[0])[0])
-        t.start(latest_ts)
-    else:
-        pg.__del__()
+
+def generate_collection_map(settings_mdb):
+    """
+    TODO: 
+    - add docs
+    - disconnect from Mongo!
+    """
+    logger.info("Starting Purr v%s ..." %
+                pkg_resources.require("purr")[0].version)
+
+    logger.info("PID=%s" % os.getpid())
+    mongo = mongodb.MongoConnection(settings_mdb)
+    coll_map = cm.determine_types(mongo.conn, settings_mdb["db_name"])
+    cm.create_file(coll_map)
+    # mongo.disconnect()

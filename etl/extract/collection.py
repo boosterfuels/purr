@@ -1,12 +1,13 @@
 from etl.monitor import logger
 from etl.extract import init_mongo
-from bson import ObjectId
+import pymongo
 
 
 def check(db, colls_requested):
     """
-    Checks if requested collections exist in the database. 
-    Gets all collection names from MongoDB (colls_name) and creates a new list which contains only the existing collection names (colls_existing).
+    Checks if requested collections exist in the database.
+    Gets all collection names from MongoDB (colls_name) and creates
+    a new list which contains only the existing collection names.
 
     Parameters
     ----------
@@ -27,7 +28,7 @@ def check(db, colls_requested):
 
     Example
     -------
-    check(db, ['Car'])  
+    check(db, ['Car'])
       []
     check(db, ['Region', 'Customer']
       ['Region', 'Customer']
@@ -48,7 +49,7 @@ def check(db, colls_requested):
     return colls_existing
 
 
-def get_by_name(db, name):
+def get_by_name(db, name, size=20000):
     """
     Gets data from collection limited by batch size.
 
@@ -74,7 +75,6 @@ def get_by_name(db, name):
     ----
     - let the user decide batch size
     """
-    size = 30000
     docs = []
     try:
         logger.info('[COLLECTION] Loading data from collection %s...' % name)
@@ -87,9 +87,49 @@ def get_by_name(db, name):
     return docs
 
 
-def get_by_name_reduced(db, name, fields):
+def get_docs_for_type_check(db, name, nr_of_docs=100):
     """
-    Gets data from collection limited by batch size containing only specific fields.
+    Gets data from a collection limited.
+
+    Parameters
+    ----------
+    db : pymongo.database.Database
+      Database connection
+    name : string
+      Name of collection.
+    nr_of_docs : integer
+      Number of documents to return
+
+    Returns
+    -------
+    docs : pymongo.cursor.Cursor
+
+    Raises
+    ------
+
+    Example
+    -------
+    get_docs_for_type_check(db, 'Car')
+
+    TODO
+    ----
+    - let the user decide batch size
+    """
+    docs = []
+    try:
+        logger.info('[COLLECTION] Loading data from collection %s...' % name)
+        c = db[name]
+        docs = c.find().limit(nr_of_docs)
+    except Exception as ex:
+        logger.error(
+            '[COLLECTION] Loading data from collection %s failed.' % name)
+    return docs
+
+
+def get_by_name_reduced(db, name, fields, size=20000):
+    """
+    Gets data from collection limited by batch size containing
+    only specific fields.
 
     Parameters
     ----------
@@ -115,16 +155,16 @@ def get_by_name_reduced(db, name, fields):
     ----
     - let the user decide batch size
     """
-    size = 30000
     docs = []
     try:
         logger.info('[COLLECTION] Loading data from collection %s...' % name)
         c = db[name]
-        # create the document given to a query that specifies which fields MongoDB returns in the result set
+        # create the document given to a query that specifies which
+        # fields MongoDB returns in the result set
         projection = {}
         for field in fields:
             projection[field] = 1
-        bz = c.find({}, projection)
+        bz = c.find({}, projection).sort('$natural', pymongo.DESCENDING)
         docs = bz.batch_size(size)
     except Exception as ex:
         logger.error(
@@ -132,11 +172,9 @@ def get_by_name_reduced(db, name, fields):
     return docs
 
 
-def get_doc_by_id(db, name, id):
+def get_all(db):
     try:
-        c = db[name]
-        bz = c.find_one({"_id": ObjectId(id)})
-        return bz
+        return db.collection_names(include_system_collections=False)
     except Exception as ex:
         logger.error(
-            '[COLLECTION] Loading document from collection %s failed. Details: %s' % (name, ex))
+            '[COLLECTION] Loading collection names failed.')

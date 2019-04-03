@@ -1,8 +1,11 @@
 import psycopg2
 import time
 
-from etl.load import table, row, constraint, schema
+from etl.load import table, row, constraint, schema, procedure
 from etl.monitor import logger
+from datetime import datetime
+import json
+import collections
 
 
 def create_stat_table(db, schema):
@@ -30,10 +33,10 @@ def create_stat_table(db, schema):
         ts = get_latest_successful_ts(db, 'public')
         if len(ts) == 0:
             row.insert(db, schema, table_name, attrs, values)
-        
         logger.info("[TRANSFER INFO] Created table %s." % (table_name))
     except Exception as ex:
-        logger.error("[TRANSFER_INFO] Failed to create table purr_info: %s" % (ex))
+        logger.error(
+            "[TRANSFER_INFO] Failed to create table %s: %s" % (table_name, ex))
 
 
 def get_latest_successful_ts(db, schema):
@@ -59,17 +62,20 @@ def get_latest_successful_ts(db, schema):
         return res
     except Exception as ex:
         logger.error(
-            "[TRANSFER_INFO] Failed to get the timestamp of the latest successful transfer: %s"
+            """[TRANSFER_INFO] Failed to get the timestamp
+             of the latest successful transfer: %s"""
             % (ex)
         )
 
 
 def update_latest_successful_ts(db, schema, dt):
-    cmd = "UPDATE %s.purr_info SET latest_successful_ts='%s';" % (schema, str(dt))
+    cmd = "UPDATE %s.purr_info SET latest_successful_ts='%s';" % (
+        schema, str(dt))
     try:
         db.execute_cmd(cmd)
     except Exception as ex:
         logger.error(
-            "[TRANSFER_INFO] Failed to update the timestamp of the latest successful transfer: %s"
+            """[TRANSFER_INFO] Failed to update the timestamp
+            of the latest successful transfer: %s"""
             % (ex)
         )

@@ -12,8 +12,7 @@ pip-delete-this-directory.txt
 # Documentation
 doc
 
-collections.yml
-setup.yml
+*.yml
 
 **/.DS_Store
 
@@ -32,4 +31,3 @@ eggs/
 lib/
 
 .vscode/
-land*
