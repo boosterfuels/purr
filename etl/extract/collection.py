@@ -1,7 +1,7 @@
 from etl.monitor import logger
 from etl.extract import init_mongo
 import pymongo
-
+import bson.objectid
 
 def check(db, colls_requested):
     """
@@ -178,3 +178,13 @@ def get_all(db):
     except Exception as ex:
         logger.error(
             '[COLLECTION] Loading collection names failed.')
+
+
+def get_doc_by_id(db, name, id):
+    try:
+        c = db[name]
+        bz = c.find_one({"_id": ObjectId(id)})
+        return bz
+    except Exception as ex:
+        logger.error(
+            '[COLLECTION] Loading document from collection %s failed. Details: %s' % (name, ex))
