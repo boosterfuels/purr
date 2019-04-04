@@ -43,7 +43,7 @@ def start(settings, coll_config):
     mongo = mongodb.MongoConnection(setup_mdb)
 
     cm.create_table(
-        pg, setup_pg["schema_name"], coll_config)
+        pg, coll_config, setup_pg["schema_name"])
 
     ex = extractor.Extractor(
         pg, mongo.conn, setup_pg, settings, coll_config)

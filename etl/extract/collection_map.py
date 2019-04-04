@@ -62,7 +62,7 @@ def get_table(db, schema='public'):
         )
 
 
-def create_table(db, schema, coll_map):
+def create_table(db, coll_map, schema='public'):
     """
   Adds primary key to a PostgreSQL table.
   Parameters
@@ -72,7 +72,7 @@ def create_table(db, schema, coll_map):
   -
   Example
   -------
-  create_stat_table(pg, 'purr')
+  create_table(pg, 'purr')
   """
     table_name = "purr_collection_map"
     attrs = ["id", "collection_name", "relation_name",
