@@ -25,7 +25,7 @@ class Logger():
         self.logger.info(m)
 
     def warn(self, m):
-        self.logger.warn(m)
+        self.logger.warning(m)
 
     def debug(self, m):
         self.logger.debug(m)
