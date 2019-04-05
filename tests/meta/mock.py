@@ -236,6 +236,7 @@ data_mdb_company = [
     }
 ]
 
+
 # data should look like this after transfer
 # if ordered by id
 data_pg_company = [
@@ -253,6 +254,24 @@ data_pg_company_no_id = [
     (True, ['stuff.com', 'baddance.com', 'chewbacca.com'], 'kInGsSpOrT32'),
     (False, ['festival.com'], 'BoOmClAp<3'),
     (False, ['platform934.org', 'hogwarts.com'], 'LiPGlOsS24')
+]
+
+
+data_mdb_company_updated = {
+    "active": True,
+    "signupCode": "uPsYdUpSy123",
+    "domains": [
+        "southpark.com"
+    ]
+}
+
+
+data_pg_company_updated_no_id = [
+    (True, ['southpark.com'], 'uPsYdUpSy123'),
+    (True, ['southpark.com'], 'uPsYdUpSy123'),
+    (True, ['southpark.com'], 'uPsYdUpSy123'),
+    (True, ['southpark.com'], 'uPsYdUpSy123'),
+    (True, ['southpark.com'], 'uPsYdUpSy123'),
 ]
 
 

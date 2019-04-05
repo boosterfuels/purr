@@ -432,7 +432,65 @@ class TestExtractor(unittest.TestCase):
         assert mocked == res
 
     def test_update_multiple(self):
-        assert False
+        # no unset
+        # TODO: test when there is value in unset
+        cursor = pg.conn.cursor()
+
+        # reset CM in the database
+        cursor.execute(query["table_drop_purr_cm"])
+        cursor.execute(query["table_drop_company"])
+
+        pg.conn.commit()
+        create_and_populate_company_mdb()
+        cm.create_table(pg, mock.coll_config)
+
+        unset = []
+        coll = mock.coll_names[0]
+        rel = mock.rel_names[0]
+        docs = []  # mongo[coll].find()
+        mock_updated = mock.data_mdb_company_updated
+        for doc in mongo[coll].find():
+            docs.append({
+                "_id": doc["_id"],
+                "active": mock_updated["active"],
+                "signupCode": mock_updated["signupCode"],
+                "domains": mock_updated["domains"]
+            })
+        coll_config = copy.deepcopy(mock.coll_config_company_employee)
+        ex = extractor.Extractor(
+            pg,
+            mongo,
+            mock.setup_pg,
+            mock.settings,
+            coll_config
+        )
+        schema = mock.setup_pg["schema_name"]
+
+        r = relation.Relation(
+            pg,
+            schema,
+            rel,
+            True
+        )
+        attrs = mock.attrs_company
+        types = mock.types_company
+        r.create_with_columns(attrs, types)
+
+        ex.update_multiple(docs, r, coll)
+
+        cmd = "SELECT %s FROM %s order by id" % (", ".join(attrs[1:]), rel)
+        cursor.execute(cmd)
+        mocked = mock.data_pg_company_updated_no_id
+        res = cursor.fetchall()
+        print("MOCKED")
+        print(mocked)
+        print("RESULT")
+        print(res)
+
+        cursor.close()
+        del r
+        del ex
+        assert mocked == res
 
     def test_prepare_attr_details(self):
         assert False
