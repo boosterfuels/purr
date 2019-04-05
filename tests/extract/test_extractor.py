@@ -389,7 +389,8 @@ class TestExtractor(unittest.TestCase):
         unset = []
         coll = mock.coll_names[0]
         rel = mock.rel_names[0]
-        docs = []  # mongo[coll].find()
+        docs = []
+
         for doc in mongo[coll].find():
             docs.append(doc)
         coll_config = copy.deepcopy(mock.coll_config_company_employee)
@@ -492,45 +493,70 @@ class TestExtractor(unittest.TestCase):
         del ex
         assert mocked == res
 
-    def test_prepare_attr_details(self):
-        assert False
+    def test_prepare_attr_details_with_extra_props(self):
+        coll_config = copy.deepcopy(mock.coll_config_company_employee)
+        ex = extractor.Extractor(
+            pg,
+            mongo,
+            mock.setup_pg,
+            mock.settings,
+            coll_config
+        )
+        type_extra_props_pg = 'jsonb'
 
-    def test_adjust_columns(self):
-        assert False
+        ex.include_extra_props = True
+        attrs = copy.deepcopy(mock.attrs_company)
+        fields = copy.deepcopy(mock.fields_company)
+        types = []
+        for item in mock.types_company:
+            types.append(item.lower())
 
-    # def test_prepare_attr_details_with_extra_props(self):
-    #     ex.include_extra_props = True
-    #     attribute_details = ex.prepare_attr_details(
-    #         attrs_conf, attrs_mdb, types_conf, type_extra_props_pg)
-    #     import pprint
-    #     pprint.pprint(attribute_details)
-    #     res = {
-    #         '_id': {'name_conf': 'id', 'type_conf': 'text', 'value': None},
-    #         'active': {'name_conf': 'active', 'type_conf': 'boolean', 'value': None},
-    #         'domains': {'name_conf': 'domains', 'type_conf': 'jsonb', 'value': None},
-    #         'extraProps': {'name_conf': '_extra_props', 'type_conf': 'jsonb', 'value': None},
-    #         'signupCode': {'name_conf': 'signup_code', 'type_conf': 'text', 'value': None}
-    #     }
-    #     assert res == attribute_details
+        attribute_details = ex.prepare_attr_details(
+            attrs, fields, types, type_extra_props_pg)
+        import pprint
+        print("RESULT")
+        pprint.pprint(attribute_details)
+        print("MOCKED")
+        pprint.pprint(mock.attr_details)
+        del ex
+        assert mock.attr_details == attribute_details
 
-    # def test_prepare_attr_details_without_extra_props(self):
-    #     attrs_conf = ['id', 'active', 'domains', 'signup_code']
-    #     attrs_mdb = ['_id', 'active', 'domains', 'signupCode']
-    #     types_conf = ['text', 'boolean', 'jsonb', 'text']
-    #     type_extra_props_pg = None
-    #     ex = extractor.Extractor(pg, mongo, setup_pg, settings, coll_conf)
-    #     ex.include_extra_props = False
-    #     attribute_details = ex.prepare_attr_details(
-    #         attrs_conf, attrs_mdb, types_conf, type_extra_props_pg)
-    #     import pprint
-    #     pprint.pprint(attribute_details)
-    #     res = {
-    #         '_id': {'name_conf': 'id', 'type_conf': 'text', 'value': None},
-    #         'active': {'name_conf': 'active', 'type_conf': 'boolean', 'value': None},
-    #         'domains': {'name_conf': 'domains', 'type_conf': 'jsonb', 'value': None},
-    #         'signupCode': {'name_conf': 'signup_code', 'type_conf': 'text', 'value': None}
-    #     }
-    #     assert res == attribute_details
+    def test_prepare_attr_details_without_extra_props(self):
+        coll_config = copy.deepcopy(mock.coll_config_company_employee)
+        ex = extractor.Extractor(
+            pg,
+            mongo,
+            mock.setup_pg,
+            mock.settings,
+            coll_config
+        )
 
-    def test_adjust_columns(self):
-        assert False
+        ex.include_extra_props = False
+        attrs = copy.deepcopy(mock.attrs_company)
+        fields = copy.deepcopy(mock.fields_company)
+        types = []
+        for item in mock.types_company:
+            types.append(item.lower())
+
+        attribute_details = ex.prepare_attr_details(
+            attrs, fields, types)
+        import pprint
+        print("RESULT")
+        pprint.pprint(attribute_details)
+        print("MOCKED")
+        pprint.pprint(mock.attr_details)
+        del ex
+        mocked = copy.deepcopy(mock.attr_details)
+        del mocked["extraProps"]
+
+        assert mocked == attribute_details
+
+    # def test_adjust_columns(self):
+    #     assert False
+
+    # def test_handle_failed_type_update(self):
+    #     # self.attrs_details changed
+    #     assert False
+
+    # def test_add_extra_props(self):
+    #     assert False

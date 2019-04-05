@@ -56,7 +56,7 @@ for i in range(len(attrs_company)):
 
 # --- COLLECTION INFORMATION ---
 coll_name_company = 'Company'
-fields_company = ["active", "domains", "signupCode"]
+fields_company = ["_id", "active", "domains", "signupCode"]
 
 coll_name_employee = 'Employee'
 fields_employee = ["firstName", "lastName", "hair"]
@@ -301,3 +301,12 @@ data_mdb_employee = [
         "lastName": "Hound",
     }
 ]
+
+
+attr_details = {
+    '_id': {'name_conf': 'id', 'type_conf': 'text', 'value': None},
+    'active': {'name_conf': 'active', 'type_conf': 'boolean', 'value': None},
+    'domains': {'name_conf': 'domains', 'type_conf': 'jsonb', 'value': None},
+    'extraProps': {'name_conf': '_extra_props', 'type_conf': 'jsonb', 'value': None},
+    'signupCode': {'name_conf': 'signup_code', 'type_conf': 'text', 'value': None}
+}
