@@ -27,7 +27,7 @@ def get_type_pg(item):
         "dict": 'boolean',
         "list": 'jsonb',
     }
-    
+
     if str(item_type) in types.keys():
         pg_type = types[str(item_type)]
     elif item_type is type(None):

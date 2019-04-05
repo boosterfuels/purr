@@ -3,6 +3,7 @@ from etl.extract import init_mongo
 import pymongo
 import bson.objectid
 
+
 def check(db, colls_requested):
     """
     Checks if requested collections exist in the database.
@@ -187,4 +188,6 @@ def get_doc_by_id(db, name, id):
         return bz
     except Exception as ex:
         logger.error(
-            '[COLLECTION] Loading document from collection %s failed. Details: %s' % (name, ex))
+            """
+            [COLLECTION] Loading document from collection %s failed.
+            Details: %s""" % (name, ex))

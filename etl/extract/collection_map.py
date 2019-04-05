@@ -29,7 +29,7 @@ def get_query_update(def_coll, schema, table, attrs, row_id):
     return query
 
 
-def populate_table(db, coll_map, table, attrs, schema = 'public'):
+def populate_table(db, coll_map, table, attrs, schema='public'):
     # TODO: default to public
     collection_map = collections.OrderedDict(coll_map)
     for coll_name, v in coll_map.items():
@@ -130,7 +130,8 @@ def determine_types(mongo, name_db):
                 name_column = tc.snake_case(k)
                 if name_column in fields:
                     logger.warn(
-                        "%s Column %s cannot appear twice. Skipping..." % (CURR_FILE, k))
+                        "%s Column %s cannot appear twice. Skipping..."
+                        % (CURR_FILE, k))
                     continue
                 else:
                     fields.append(name_column)

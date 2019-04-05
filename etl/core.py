@@ -86,7 +86,7 @@ def start(settings, coll_config):
 
 def generate_collection_map(settings_mdb):
     """
-    TODO: 
+    TODO:
     - add docs
     - disconnect from Mongo!
     """

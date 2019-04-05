@@ -227,7 +227,8 @@ class Tailer(extractor.Extractor):
                         self.pg, self.schema)
                     latest_ts = int((list(res)[0])[0])
                     dt = latest_ts
-                    logger.info("[TAILER] Tailing is stopped. Next time, bring more cookies.")
+                    logger.info(
+                        """[TAILER] Stopping. Next time, bring more cookies.""")
                     raise SystemExit()
                 else:
                     loop = True

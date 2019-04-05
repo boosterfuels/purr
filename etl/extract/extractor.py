@@ -121,11 +121,11 @@ class Extractor():
 
     def table_track(self, coll_map_cur, coll_map_new):
         """
-        coll_map_cur : list 
+        coll_map_cur : list
                      : current collection map
         coll_map_new : list
                      : new collection map
-        Update the extractor object's collection map and 
+        Update the extractor object's collection map and
         starts tracking collections (data transfer).
 
         TODO: take care of extra props type (JSONB)
