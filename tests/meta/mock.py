@@ -40,36 +40,43 @@ settings = {
 
 # --- RELATION INFORMATION ---
 
-rel_name = 'company'
-rel_name_coll_map = 'purr_collection_map'
+rel_name_company = 'company'
+rel_name_employee = 'company'
+rel_name_company_coll_map = 'purr_collection_map'
 
-company_attrs = ["id", "active", "domains", "signup_code"]
-company_types = ["TEXT", "BOOLEAN", "JSONB", "TEXT"]
+attrs_company = ["id", "active", "domains", "signup_code"]
+types_company = ["TEXT", "BOOLEAN", "JSONB", "TEXT"]
 
 attrs_types = []
-for i in range(len(company_attrs)):
-    attrs_types.append("%s %s" % (company_attrs[i], company_types[i]))
+for i in range(len(attrs_company)):
+    attrs_types.append("%s %s" % (attrs_company[i], types_company[i]))
 
 # --- COLLECTION INFORMATION ---
-coll_name = 'Company'
-company_fields = ["active", "domains", "signupCode"]
+coll_name_company = 'Company'
+fields_company = ["active", "domains", "signupCode"]
+
+coll_name_employee = 'Employee'
+fields_employee = ["firstName", "lastName", "hair"]
+attrs_employee = ["first_name", "last_name", "hair"]
+
 
 # --- QUERIES ---
 query = {
     "db_exists": "select exists(SELECT datname FROM pg_catalog.pg_database WHERE lower(datname) = lower('%s'))" % db_name_pg,
     "db_create": "CREATE DATABASE %s;" % db_name_pg,
     "db_drop": "DROP DATABASE IF EXISTS %s;" % db_name_pg,
-    "table_drop_purr_cm": "DROP TABLE IF EXISTS %s;" % rel_name_coll_map,
-    "table_drop_company": "DROP TABLE IF EXISTS %s;" % rel_name,
-    "table_create_company": "CREATE TABLE %s(%s);" % (rel_name, ', '.join(attrs_types)),
+    "table_drop_purr_cm": "DROP TABLE IF EXISTS %s;" % rel_name_company_coll_map,
+    "table_drop_company": "DROP TABLE IF EXISTS %s;" % rel_name_company,
+    "table_drop_employee": "DROP TABLE IF EXISTS %s;" % rel_name_employee,
+    "table_create_company": "CREATE TABLE %s(%s);" % (rel_name_company, ', '.join(attrs_types)),
     "table_check_company_columns": """
-        SELECT DISTINCT column_name, data_type FROM information_schema.columns 
+        SELECT DISTINCT column_name, data_type FROM information_schema.columns
         WHERE table_name = '%s'
-    """ % rel_name
+    """ % rel_name_company
 }
 
 coll_config = {
-    coll_name:
+    coll_name_company:
     {
         ':columns': [
               {':source': '_id',
@@ -86,7 +93,7 @@ coll_config = {
                'signup_code': None}],
         ':meta': {
             ':extra_props': 'JSONB',
-            ':table': rel_name
+            ':table': rel_name_company
         }
     }
 }
@@ -96,7 +103,7 @@ coll_config_db = [(0, 'Company', 'company', [{'id': None, ':type': 'TEXT', ':sou
                    ':type': 'JSONB', ':source': 'domains', 'domains': None}, {':type': 'TEXT', ':source': 'signupCode', 'signup_code': None}])]
 
 coll_config_new = {
-    coll_name:
+    coll_name_company:
     {
         ':columns': [
             {':source': '_id',
@@ -113,7 +120,7 @@ coll_config_new = {
              'signup_code': None}],
         ':meta': {
             ':extra_props': 'JSONB',
-            ':table': rel_name
+            ':table': rel_name_company
         }
     }
 }
@@ -121,7 +128,65 @@ coll_config_new = {
 coll_config_db_new = [(0, 'Company', 'company', [{'id': None, ':type': 'TEXT', ':source': '_id'}, {':type': 'BOOLEAN', 'active': None, ':source': 'active'}, {
                        ':type': 'TEXT', ':source': 'domains', 'domains': None}, {':type': 'TEXT', ':source': 'signupCode', 'signup_code': None}])]
 
-ex = extractor.Extractor(pg, mongo, setup_pg, settings, coll_config)
+
+coll_config_company_employee = {
+    coll_name_company:
+    {
+        ':columns': [
+            {':source': '_id',
+             ':type': 'TEXT',
+             'id': None},
+            {':source': 'active',
+             ':type': 'BOOLEAN',
+             'active': None},
+            {':source': 'domains',
+             ':type': 'JSONB',
+             'domains': None},
+            {':source': 'signupCode',
+             ':type': 'TEXT',
+             'signup_code': None}],
+        ':meta': {
+            ':extra_props': 'JSONB',
+            ':table': rel_name_company
+        }
+    },
+    coll_name_employee:
+    {
+        ':columns': [
+            {':source': '_id',
+             ':type': 'TEXT',
+             'id': None},
+            {':source': 'firstName',
+             ':type': 'TEXT',
+             'first_name': None},
+            {':source': 'lastName',
+             ':type': 'TEXT',
+             'last_name': None},
+            {':source': 'hair',
+             ':type': 'TEXT',
+             'hair': None}],
+        ':meta': {
+            ':extra_props': 'JSONB',
+            ':table': rel_name_employee
+        }
+    }
+}
+
+coll_config_db_company_employee = [
+    (0, 'Company', 'company', [
+        {'id': None, ':type': 'TEXT', ':source': '_id'},
+        {':type': 'BOOLEAN', 'active': None, ':source': 'active'},
+        {':type': 'JSONB', ':source': 'domains', 'domains': None},
+        {':type': 'TEXT', ':source': 'signupCode', 'signup_code': None}
+    ]),
+    (1, 'Employee', 'employee', [
+        {'id': None, ':type': 'TEXT', ':source': '_id'},
+        {':type': 'TEXT', 'first_name': None, ':source': 'firstName'},
+        {':type': 'TEXT', ':source': 'lastName', 'last_name': None},
+        {':type': 'TEXT', ':source': 'hair', 'hair': None}
+    ])
+]
+
 
 pg_coll_map_attrs = ["id", "collection_name", "relation_name",
                      "types", "updated_at", "query_update"]
