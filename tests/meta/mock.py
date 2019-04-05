@@ -40,8 +40,11 @@ settings = {
 
 # --- RELATION INFORMATION ---
 
+coll_names = ['Company', 'Employee']
+rel_names = ['company', 'employee']
+
 rel_name_company = 'company'
-rel_name_employee = 'company'
+rel_name_employee = 'employee'
 collection_map = 'purr_collection_map'
 
 attrs_company = ["id", "active", "domains", "signup_code"]

@@ -232,7 +232,7 @@ class TestExtractor(unittest.TestCase):
         cursor.close()
         del ex
         assert True
-    
+
     def test_update_coll_map_unchanged(self):
 
         # collection map is not changed
@@ -283,7 +283,7 @@ class TestExtractor(unittest.TestCase):
             mock.settings,
             coll_config
         )
-        
+
         # this pulls the map from the db (mock.coll_config)
         ex.update_coll_map()
         print("NEW", ex.coll_map_cur)
@@ -297,12 +297,50 @@ class TestExtractor(unittest.TestCase):
         assert res
 
     def test_transfer(self):
-        assert False
+        # drop/truncate table
+        # create schema
+        # transfers collections
+        cursor = pg.conn.cursor()
+
+        # reset CM in the database
+        cursor.execute(query["table_drop_purr_cm"])
+        cursor.execute(query["table_drop_company"])
+        cursor.execute(query["table_drop_employee"])
+        pg.conn.commit()
+        create_and_populate_company_mdb()
+        cm.create_table(pg, mock.coll_config)
+
+        # collection which will be transferred
+        collection_names = mock.coll_names
+
+        coll_config = copy.deepcopy(mock.coll_config_company_employee)
+        ex = extractor.Extractor(
+            pg,
+            mongo,
+            mock.setup_pg,
+            mock.settings,
+            coll_config
+        )
+        ex.transfer(collection_names)
+        for i in range(len(mock.rel_names)):
+            rel = mock.rel_names[i]
+            cursor.execute("SELECT count(*) FROM %s" % (rel))
+            cnt_pg = cursor.fetchone()
+            cnt_mongo = mongo[collection_names[i]].count()
+            if cnt_mongo != cnt_pg[0]:
+                print("Postgres:", cnt_pg[0])
+                print("MongoDB:", cnt_mongo)
+                assert False
+
+        cursor.close()
+        del ex
+
+        assert True
 
     def test_transfer_coll(self):
         # TODO: check
 
-    #     assert False
+        # assert False
 
     def test_insert_multiple(self):
         assert False
