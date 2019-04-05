@@ -13,15 +13,13 @@ import copy
 pg = mock.pg
 mongo = mock.mongo
 query = mock.query
-setup_pg = mock.setup_pg
-rel_name = mock.rel_name
-rel_name_cm = mock.rel_name_coll_map
-coll_name = mock.coll_name
-settings = mock.settings
-schema = setup_pg["schema_name"]
+rel_name_company = mock.rel_name_company
+rel_name_company_cm = mock.rel_name_company_coll_map
+coll_name_company = mock.coll_name_company
+coll_name_employee = mock.coll_name_employee
 coll_conf = mock.coll_config
 coll_conf_new = mock.coll_config_new
-ex = extractor.Extractor(pg, mongo, setup_pg, settings, coll_conf)
+ex = extractor.Extractor(pg, mongo, mock.setup_pg, mock.settings, coll_conf)
 pg_cm_attrs = mock.pg_coll_map_attrs
 
 
@@ -39,9 +37,85 @@ def create_and_populate_company_pg():
 
     cursor.close()
 
+
 def create_and_populate_company_mdb():
-    #TODO
+    # TODO
+    mongo.drop_collection(coll_name_company)
     print("creates collection company")
+    docs = [
+        {
+            "active": True,
+            "signupCode": "uPsYdUpSy123",
+            "domains": [
+                "southpark.com"
+            ]
+        },
+        {
+            "active": True,
+            "signupCode": "node",
+            "domains": [
+                "amazon.com"
+            ]
+        },
+        {
+            "active": True,
+            "signupCode": "kInGsSpOrT32",
+            "domains": [
+                "stuff.com",
+                "baddance.com",
+                "chewbacca.com"
+            ]
+        },
+        {
+            "active": False,
+            "signupCode": "BoOmClAp<3",
+            "domains": [
+                "festival.com"
+            ]
+        },
+        {
+            "active": False,
+            "signupCode": "LiPGlOsS24",
+            "domains": [
+                "platform934.org",
+                "hogwarts.com",
+            ]
+        }
+    ]
+    mongo[coll_name_company].insert_many(docs)
+
+
+def create_and_populate_employee_mdb():
+    mongo.drop_collection(coll_name_employee)
+    print("creates collection employee")
+    docs = [
+        {
+            "firstName": "John",
+            "lastName": "Snow",
+        },
+        {
+
+            "firstName": "Arya",
+            "lastName": "Start",
+        },
+        {
+
+            "firstName": "Sansa",
+            "lastName": "Stark",
+        },
+        {
+
+            "firstName": "Little",
+            "lastName": "Finger",
+        },
+        {
+
+            "firstName": "The",
+            "lastName": "Hound",
+        }
+    ]
+    mongo[coll_name_employee].insert_many(docs)
+
 
 class TestExtractor(unittest.TestCase):
 
@@ -133,15 +207,89 @@ class TestExtractor(unittest.TestCase):
         assert res_db == res_expected
 
     def test_table_track(self):
-        create_and_populate_company_pg()
+        # TODO: see if the table is transfered to the PG database
+        create_and_populate_company_mdb()
+        create_and_populate_employee_mdb()
+
         cursor = pg.conn.cursor()
+        cursor.execute(query["table_drop_company"])
+        cursor.execute(query["table_drop_employee"])
+        cursor.execute(query["table_drop_purr_cm"])
+
+        # create table for CM in the database
+        cm.create_table(pg, coll_conf)
+        ex = extractor.Extractor(
+            pg, mongo, mock.setup_pg, mock.settings, coll_conf)
+
+        # # changes extractor's collection definition for every collection
+        # # and transfers
+
+        coll_map_old = mock.coll_config_db
+        coll_map_new = mock.coll_config_db_company_employee
+        ex.table_track(coll_map_old, coll_map_new)
+
+        mocked = mock.coll_config_company_employee
+        if (len(ex.coll_def) != len(mocked)):
+            assert False
+
+        for k, v in ex.coll_def.items():
+            if v != mocked[k]:
+                print(k)
+                print(v[":columns"])
+                print(mocked[k][":columns"])
+                if v[":columns"] != mocked[k][":columns"]:
+                    assert False
+
         cursor.close()
+        del ex
 
-
-        assert True == True
+        assert True
 
     def test_table_untrack(self):
-        assert True == True
+        # TODO:
+        # - check if the table is left in the PG database
+        # - try to insert new data to mongodb and check
+        # if its left out from the data transfer
+        # this one should remove employee from the collection map
+        create_and_populate_company_mdb()
+        create_and_populate_employee_mdb()
+
+        cursor = pg.conn.cursor()
+        cursor.execute(query["table_drop_company"])
+        cursor.execute(query["table_drop_employee"])
+        cursor.execute(query["table_drop_purr_cm"])
+
+        # create table for CM in the database
+        cm.create_table(pg, coll_conf)
+        ex = extractor.Extractor(
+            pg,
+            mongo,
+            mock.setup_pg,
+            mock.settings,
+            mock.coll_config_company_employee
+        )
+
+        # # changes extractor's collection definition for every collection
+        # # and transfers
+        coll_map_old = mock.coll_config_db_company_employee
+        coll_map_new = mock.coll_config_db
+        ex.table_track(coll_map_old, coll_map_new)
+
+        mocked = mock.coll_config
+        if (len(ex.coll_def) != len(mocked)):
+            assert False
+
+        for k, v in ex.coll_def.items():
+            if v != mocked[k]:
+                print(k)
+                print(v[":columns"])
+                print(mocked[k][":columns"])
+                if v[":columns"] != mocked[k][":columns"]:
+                    assert False
+
+        cursor.close()
+        del ex
+        assert True
 
     def test_update_coll_map(self):
         assert True == True
@@ -153,16 +301,16 @@ class TestExtractor(unittest.TestCase):
         # TODO: check
         # transfer one collection
 
-        # cmd = "DROP TABLE IF EXISTS %s;" % rel_name
+        # cmd = "DROP TABLE IF EXISTS %s;" % rel_name_company
         # cursor = pg.conn.cursor()
         # cursor.execute(cmd)
 
         # ex = extractor.Extractor(pg, mongo, setup_pg, settings, coll_conf)
-        # ex.transfer_coll(coll_name)
+        # ex.transfer_coll(coll_name_company)
 
-        # cmd = "SELECT count(*) from %s;" % rel_name
+        # cmd = "SELECT count(*) from %s;" % rel_name_company
         # cnt_pg = pg.execute_cmd_with_fetch(cmd)
-        # cnt_mongo = mongo[coll_name].count()
+        # cnt_mongo = mongo[coll_name_company].count()
         # print(cnt_pg[0][0], cnt_mongo)
         # cursor.close()
         # assert cnt_pg[0][0] == cnt_mongo
