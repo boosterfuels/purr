@@ -242,7 +242,6 @@ class Relation():
             row.insert_bulk(self.db, self.schema,
                             self.relation_name, attrs_pg, result)
 
-
     def delete(self, docs):
         ids = []
         if type(docs) is list:
@@ -299,9 +298,6 @@ class Relation():
                     type_new = column_type
 
                     if type_orig != type_new:
-                        attr_new = type_checker.rename(
-                            attr, type_orig, type_new
-                        )
                         if attr_new is not None:
                             if attr_new not in self.column_names:
                                 table.add_column(

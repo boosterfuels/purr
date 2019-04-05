@@ -29,7 +29,8 @@ def get_query_update(def_coll, schema, table, attrs, row_id):
     return query
 
 
-def populate_table(db, coll_map, schema, table, attrs):
+def populate_table(db, coll_map, table, attrs, schema='public'):
+    # TODO: default to public
     collection_map = collections.OrderedDict(coll_map)
     for coll_name, v in coll_map.items():
         row_id = list(collection_map).index(coll_name)
@@ -61,7 +62,7 @@ def get_table(db, schema='public'):
         )
 
 
-def create_table(db, schema, coll_map):
+def create_table(db, coll_map, schema='public'):
     """
   Adds primary key to a PostgreSQL table.
   Parameters
@@ -71,7 +72,7 @@ def create_table(db, schema, coll_map):
   -
   Example
   -------
-  create_stat_table(pg, 'purr')
+  create_table(pg, 'purr')
   """
     table_name = "purr_collection_map"
     attrs = ["id", "collection_name", "relation_name",
@@ -89,7 +90,7 @@ def create_table(db, schema, coll_map):
             [TRANSFER_INFO] Failed to create table %s.%s: %s
             """ % (schema, table_name, ex))
 
-    populate_table(db, coll_map, schema, table_name, attrs)
+    populate_table(db, coll_map, table_name, attrs, schema)
     procedure_name = 'notify_type'
     procedure.drop_type_notification(db, procedure_name)
     procedure.create_type_notification(db, procedure_name)
@@ -128,7 +129,9 @@ def determine_types(mongo, name_db):
             for k, v in doc.items():
                 name_column = tc.snake_case(k)
                 if name_column in fields:
-                    logger.warn("%s Column %s cannot appear twice. Skipping..." % (CURR_FILE, k))
+                    logger.warn(
+                        "%s Column %s cannot appear twice. Skipping..."
+                        % (CURR_FILE, k))
                     continue
                 else:
                     fields.append(name_column)
