@@ -42,7 +42,7 @@ settings = {
 
 rel_name_company = 'company'
 rel_name_employee = 'company'
-rel_name_company_coll_map = 'purr_collection_map'
+collection_map = 'purr_collection_map'
 
 attrs_company = ["id", "active", "domains", "signup_code"]
 types_company = ["TEXT", "BOOLEAN", "JSONB", "TEXT"]
@@ -65,7 +65,7 @@ query = {
     "db_exists": "select exists(SELECT datname FROM pg_catalog.pg_database WHERE lower(datname) = lower('%s'))" % db_name_pg,
     "db_create": "CREATE DATABASE %s;" % db_name_pg,
     "db_drop": "DROP DATABASE IF EXISTS %s;" % db_name_pg,
-    "table_drop_purr_cm": "DROP TABLE IF EXISTS %s;" % rel_name_company_coll_map,
+    "table_drop_purr_cm": "DROP TABLE IF EXISTS %s;" % collection_map,
     "table_drop_company": "DROP TABLE IF EXISTS %s;" % rel_name_company,
     "table_drop_employee": "DROP TABLE IF EXISTS %s;" % rel_name_employee,
     "table_create_company": "CREATE TABLE %s(%s);" % (rel_name_company, ', '.join(attrs_types)),
@@ -190,3 +190,73 @@ coll_config_db_company_employee = [
 
 pg_coll_map_attrs = ["id", "collection_name", "relation_name",
                      "types", "updated_at", "query_update"]
+
+
+data_mdb_company = [
+    {
+        "active": True,
+        "signupCode": "uPsYdUpSy123",
+        "domains": [
+            "southpark.com"
+        ]
+    },
+    {
+        "active": True,
+        "signupCode": "node",
+        "domains": [
+            "amazon.com"
+        ]
+    },
+    {
+        "active": True,
+        "signupCode": "kInGsSpOrT32",
+        "domains": [
+            "stuff.com",
+            "baddance.com",
+            "chewbacca.com"
+        ]
+    },
+    {
+        "active": False,
+        "signupCode": "BoOmClAp<3",
+        "domains": [
+            "festival.com"
+        ]
+    },
+    {
+        "active": False,
+        "signupCode": "LiPGlOsS24",
+        "domains": [
+            "platform934.org",
+            "hogwarts.com",
+        ]
+    }
+]
+
+
+data_mdb_employee = [
+    {
+        "firstName": "John",
+        "lastName": "Snow",
+    },
+    {
+
+        "firstName": "Arya",
+        "lastName": "Start",
+    },
+    {
+
+        "firstName": "Sansa",
+        "lastName": "Stark",
+    },
+    {
+
+        "firstName": "Little",
+        "lastName": "Finger",
+    },
+    {
+
+        "firstName": "The",
+        "lastName": "Hound",
+    }
+]
