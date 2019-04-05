@@ -1,5 +1,4 @@
 from bson import ObjectId
-from bson.json_util import default
 import json
 import datetime
 
@@ -7,7 +6,8 @@ import datetime
 def cast(column_type, value):
     '''
     Casts value based on required column type in collections.yml.
-    When serializing ObjectId and datetime, a string is returned instead of objects with $oid and $date keys.
+    When serializing ObjectId and datetime, a string is returned
+    instead of objects with $oid and $date keys.
     Example:
       { _id: { $oid: "56ac26cc05b37b4e1a4d2c22" } }
       { _id: "56ac26cc05b37b4e1a4d2c22" }
@@ -17,7 +17,7 @@ def cast(column_type, value):
     column_type : string
                   type of column
     value       : anything
-                  value to cast 
+                  value to cast
     '''
     new_value = None
 

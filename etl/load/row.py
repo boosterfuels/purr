@@ -1,10 +1,11 @@
 import psycopg2
-from bson.json_util import loads, dumps
+from bson.json_util import dumps
 
 from etl.load import init_pg as pg, table
 from etl.monitor import logger
 import datetime
 from psycopg2.extras import execute_values
+import json
 
 # Open a cursor to perform database operations
 
@@ -88,19 +89,21 @@ def insert_bulk(db, schema, table, attrs, values):
         logger.error("[ROW] INSERT failed: %s" % ex)
         logger.error("[ROW] CMD: %s" % cmd)
         logger.error("[ROW] VALUES: %s" % values)
-        raise SystemExit
+        raise SystemExit()
 
 
-def upsert_bulk(db, schema, table, attrs, values):
+def upsert_bulk(db, schema, table, attrs, rows):
     """
     Inserts a row defined by attributes and values into a specific
     table of the PG database.
 
     Parameters
     ----------
+    db : obj
+    schema : string
     table_name : string
     attrs :     string[]
-    values :    string[]
+    rows :    string[]
 
     Returns
     -------
@@ -108,32 +111,44 @@ def upsert_bulk(db, schema, table, attrs, values):
 
     Example
     -------
-    insert('Audience', [attributes], [values])
+    upsert_bulk(db, 'public', 'audience', [attributes], [values])
+    Note: command is different for Postgres v10+:
+    cmd = "INSERT INTO %s.%s (%s) VALUES (%s) ON CONFLICT ON CONSTRAINT %s
+    DO UPDATE SET (%s) = ROW(%s);"
     """
+    NR_OF_ROWS_TO_DISPLAY = 20
     temp = []
-    for a in attrs:
+    for v in rows[0]:
         temp.append('%s')
 
     temp = ', '.join(temp)
-    # needed for upsert
-    excluded = [('EXCLUDED.%s' % a) for a in attrs]
+
     attrs_reduced = [('"%s"' % a) for a in attrs]
     attrs_reduced = ', '.join(attrs_reduced)
+
+    excluded = [('EXCLUDED.%s' % a) for a in attrs]
+    excluded = ', '.join(excluded)
+
     attrs = [('"%s"' % a) for a in attrs]
     attrs = ', '.join(attrs)
-    excluded = ', '.join(excluded)
+
     # default primary key in Postgres is name_of_table_pkey
     constraint = '%s_pkey' % table
-    cmd = "INSERT INTO %s.%s (%s) VALUES %s ON CONFLICT ON CONSTRAINT %s DO UPDATE SET (%s) = (%s);" % (
-        schema, table.lower(), attrs, '%s', constraint, attrs_reduced, excluded)
+
+    cmd = """
+    INSERT INTO %s.%s (%s) VALUES (%s) ON CONFLICT ON CONSTRAINT %s
+    DO UPDATE SET (%s) = (%s);
+    """ % (
+        schema, table.lower(), attrs, temp,
+        constraint, attrs_reduced, excluded)
     try:
-        execute_values(db.cur, cmd, values)
+        db.cur.executemany(cmd, rows)
         db.conn.commit()
     except Exception as ex:
         logger.error("[ROW] UPSERT failed: %s" % ex)
-        logger.error("[ROW] CMD: %s" % cmd)
-        logger.error("[ROW] VALUES: %s" % values)
-        raise SystemExit
+        if len(rows) <= NR_OF_ROWS_TO_DISPLAY:
+            logger.error("[ROW] CMD:\n %s" % cmd, db.cur.mogrify())
+            logger.error("[ROW] VALUES:\n %s" % rows)
 
 
 def upsert_bulk_tail(db, schema, table, attrs, rows):
@@ -171,62 +186,64 @@ def upsert_bulk_tail(db, schema, table, attrs, rows):
         db.conn.commit()
 
     except Exception as ex:
-        logger.error("[ROW] UPSERT failed: %s" % ex)
+        logger.error("[ROW] UPSERT failed when tailing: %s" % ex)
         logger.error("[ROW] VALUES: %s" % values)
-        raise SystemExit
+        raise SystemExit()
 
 
-def update(db, schema, table_name, attrs, values):
+def upsert_transfer_info(db, schema, table, attrs, row):
     """
-    Updates a row in a specific table of the PG database.
-
-    Parameters
-    ----------
-    table_name : string
-    attrs :     string[]
-    values :    string[]
-
-    Returns
-    -------
-    -
-
-    Example
-    -------
-    update('audience', [attributes], [values])
-
+    Updates the collection map.
     """
-    attr_val_pairs = []
-
-    oid = ""
-    nr_of_attrs = len(attrs)
-
-    if nr_of_attrs < 2:
-        return
-    for i in range(len(attrs)):
-        pair = ""
-        if attrs[i] == "id":
-            oid = "'%s'" % str(values[i])
-            continue
-        if values[i] is None:
-            pair = "%s = null" % (attrs[i])
-        elif type(values[i]) is datetime.datetime:
-            pair = "%s = '%s'" % (attrs[i], values[i])
-        elif type(values[i]) is str:
-            if values[i].startswith("{") is True:
-                pair = "%s = '%s'" % (attrs[i], values[i])
-            pair = "%s = '%s'" % (attrs[i], values[i])
+    temp = []
+    temp_row = []
+    for r in row:
+        if type(r) is list and type(r[0]) is dict:
+            temp.append('%s::jsonb[]')
         else:
-            pair = "%s = %s" % (attrs[i], values[i])
-        attr_val_pairs.append(pair)
+            temp.append('%s')
 
-    pairs = ", ".join(attr_val_pairs)
-    cmd = "UPDATE %s.%s SET %s WHERE id = %s;" % (
-        schema, table_name.lower(), pairs, oid)
-    logger.info("[ROW] %s" % cmd)
+    placeholder = []
+
+    values = []
+    for r in row:
+        if type(r) is list and type(r[0]) is dict:
+            for item in r:
+                temp_row.append(json.dumps(item))
+            placeholder.append("%s::jsonb[]")
+        else:
+            placeholder.append("'%s'" % r)
+
+    placeholder = ','.join(placeholder)
+
+    temp = ', '.join(temp)
+
+    attrs_reduced = [('"%s"' % a) for a in attrs]
+    attrs_reduced = ', '.join(attrs_reduced)
+
+    excluded = [('EXCLUDED.%s' % a) for a in attrs]
+    excluded = ', '.join(excluded)
+
+    attrs = [('"%s"' % a) for a in attrs]
+    attrs = ', '.join(attrs)
+
+    # default primary key in Postgres is name_of_table_pkey
+    constraint = '%s_pkey' % table
+
+    # upsert
+    cmd = """INSERT INTO %s.%s (%s) VALUES (%s) ON CONFLICT ON CONSTRAINT %s
+    DO UPDATE SET (%s) = (%s);""" % (
+        schema, table.lower(), attrs, placeholder,
+        constraint, attrs_reduced, excluded)
+
     try:
-        db.execute_cmd(cmd)
+        db.cur.execute(cmd, [temp_row])
+        db.conn.commit()
     except Exception as ex:
-        logger.error('[ROW] Update failed: %s' % ex)
+        logger.error("[ROW] UPSERT TRANSFER INFO failed: %s" % ex)
+        logger.error("\n[ROW] CMD:\n %s" % cmd)
+        logger.error("\n[ROW] VALUES:\n %s" % row)
+        raise SystemExit()
 
 
 def delete(db, schema, table_name, ids):
@@ -237,7 +254,8 @@ def delete(db, schema, table_name, ids):
     ----------
     table_name : string
     object_id : ObjectId
-                (will need to get the hex encoded version of ObjectId with str(object_id))
+                (will need to get the hex encoded version
+                of ObjectId with str(object_id))
 
     Returns
     -------
