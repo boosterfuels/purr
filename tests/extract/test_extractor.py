@@ -323,8 +323,8 @@ class TestExtractor(unittest.TestCase):
         )
         ex.transfer(collection_names)
         for i in range(len(mock.rel_names)):
-            rel = mock.rel_names[i]
-            cursor.execute("SELECT count(*) FROM %s" % (rel))
+            relation = mock.rel_names[i]
+            cursor.execute("SELECT count(*) FROM %s" % (relation))
             cnt_pg = cursor.fetchone()
             cnt_mongo = mongo[collection_names[i]].count()
             if cnt_mongo != cnt_pg[0]:
@@ -340,10 +340,96 @@ class TestExtractor(unittest.TestCase):
     def test_transfer_coll(self):
         # TODO: check
 
-        # assert False
+        cursor = pg.conn.cursor()
+
+        # reset CM in the database
+        cursor.execute(query["table_drop_purr_cm"])
+        cursor.execute(query["table_drop_company"])
+        cursor.execute(query["table_drop_employee"])
+        pg.conn.commit()
+        create_and_populate_company_mdb()
+        cm.create_table(pg, mock.coll_config)
+
+        # collection which will be transferred
+        collection = mock.coll_names[0]
+        relation = mock.rel_names[0]
+
+        coll_config = copy.deepcopy(mock.coll_config_company_employee)
+        ex = extractor.Extractor(
+            pg,
+            mongo,
+            mock.setup_pg,
+            mock.settings,
+            coll_config
+        )
+        ex.transfer_coll(collection)
+        cursor.execute("SELECT count(*) FROM %s" % (relation))
+        cnt_pg = cursor.fetchone()
+        cnt_mongo = mongo[collection].count()
+        print("Postgres:", cnt_pg[0])
+        print("MongoDB:", cnt_mongo)
+
+        cursor.close()
+        del ex
+        assert cnt_mongo == cnt_pg[0]
 
     def test_insert_multiple(self):
-        assert False
+        # no unset
+        # TODO: test when there is value in unset
+        cursor = pg.conn.cursor()
+
+        # reset CM in the database
+        cursor.execute(query["table_drop_purr_cm"])
+        cursor.execute(query["table_drop_company"])
+
+        pg.conn.commit()
+        create_and_populate_company_mdb()
+        cm.create_table(pg, mock.coll_config)
+
+        unset = []
+        coll = mock.coll_names[0]
+        rel = mock.rel_names[0]
+        docs = []  # mongo[coll].find()
+        for doc in mongo[coll].find():
+            docs.append(doc)
+        coll_config = copy.deepcopy(mock.coll_config_company_employee)
+        ex = extractor.Extractor(
+            pg,
+            mongo,
+            mock.setup_pg,
+            mock.settings,
+            coll_config
+        )
+        schema = mock.setup_pg["schema_name"]
+
+        r = relation.Relation(
+            pg,
+            schema,
+            rel,
+            True
+        )
+        attrs = mock.attrs_company
+        types = mock.types_company
+        r.create_with_columns(attrs, types)
+
+        ex.insert_multiple(docs, r, coll)
+
+        print("COLLECTION", coll)
+        print("DOCUMENTS", docs)
+
+        cmd = "SELECT %s FROM %s order by id" % (", ".join(attrs[1:]), rel)
+        cursor.execute(cmd)
+        mocked = mock.data_pg_company_no_id
+        res = cursor.fetchall()
+        print("MOCKED")
+        print(mocked)
+        print("RESULT")
+        print(res)
+
+        cursor.close()
+        del r
+        del ex
+        assert mocked == res
 
     def test_update_multiple(self):
         assert False

@@ -236,6 +236,25 @@ data_mdb_company = [
     }
 ]
 
+# data should look like this after transfer
+# if ordered by id
+data_pg_company = [
+    ('5ca7b1d3a54d75271eb97ab8', True, ['southpark.com'], 'uPsYdUpSy123'),
+    ('5ca7b1d3a54d75271eb97ab9', True, ['amazon.com'], 'node'),
+    ('5ca7b1d3a54d75271eb97aba', True, [
+     'stuff.com', 'baddance.com', 'chewbacca.com'], 'kInGsSpOrT32'),
+    ('5ca7b1d3a54d75271eb97abb', False, ['festival.com'], 'BoOmClAp<3'),
+    ('5ca7b1d3a54d75271eb97abc', False, [
+     'platform934.org', 'hogwarts.com'], 'LiPGlOsS24')
+]
+data_pg_company_no_id = [
+    (True, ['southpark.com'], 'uPsYdUpSy123'),
+    (True, ['amazon.com'], 'node'),
+    (True, ['stuff.com', 'baddance.com', 'chewbacca.com'], 'kInGsSpOrT32'),
+    (False, ['festival.com'], 'BoOmClAp<3'),
+    (False, ['platform934.org', 'hogwarts.com'], 'LiPGlOsS24')
+]
+
 
 data_mdb_employee = [
     {
