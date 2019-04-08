@@ -15,6 +15,8 @@ import json
 name_extra_props_pg = "_extra_props"
 name_extra_props_mdb = "extraProps"
 
+CURR_FILE = "[EXTRACTOR]"
+
 
 class Extractor():
     """
@@ -38,7 +40,7 @@ class Extractor():
         self.tailing_from = settings_general['tailing_from']
         self.tailing_from_db = settings_general['tailing_from_db']
         self.coll_map_cur = cm.get_table(self.pg)
-        self.attrs_details = {}
+        self.attr_details = {}
 
     def update_table_def(self, coll_map_cur, coll_map_new):
         for i in range(0, len(coll_map_cur)):
@@ -70,8 +72,9 @@ class Extractor():
                                 type_new = field[":type"]
                                 if tc.is_convertable(type_old, type_new):
                                     logger.info(
-                                        """[EXTRACTOR] table %s, column %s:
+                                        """%s table %s, column %s:
                                         Type [%s] is convertable to [%s]""" % (
+                                            CURR_FILE,
                                             name_table,
                                             column,
                                             type_old,
@@ -86,9 +89,10 @@ class Extractor():
                                 else:
 
                                     logger.error("""
-                                        [EXTRACTOR] In table %s, column %s:
+                                        %s In table %s, column %s:
                                         Type [%s] is NOT convertable to [%s]
                                         """ % (
+                                        CURR_FILE,
                                         name_table,
                                         column,
                                         type_old,
@@ -130,7 +134,8 @@ class Extractor():
 
         TODO: take care of extra props type (JSONB)
         """
-        logger.info("[EXTRACTOR] Adding new collection")
+        logger.info("%s Adding new collection" %
+                    CURR_FILE)
         colls_cur = [x[1] for x in coll_map_cur]
         colls_new = [x[1] for x in coll_map_new]
         colls_to_add = [x for x in colls_new if x not in colls_cur]
@@ -160,21 +165,25 @@ class Extractor():
         colls_to_remove = [x[1]
                            for x in coll_map_cur if x[2] in tables_to_drop]
 
-        logger.info("[EXTRACTOR] Stop syncing collections %s." %
-                    ", ".join(colls_to_remove))
+        logger.info("%s Stop syncing collections %s." %
+                    (
+                        CURR_FILE,
+                        ", ".join(colls_to_remove)))
 
         for coll in colls_to_remove:
             self.coll_def.pop(coll, None)
 
     def update_coll_map(self):
         # TODO: get types from pg
-        logger.info("[EXTRACTOR] Updating schema from purr_collection_map")
+        logger.info("%s Updating schema from purr_collection_map" %
+                    CURR_FILE)
 
         coll_map_cur = self.coll_map_cur
         coll_map_new = cm.get_table(self.pg)
 
         if coll_map_cur == coll_map_new:
-            logger.info("[EXTRACTOR] Schema is not changed")
+            logger.info("%s Database schema is not changed" %
+                        CURR_FILE)
             return
 
         # If no tables were added or removed then update
@@ -210,7 +219,9 @@ class Extractor():
 
         coll_names = collection.check(self.mdb, coll_names_in_config)
         if len(coll_names) == 0:
-            logger.info('[EXTRACTOR] No collections.')
+            logger.info('%s No collections to transfer.' %
+                        CURR_FILE
+                        )
             return
 
         relation_names = []
@@ -239,7 +250,7 @@ class Extractor():
         coll : string
              : name of collection which is going to be transferred
         '''
-        (r, attrs_details) = self.adjust_columns(coll)
+        r = self.adjust_columns(coll)
 
         if self.tailing_from is not None or self.tailing_from_db is True:
             return
@@ -247,7 +258,7 @@ class Extractor():
         if self.include_extra_props is True:
             docs = collection.get_by_name(self.mdb, coll)
         else:
-            attr_source = [k for k, v in self.attrs_details.items()]
+            attr_source = [k for k, v in self.attr_details.items()]
             docs = collection.get_by_name_reduced(self.mdb, coll, attr_source)
 
         # Start transferring docs
@@ -262,41 +273,46 @@ class Extractor():
                     if self.include_extra_props is True:
                         r.insert_config_bulk(
                             transferring,
-                            self.attrs_details,
+                            self.attr_details,
                             self.include_extra_props)
                     else:
                         r.insert_config_bulk_no_extra_props(
                             transferring,
-                            self.attrs_details,
+                            self.attr_details,
                             self.include_extra_props)
                     transferring = []
                 if i + 1 == nr_of_docs and (i + 1) % nr_of_transferred != 0:
                     if self.include_extra_props is True:
                         r.insert_config_bulk(
                             transferring,
-                            self.attrs_details,
+                            self.attr_details,
                             self.include_extra_props)
                     else:
                         r.insert_config_bulk_no_extra_props(
                             transferring,
-                            self.attrs_details,
+                            self.attr_details,
                             self.include_extra_props)
                         logger.info(
-                            "[EXTRACTOR] Finished collection %s: %d docs"
+                            "%s Finished collection %s: %d docs"
                             % (coll, i + 1))
                         transferring = []
             except Exception as ex:
-                logger.error("""[EXTRACTOR] Transfer unsuccessful. %s""" % ex)
+                logger.error("""%s Transfer unsuccessful. %s""" % (
+                    CURR_FILE,
+                    ex))
             if (i+1) % (nr_of_transferred*10) == 0:
                 logger.info("""
-                   [EXTRACTOR] Transferred %d from collection %s
-                   """ % (i+1, coll))
+                   %s Transferred %d from collection %s
+                   """ % (
+                    CURR_FILE,
+                    i+1, coll))
             i += 1
 
     def insert_multiple(self, docs, r, coll, unset=[]):
         '''
         Transfers multiple documents with different fields
         (not whole collections).
+        Used by [TAILER]
         Parameters
         ----------
         doc : dict
@@ -333,27 +349,29 @@ class Extractor():
         # a dictionary which will contain all the information about
         # the attribute before and after the conversion.
 
-        self.attrs_details = self.prepare_attr_details(
+        self.attr_details = self.prepare_attr_details(
             att_new, att_orig, types, type_x_props_pg)
         # TODO remove this stuff with the extra props
         try:
             if self.include_extra_props is True:
                 r.insert_config_bulk(
-                    docs, self.attrs_details, self.include_extra_props, unset)
+                    docs, self.attr_details, self.include_extra_props, unset)
             else:
                 r.insert_config_bulk_no_extra_props_tailed(
-                    docs, self.attrs_details, self.include_extra_props, unset)
+                    docs, self.attr_details, self.include_extra_props, unset)
         except Exception as ex:
             logger.error("""
-            [EXTRACTOR] Transferring to %s was unsuccessful.
+            %s Transferring to %s was unsuccessful.
             Exception: %s
             """ % (
-                r.name_rel, ex))
+                CURR_FILE,
+
+                r.relation_name, ex))
             logger.error("%s\n" % docs)
 
     def update_multiple(self, docs, r, coll, unset=[]):
         '''
-        Transfers multiple documents with different fields.
+        Upserts multiple documents with different fields.
         Parameters
         ----------
         doc : dict
@@ -362,6 +380,8 @@ class Extractor():
             relation in PG
         coll : string
              : collection name
+        unset : list
+                list of fields that must be removed
         Returns
         -------
         -
@@ -384,20 +404,21 @@ class Extractor():
         # contain all the information
         # about the attribute before and after the conversion.
 
-        self.attrs_details = self.prepare_attr_details(
+        self.attr_details = self.prepare_attr_details(
             attrs_new, attrs_original, types, type_x_props_pg)
         # TODO remove this stuff with the extra props.
         try:
             if self.include_extra_props is True:
                 r.insert_config_bulk(
-                    docs, self.attrs_details, self.include_extra_props, unset)
+                    docs, self.attr_details, self.include_extra_props, unset)
             else:
                 r.insert_config_bulk_no_extra_props_tailed(
-                    docs, self.attrs_details, self.include_extra_props, unset)
+                    docs, self.attr_details, self.include_extra_props, unset)
         except Exception as ex:
             logger.error("""
-            [EXTRACTOR] Transferring to %s was unsuccessful. Exception: %s
+            %s Transferring to %s was unsuccessful. Exception: %s
             """ % (
+                CURR_FILE,
                 r.relation_name, ex))
             logger.error('%s\n' % docs)
 
@@ -407,13 +428,12 @@ class Extractor():
                              types_conf,
                              type_x_props_pg=None):
         '''
-        Adds extra properties field.
-        This field needs to be added like this because it is not
-        part of the original document.
-        It can also have any type.
+        Adds extra properties field to the attribute details (attr_details).
+        Extra properties it is not part of the original document and it needs to 
+        be added in this separate step.
         Returns
         -------
-        attrs_details : list
+        attr_details : list
                       : attribute details with extra property
 
         Parameters
@@ -442,20 +462,36 @@ class Extractor():
             attrs_mdb.append(name_extra_props_mdb)
             types_conf.append(type_x_props_pg)
 
-        self.attrs_details = {}
+        self.attr_details = {}
         for i in range(0, len(attrs_mdb)):
             details = {}
             details["name_conf"] = attrs_conf[i]
             details["type_conf"] = types_conf[i]
             details["value"] = None
-            self.attrs_details[attrs_mdb[i]] = details
-        return self.attrs_details
+            self.attr_details[attrs_mdb[i]] = details
+        return self.attr_details
 
     def adjust_columns(self, coll):
         """
-        Adds or removes extra properties if necessary and updates column types.
+        Adds or removes extra properties if necessary and updates column types
+        for a collection.
+        Changes the attribute details (attr_details)
+
+        Parameters
+        ----------
+        coll : string
+             : name of the collection
+
+
+        Returns
+        ----------
+        r : object
+          : the relation object
+
+
+
         """
-        # get data from collection map
+        # get data from the collection map
         (attrs_new,
          attrs_original,
          types,
@@ -467,9 +503,34 @@ class Extractor():
 
         r = relation.Relation(self.pg, self.schema, relation_name)
 
+        self.add_extra_props(attrs_original, attrs_new, types)
+        # Check if changing type was unsuccessful.
+        failed = r.udpate_types(self.attr_details)
+        self.handle_failed_type_update(failed)
+
+        return r
+
+    def handle_failed_type_update(self, failed):
+        if failed is not None:
+            for tuf in failed:
+                name_pg = tuf[0]
+                name_mdb = [
+                    attr for attr in self.attr_details if self.attr_details[attr]["name_conf"] == name_pg][0]
+                type_orig = tuf[1].lower()
+                type_new = self.attr_details[name_mdb]["type_conf"].lower()
+                self.attr_details[name_mdb]["type_conf"] = type_orig
+                logger.warn("""
+                    %s Type conversion is not possible for column '%s'.
+                    Skipping conversion %s -> %s.""" %
+                            (
+                                CURR_FILE,
+                                name_pg, type_orig, type_new))
+
+    def add_extra_props(self, attrs_original, attrs_new, types):
+
         # This dict contains all the necessary information about the
         # Mongo fields, Postgres columns and their types
-        self.attrs_details = {}
+        self.attr_details = {}
         attrs_mdb = attrs_original
         attrs_conf = attrs_new
         types_conf = types
@@ -479,35 +540,9 @@ class Extractor():
             types_conf.append(type_x_props)
             attrs_mdb.append(name_extra_props_mdb)
 
-            # Add column extra_props to table if it does not exist
-            # table.add_column(self.pg, self.schema, r.relation_name,
-            # name_extra_props_pg, type_x_props)
-        # else:
-        #   # Remove column extra_props from table if it exists
-        #   table.remove_column(self.pg, r.relation_name, name_extra_props_pg)
-
         for i in range(len(attrs_mdb)):
             details = {}
             details["name_conf"] = attrs_conf[i]
             details["type_conf"] = types[i]
             details["value"] = None
-            self.attrs_details[attrs_mdb[i]] = details
-
-        # TODO insert function call here
-        # Check if changing type was unsuccessful.
-        type_update_failed = r.udpate_types(self.attrs_details)
-
-        if type_update_failed is not None:
-            for tuf in type_update_failed:
-                name_pg = tuf[0]
-                name_mdb = [
-                    attr for attr in self.attrs_details if self.attrs_details[attr]["name_conf"] == name_pg][0]
-                type_orig = tuf[1].lower()
-                type_new = self.attrs_details[name_mdb]["type_conf"].lower()
-                self.attrs_details[name_mdb]["type_conf"] = type_orig
-                logger.warn("""
-                [EXTRACTOR] Type conversion is not possible for column '%s'.
-                Skipping conversion %s -> %s.""" %
-                            (name_pg, type_orig, type_new))
-
-        return r, self.attrs_details
+            self.attr_details[attrs_mdb[i]] = details
