@@ -1,6 +1,5 @@
 import psycopg2
 import pymongo
-# from etl import extract
 from etl.extract import extractor, extractor
 from etl.transform import relation
 import pytest
@@ -58,8 +57,6 @@ class TestExtractor(unittest.TestCase):
         # create test databases in Mongo and Postgres
         # Postgres
         cursor = pg.conn.cursor()
-        # cursor.execute(query["db_drop"])
-        # cursor.execute(query["db_create"])
         cursor.execute(query["db_exists"])
         db_exists = cursor.fetchone()
         assert db_exists[0] == True
@@ -448,7 +445,7 @@ class TestExtractor(unittest.TestCase):
         unset = []
         coll = mock.coll_names[0]
         rel = mock.rel_names[0]
-        docs = []  # mongo[coll].find()
+        docs = [] 
         mock_updated = mock.data_mdb_company_updated
         for doc in mongo[coll].find():
             docs.append({
