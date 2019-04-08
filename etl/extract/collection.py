@@ -120,7 +120,9 @@ def get_docs_for_type_check(db, name, nr_of_docs=100):
     try:
         logger.info('[COLLECTION] Loading data from collection %s...' % name)
         c = db[name]
-        docs = c.find().limit(nr_of_docs)
+        docs = c.find().sort(
+            '$natural', pymongo.DESCENDING
+        ).skip(0).limit(nr_of_docs)
     except Exception as ex:
         logger.error(
             '[COLLECTION] Loading data from collection %s failed.' % name)
