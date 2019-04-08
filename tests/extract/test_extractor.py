@@ -14,12 +14,11 @@ pg = mock.pg
 mongo = mock.mongo
 query = mock.query
 rel_name_company = mock.rel_name_company
-rel_name_company_cm = mock.rel_name_company_coll_map
 coll_name_company = mock.coll_name_company
 coll_name_employee = mock.coll_name_employee
-coll_conf = mock.coll_config
 coll_conf_new = mock.coll_config_new
-ex = extractor.Extractor(pg, mongo, mock.setup_pg, mock.settings, coll_conf)
+ex = extractor.Extractor(pg, mongo, mock.setup_pg,
+                         mock.settings, mock.coll_config)
 pg_cm_attrs = mock.pg_coll_map_attrs
 
 
@@ -27,7 +26,7 @@ def create_and_populate_company_pg():
     cursor = pg.conn.cursor()
     cursor.execute(query["table_drop_purr_cm"])
     # create table for CM in the database
-    cm.create_table(pg, coll_conf)
+    cm.create_table(pg, mock.coll_config)
 
     cursor.execute(query["table_drop_company"])
     cursor.execute(query["table_create_company"])
@@ -42,78 +41,14 @@ def create_and_populate_company_mdb():
     # TODO
     mongo.drop_collection(coll_name_company)
     print("creates collection company")
-    docs = [
-        {
-            "active": True,
-            "signupCode": "uPsYdUpSy123",
-            "domains": [
-                "southpark.com"
-            ]
-        },
-        {
-            "active": True,
-            "signupCode": "node",
-            "domains": [
-                "amazon.com"
-            ]
-        },
-        {
-            "active": True,
-            "signupCode": "kInGsSpOrT32",
-            "domains": [
-                "stuff.com",
-                "baddance.com",
-                "chewbacca.com"
-            ]
-        },
-        {
-            "active": False,
-            "signupCode": "BoOmClAp<3",
-            "domains": [
-                "festival.com"
-            ]
-        },
-        {
-            "active": False,
-            "signupCode": "LiPGlOsS24",
-            "domains": [
-                "platform934.org",
-                "hogwarts.com",
-            ]
-        }
-    ]
+    docs = mock.data_mdb_company
     mongo[coll_name_company].insert_many(docs)
 
 
 def create_and_populate_employee_mdb():
     mongo.drop_collection(coll_name_employee)
     print("creates collection employee")
-    docs = [
-        {
-            "firstName": "John",
-            "lastName": "Snow",
-        },
-        {
-
-            "firstName": "Arya",
-            "lastName": "Start",
-        },
-        {
-
-            "firstName": "Sansa",
-            "lastName": "Stark",
-        },
-        {
-
-            "firstName": "Little",
-            "lastName": "Finger",
-        },
-        {
-
-            "firstName": "The",
-            "lastName": "Hound",
-        }
-    ]
+    docs = mock.data_mdb_employee
     mongo[coll_name_employee].insert_many(docs)
 
 
@@ -189,7 +124,7 @@ class TestExtractor(unittest.TestCase):
         cursor = pg.conn.cursor()
 
         # add type
-        conf = mock.coll_config_db
+        conf = copy.deepcopy(mock.coll_config_db)
         conf_new = copy.deepcopy(conf)
 
         conf_new[0][3].pop()
@@ -216,10 +151,11 @@ class TestExtractor(unittest.TestCase):
         cursor.execute(query["table_drop_employee"])
         cursor.execute(query["table_drop_purr_cm"])
 
+        coll_config = copy.deepcopy(mock.coll_config)
         # create table for CM in the database
-        cm.create_table(pg, coll_conf)
+        cm.create_table(pg, mock.coll_config)
         ex = extractor.Extractor(
-            pg, mongo, mock.setup_pg, mock.settings, coll_conf)
+            pg, mongo, mock.setup_pg, mock.settings, coll_config)
 
         # # changes extractor's collection definition for every collection
         # # and transfers
@@ -240,6 +176,7 @@ class TestExtractor(unittest.TestCase):
                 if v[":columns"] != mocked[k][":columns"]:
                     assert False
 
+        cursor.execute(query["table_drop_purr_cm"])
         cursor.close()
         del ex
 
@@ -260,23 +197,28 @@ class TestExtractor(unittest.TestCase):
         cursor.execute(query["table_drop_purr_cm"])
 
         # create table for CM in the database
-        cm.create_table(pg, coll_conf)
+        cm.create_table(pg, mock.coll_config)
+        coll_config = copy.deepcopy(mock.coll_config_company_employee)
+
         ex = extractor.Extractor(
             pg,
             mongo,
             mock.setup_pg,
             mock.settings,
-            mock.coll_config_company_employee
+            coll_config
         )
 
         # # changes extractor's collection definition for every collection
         # # and transfers
-        coll_map_old = mock.coll_config_db_company_employee
-        coll_map_new = mock.coll_config_db
-        ex.table_track(coll_map_old, coll_map_new)
 
-        mocked = mock.coll_config
+        coll_map_old = copy.deepcopy(mock.coll_config_db_company_employee)
+        coll_map_new = copy.deepcopy(mock.coll_config_db)
+        ex.table_untrack(coll_map_old, coll_map_new)
+
+        mocked = copy.deepcopy(mock.coll_config)
         if (len(ex.coll_def) != len(mocked)):
+            print("NEW", ex.coll_def)
+            print("OlD", mocked)
             assert False
 
         for k, v in ex.coll_def.items():
@@ -291,76 +233,330 @@ class TestExtractor(unittest.TestCase):
         del ex
         assert True
 
-    def test_update_coll_map(self):
-        assert True == True
+    def test_update_coll_map_unchanged(self):
+
+        # collection map is not changed
+        # extractor.coll_map_cur stays the same
+
+        cursor = pg.conn.cursor()
+
+        cursor.execute(query["table_drop_purr_cm"])
+
+        # create table for CM in the database
+        cm.create_table(pg, mock.coll_config)
+
+        coll_config = copy.deepcopy(mock.coll_config)
+        ex = extractor.Extractor(
+            pg,
+            mongo,
+            mock.setup_pg,
+            mock.settings,
+            coll_config
+        )
+        ex.update_coll_map()
+        print("OLD", ex.coll_map_cur)
+        print("NEW", mock.coll_config_db)
+        cursor.close()
+
+        res = (ex.coll_map_cur == mock.coll_config_db)
+        del ex
+        assert res
+
+    def test_update_coll_map_changed(self):
+
+        # collection map is changed and
+        # extractor.coll_map_cur needs to be updated
+
+        # purr_collection_map needs old values
+        cursor = pg.conn.cursor()
+        cursor.execute(query["table_drop_purr_cm"])
+
+        # create table for CM in the database
+        cm.create_table(pg, mock.coll_config)
+
+        coll_config = copy.deepcopy(mock.coll_config_company_employee)
+
+        ex = extractor.Extractor(
+            pg,
+            mongo,
+            mock.setup_pg,
+            mock.settings,
+            coll_config
+        )
+
+        # this pulls the map from the db (mock.coll_config)
+        ex.update_coll_map()
+        print("NEW", ex.coll_map_cur)
+        print("MOCK", mock.coll_config_db_company_employee)
+        # case 2: collection map is changed and
+        # extractor.coll_map_cur needs to be updated
+        cursor.close()
+
+        res = (ex.coll_map_cur == mock.coll_config_db)
+        del ex
+        assert res
 
     def test_transfer(self):
-        assert True == True
+        # drop/truncate table
+        # create schema
+        # transfers collections
+        cursor = pg.conn.cursor()
+
+        # reset CM in the database
+        cursor.execute(query["table_drop_purr_cm"])
+        cursor.execute(query["table_drop_company"])
+        cursor.execute(query["table_drop_employee"])
+        pg.conn.commit()
+        create_and_populate_company_mdb()
+        cm.create_table(pg, mock.coll_config)
+
+        # collection which will be transferred
+        collection_names = mock.coll_names
+
+        coll_config = copy.deepcopy(mock.coll_config_company_employee)
+        ex = extractor.Extractor(
+            pg,
+            mongo,
+            mock.setup_pg,
+            mock.settings,
+            coll_config
+        )
+        ex.transfer(collection_names)
+        for i in range(len(mock.rel_names)):
+            relation = mock.rel_names[i]
+            cursor.execute("SELECT count(*) FROM %s" % (relation))
+            cnt_pg = cursor.fetchone()
+            cnt_mongo = mongo[collection_names[i]].count()
+            if cnt_mongo != cnt_pg[0]:
+                print("Postgres:", cnt_pg[0])
+                print("MongoDB:", cnt_mongo)
+                assert False
+
+        cursor.close()
+        del ex
+
+        assert True
 
     def test_transfer_coll(self):
         # TODO: check
-        # transfer one collection
 
-        # cmd = "DROP TABLE IF EXISTS %s;" % rel_name_company
-        # cursor = pg.conn.cursor()
-        # cursor.execute(cmd)
+        cursor = pg.conn.cursor()
 
-        # ex = extractor.Extractor(pg, mongo, setup_pg, settings, coll_conf)
-        # ex.transfer_coll(coll_name_company)
+        # reset CM in the database
+        cursor.execute(query["table_drop_purr_cm"])
+        cursor.execute(query["table_drop_company"])
+        cursor.execute(query["table_drop_employee"])
+        pg.conn.commit()
+        create_and_populate_company_mdb()
+        cm.create_table(pg, mock.coll_config)
 
-        # cmd = "SELECT count(*) from %s;" % rel_name_company
-        # cnt_pg = pg.execute_cmd_with_fetch(cmd)
-        # cnt_mongo = mongo[coll_name_company].count()
-        # print(cnt_pg[0][0], cnt_mongo)
-        # cursor.close()
-        # assert cnt_pg[0][0] == cnt_mongo
-        assert True == True
+        # collection which will be transferred
+        collection = mock.coll_names[0]
+        relation = mock.rel_names[0]
+
+        coll_config = copy.deepcopy(mock.coll_config_company_employee)
+        ex = extractor.Extractor(
+            pg,
+            mongo,
+            mock.setup_pg,
+            mock.settings,
+            coll_config
+        )
+        ex.transfer_coll(collection)
+        cursor.execute("SELECT count(*) FROM %s" % (relation))
+        cnt_pg = cursor.fetchone()
+        cnt_mongo = mongo[collection].count()
+        print("Postgres:", cnt_pg[0])
+        print("MongoDB:", cnt_mongo)
+
+        cursor.close()
+        del ex
+        assert cnt_mongo == cnt_pg[0]
 
     def test_insert_multiple(self):
-        assert True == True
+        # no unset
+        # TODO: test when there is value in unset
+        cursor = pg.conn.cursor()
+
+        # reset CM in the database
+        cursor.execute(query["table_drop_purr_cm"])
+        cursor.execute(query["table_drop_company"])
+
+        pg.conn.commit()
+        create_and_populate_company_mdb()
+        cm.create_table(pg, mock.coll_config)
+
+        unset = []
+        coll = mock.coll_names[0]
+        rel = mock.rel_names[0]
+        docs = []
+
+        for doc in mongo[coll].find():
+            docs.append(doc)
+        coll_config = copy.deepcopy(mock.coll_config_company_employee)
+        ex = extractor.Extractor(
+            pg,
+            mongo,
+            mock.setup_pg,
+            mock.settings,
+            coll_config
+        )
+        schema = mock.setup_pg["schema_name"]
+
+        r = relation.Relation(
+            pg,
+            schema,
+            rel,
+            True
+        )
+        attrs = mock.attrs_company
+        types = mock.types_company
+        r.create_with_columns(attrs, types)
+
+        ex.insert_multiple(docs, r, coll)
+
+        print("COLLECTION", coll)
+        print("DOCUMENTS", docs)
+
+        cmd = "SELECT %s FROM %s order by id" % (", ".join(attrs[1:]), rel)
+        cursor.execute(cmd)
+        mocked = mock.data_pg_company_no_id
+        res = cursor.fetchall()
+        print("MOCKED")
+        print(mocked)
+        print("RESULT")
+        print(res)
+
+        cursor.close()
+        del r
+        del ex
+        assert mocked == res
 
     def test_update_multiple(self):
-        assert True == True
+        # no unset
+        # TODO: test when there is value in unset
+        cursor = pg.conn.cursor()
 
-    def test_prepare_attr_details(self):
-        assert True == True
+        # reset CM in the database
+        cursor.execute(query["table_drop_purr_cm"])
+        cursor.execute(query["table_drop_company"])
 
-    def test_adjust_columns(self):
-        assert True == True
+        pg.conn.commit()
+        create_and_populate_company_mdb()
+        cm.create_table(pg, mock.coll_config)
 
-    # def test_prepare_attr_details_with_extra_props(self):
-    #     ex.include_extra_props = True
-    #     attribute_details = ex.prepare_attr_details(
-    #         attrs_conf, attrs_mdb, types_conf, type_extra_props_pg)
-    #     import pprint
-    #     pprint.pprint(attribute_details)
-    #     res = {
-    #         '_id': {'name_conf': 'id', 'type_conf': 'text', 'value': None},
-    #         'active': {'name_conf': 'active', 'type_conf': 'boolean', 'value': None},
-    #         'domains': {'name_conf': 'domains', 'type_conf': 'jsonb', 'value': None},
-    #         'extraProps': {'name_conf': '_extra_props', 'type_conf': 'jsonb', 'value': None},
-    #         'signupCode': {'name_conf': 'signup_code', 'type_conf': 'text', 'value': None}
-    #     }
-    #     assert res == attribute_details
+        unset = []
+        coll = mock.coll_names[0]
+        rel = mock.rel_names[0]
+        docs = []  # mongo[coll].find()
+        mock_updated = mock.data_mdb_company_updated
+        for doc in mongo[coll].find():
+            docs.append({
+                "_id": doc["_id"],
+                "active": mock_updated["active"],
+                "signupCode": mock_updated["signupCode"],
+                "domains": mock_updated["domains"]
+            })
+        coll_config = copy.deepcopy(mock.coll_config_company_employee)
+        ex = extractor.Extractor(
+            pg,
+            mongo,
+            mock.setup_pg,
+            mock.settings,
+            coll_config
+        )
+        schema = mock.setup_pg["schema_name"]
 
-    # def test_prepare_attr_details_without_extra_props(self):
-    #     attrs_conf = ['id', 'active', 'domains', 'signup_code']
-    #     attrs_mdb = ['_id', 'active', 'domains', 'signupCode']
-    #     types_conf = ['text', 'boolean', 'jsonb', 'text']
-    #     type_extra_props_pg = None
-    #     ex = extractor.Extractor(pg, mongo, setup_pg, settings, coll_conf)
-    #     ex.include_extra_props = False
-    #     attribute_details = ex.prepare_attr_details(
-    #         attrs_conf, attrs_mdb, types_conf, type_extra_props_pg)
-    #     import pprint
-    #     pprint.pprint(attribute_details)
-    #     res = {
-    #         '_id': {'name_conf': 'id', 'type_conf': 'text', 'value': None},
-    #         'active': {'name_conf': 'active', 'type_conf': 'boolean', 'value': None},
-    #         'domains': {'name_conf': 'domains', 'type_conf': 'jsonb', 'value': None},
-    #         'signupCode': {'name_conf': 'signup_code', 'type_conf': 'text', 'value': None}
-    #     }
-    #     assert res == attribute_details
+        r = relation.Relation(
+            pg,
+            schema,
+            rel,
+            True
+        )
+        attrs = mock.attrs_company
+        types = mock.types_company
+        r.create_with_columns(attrs, types)
 
-    def test_adjust_columns(self):
-        assert 1 == 1
+        ex.update_multiple(docs, r, coll)
+
+        cmd = "SELECT %s FROM %s order by id" % (", ".join(attrs[1:]), rel)
+        cursor.execute(cmd)
+        mocked = mock.data_pg_company_updated_no_id
+        res = cursor.fetchall()
+        print("MOCKED")
+        print(mocked)
+        print("RESULT")
+        print(res)
+
+        cursor.close()
+        del r
+        del ex
+        assert mocked == res
+
+    def test_prepare_attr_details_with_extra_props(self):
+        coll_config = copy.deepcopy(mock.coll_config_company_employee)
+        ex = extractor.Extractor(
+            pg,
+            mongo,
+            mock.setup_pg,
+            mock.settings,
+            coll_config
+        )
+        type_extra_props_pg = 'jsonb'
+
+        ex.include_extra_props = True
+        attrs = copy.deepcopy(mock.attrs_company)
+        fields = copy.deepcopy(mock.fields_company)
+        types = []
+        for item in mock.types_company:
+            types.append(item.lower())
+
+        attribute_details = ex.prepare_attr_details(
+            attrs, fields, types, type_extra_props_pg)
+        import pprint
+        print("RESULT")
+        pprint.pprint(attribute_details)
+        print("MOCKED")
+        pprint.pprint(mock.attr_details)
+        del ex
+        assert mock.attr_details == attribute_details
+
+    def test_prepare_attr_details_without_extra_props(self):
+        coll_config = copy.deepcopy(mock.coll_config_company_employee)
+        ex = extractor.Extractor(
+            pg,
+            mongo,
+            mock.setup_pg,
+            mock.settings,
+            coll_config
+        )
+
+        ex.include_extra_props = False
+        attrs = copy.deepcopy(mock.attrs_company)
+        fields = copy.deepcopy(mock.fields_company)
+        types = []
+        for item in mock.types_company:
+            types.append(item.lower())
+
+        attribute_details = ex.prepare_attr_details(
+            attrs, fields, types)
+        import pprint
+        print("RESULT")
+        pprint.pprint(attribute_details)
+        print("MOCKED")
+        pprint.pprint(mock.attr_details)
+        del ex
+        mocked = copy.deepcopy(mock.attr_details)
+        del mocked["extraProps"]
+
+        assert mocked == attribute_details
+
+    # def test_adjust_columns(self):
+    #     assert False
+
+    # def test_handle_failed_type_update(self):
+    #     # self.attrs_details changed
+    #     assert False
+
+    # def test_add_extra_props(self):
+    #     assert False

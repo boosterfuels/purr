@@ -40,9 +40,12 @@ settings = {
 
 # --- RELATION INFORMATION ---
 
+coll_names = ['Company', 'Employee']
+rel_names = ['company', 'employee']
+
 rel_name_company = 'company'
-rel_name_employee = 'company'
-rel_name_company_coll_map = 'purr_collection_map'
+rel_name_employee = 'employee'
+collection_map = 'purr_collection_map'
 
 attrs_company = ["id", "active", "domains", "signup_code"]
 types_company = ["TEXT", "BOOLEAN", "JSONB", "TEXT"]
@@ -53,7 +56,7 @@ for i in range(len(attrs_company)):
 
 # --- COLLECTION INFORMATION ---
 coll_name_company = 'Company'
-fields_company = ["active", "domains", "signupCode"]
+fields_company = ["_id", "active", "domains", "signupCode"]
 
 coll_name_employee = 'Employee'
 fields_employee = ["firstName", "lastName", "hair"]
@@ -65,7 +68,7 @@ query = {
     "db_exists": "select exists(SELECT datname FROM pg_catalog.pg_database WHERE lower(datname) = lower('%s'))" % db_name_pg,
     "db_create": "CREATE DATABASE %s;" % db_name_pg,
     "db_drop": "DROP DATABASE IF EXISTS %s;" % db_name_pg,
-    "table_drop_purr_cm": "DROP TABLE IF EXISTS %s;" % rel_name_company_coll_map,
+    "table_drop_purr_cm": "DROP TABLE IF EXISTS %s;" % collection_map,
     "table_drop_company": "DROP TABLE IF EXISTS %s;" % rel_name_company,
     "table_drop_employee": "DROP TABLE IF EXISTS %s;" % rel_name_employee,
     "table_create_company": "CREATE TABLE %s(%s);" % (rel_name_company, ', '.join(attrs_types)),
@@ -190,3 +193,120 @@ coll_config_db_company_employee = [
 
 pg_coll_map_attrs = ["id", "collection_name", "relation_name",
                      "types", "updated_at", "query_update"]
+
+
+data_mdb_company = [
+    {
+        "active": True,
+        "signupCode": "uPsYdUpSy123",
+        "domains": [
+            "southpark.com"
+        ]
+    },
+    {
+        "active": True,
+        "signupCode": "node",
+        "domains": [
+            "amazon.com"
+        ]
+    },
+    {
+        "active": True,
+        "signupCode": "kInGsSpOrT32",
+        "domains": [
+            "stuff.com",
+            "baddance.com",
+            "chewbacca.com"
+        ]
+    },
+    {
+        "active": False,
+        "signupCode": "BoOmClAp<3",
+        "domains": [
+            "festival.com"
+        ]
+    },
+    {
+        "active": False,
+        "signupCode": "LiPGlOsS24",
+        "domains": [
+            "platform934.org",
+            "hogwarts.com",
+        ]
+    }
+]
+
+
+# data should look like this after transfer
+# if ordered by id
+data_pg_company = [
+    ('5ca7b1d3a54d75271eb97ab8', True, ['southpark.com'], 'uPsYdUpSy123'),
+    ('5ca7b1d3a54d75271eb97ab9', True, ['amazon.com'], 'node'),
+    ('5ca7b1d3a54d75271eb97aba', True, [
+     'stuff.com', 'baddance.com', 'chewbacca.com'], 'kInGsSpOrT32'),
+    ('5ca7b1d3a54d75271eb97abb', False, ['festival.com'], 'BoOmClAp<3'),
+    ('5ca7b1d3a54d75271eb97abc', False, [
+     'platform934.org', 'hogwarts.com'], 'LiPGlOsS24')
+]
+data_pg_company_no_id = [
+    (True, ['southpark.com'], 'uPsYdUpSy123'),
+    (True, ['amazon.com'], 'node'),
+    (True, ['stuff.com', 'baddance.com', 'chewbacca.com'], 'kInGsSpOrT32'),
+    (False, ['festival.com'], 'BoOmClAp<3'),
+    (False, ['platform934.org', 'hogwarts.com'], 'LiPGlOsS24')
+]
+
+
+data_mdb_company_updated = {
+    "active": True,
+    "signupCode": "uPsYdUpSy123",
+    "domains": [
+        "southpark.com"
+    ]
+}
+
+
+data_pg_company_updated_no_id = [
+    (True, ['southpark.com'], 'uPsYdUpSy123'),
+    (True, ['southpark.com'], 'uPsYdUpSy123'),
+    (True, ['southpark.com'], 'uPsYdUpSy123'),
+    (True, ['southpark.com'], 'uPsYdUpSy123'),
+    (True, ['southpark.com'], 'uPsYdUpSy123'),
+]
+
+
+data_mdb_employee = [
+    {
+        "firstName": "John",
+        "lastName": "Snow",
+    },
+    {
+
+        "firstName": "Arya",
+        "lastName": "Start",
+    },
+    {
+
+        "firstName": "Sansa",
+        "lastName": "Stark",
+    },
+    {
+
+        "firstName": "Little",
+        "lastName": "Finger",
+    },
+    {
+
+        "firstName": "The",
+        "lastName": "Hound",
+    }
+]
+
+
+attr_details = {
+    '_id': {'name_conf': 'id', 'type_conf': 'text', 'value': None},
+    'active': {'name_conf': 'active', 'type_conf': 'boolean', 'value': None},
+    'domains': {'name_conf': 'domains', 'type_conf': 'jsonb', 'value': None},
+    'extraProps': {'name_conf': '_extra_props', 'type_conf': 'jsonb', 'value': None},
+    'signupCode': {'name_conf': 'signup_code', 'type_conf': 'text', 'value': None}
+}
