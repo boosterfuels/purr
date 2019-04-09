@@ -1,8 +1,7 @@
 from etl.monitor import logger
 from etl.extract import init_mongo
 import pymongo
-import bson.objectid
-
+from bson import ObjectId
 
 def check(db, colls_requested):
     """
