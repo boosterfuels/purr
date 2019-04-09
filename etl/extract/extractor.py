@@ -271,24 +271,24 @@ class Extractor():
             try:
                 if (i+1) % nr_of_transferred == 0 and i+1 >= nr_of_transferred:
                     if self.include_extra_props is True:
-                        r.insert_config_bulk(
+                        r.insert_bulk(
                             transferring,
                             self.attr_details,
                             self.include_extra_props)
                     else:
-                        r.insert_config_bulk_no_extra_props(
+                        r.insert_bulk_no_extra_props(
                             transferring,
                             self.attr_details,
                             self.include_extra_props)
                     transferring = []
                 if i + 1 == nr_of_docs and (i + 1) % nr_of_transferred != 0:
                     if self.include_extra_props is True:
-                        r.insert_config_bulk(
+                        r.insert_bulk(
                             transferring,
                             self.attr_details,
                             self.include_extra_props)
                     else:
-                        r.insert_config_bulk_no_extra_props(
+                        r.insert_bulk_no_extra_props(
                             transferring,
                             self.attr_details,
                             self.include_extra_props)
@@ -355,10 +355,10 @@ class Extractor():
         # TODO remove this stuff with the extra props
         try:
             if self.include_extra_props is True:
-                r.insert_config_bulk(
+                r.insert_bulk(
                     docs, self.attr_details, self.include_extra_props, unset)
             else:
-                r.insert_config_bulk_no_extra_props_tailed(
+                r.insert_bulk_no_extra_props_tailed(
                     docs, self.attr_details, self.include_extra_props, unset)
         except Exception as ex:
             logger.error("""
@@ -410,10 +410,10 @@ class Extractor():
         # TODO remove this stuff with the extra props.
         try:
             if self.include_extra_props is True:
-                r.insert_config_bulk(
+                r.insert_bulk(
                     docs, self.attr_details, self.include_extra_props, unset)
             else:
-                r.insert_config_bulk_no_extra_props_tailed(
+                r.insert_bulk_no_extra_props_tailed(
                     docs, self.attr_details, self.include_extra_props, unset)
         except Exception as ex:
             logger.error("""

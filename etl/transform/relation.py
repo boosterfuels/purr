@@ -106,7 +106,7 @@ class Relation():
         row.insert(self.db, self.schema, self.relation_name,
                    reduced_attributes, values)
 
-    def insert_config_bulk(self, docs, attrs,
+    def insert_bulk(self, docs, attrs,
                            include_extra_props=True, unset=[]):
         """
         Transforms document and inserts it into the corresponding table.
@@ -133,7 +133,7 @@ class Relation():
             row.insert_bulk(self.db, self.schema,
                             self.relation_name, attrs_pg, result)
 
-    def insert_config_bulk_no_extra_props(self, docs, attrs,
+    def insert_bulk_no_extra_props(self, docs, attrs,
                                           include_extra_props=True, unset=[]):
         """
         Transforms document and inserts it into the corresponding table.
@@ -176,7 +176,7 @@ class Relation():
             row.insert_bulk(self.db, self.schema,
                             self.relation_name, attrs_pg, result)
 
-    def insert_config_bulk_no_extra_props_tailed(self,
+    def insert_bulk_no_extra_props_tailed(self,
                                                  docs,
                                                  attrs,
                                                  include_extra_props=True,
