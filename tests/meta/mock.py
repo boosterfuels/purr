@@ -309,9 +309,9 @@ data_mdb_employee = [
 
 
 attr_details = {
-    '_id': {'name_conf': 'id', 'type_conf': 'text', 'value': None},
-    'active': {'name_conf': 'active', 'type_conf': 'boolean', 'value': None},
-    'domains': {'name_conf': 'domains', 'type_conf': 'jsonb', 'value': None},
-    'extraProps': {'name_conf': '_extra_props', 'type_conf': 'jsonb', 'value': None},
-    'signupCode': {'name_conf': 'signup_code', 'type_conf': 'text', 'value': None}
+    '_id': {'name_cm': 'id', 'type_cm': 'text', 'value': None},
+    'active': {'name_cm': 'active', 'type_cm': 'boolean', 'value': None},
+    'domains': {'name_cm': 'domains', 'type_cm': 'jsonb', 'value': None},
+    'extraProps': {'name_cm': '_extra_props', 'type_cm': 'jsonb', 'value': None},
+    'signupCode': {'name_cm': 'signup_code', 'type_cm': 'text', 'value': None}
 }
