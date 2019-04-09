@@ -7,6 +7,69 @@ from etl.transform import config_parser, unnester
 reserved = keyword_checker.get_keywords()
 
 
+def init_values(attrs):
+    """
+    Sets value for every column to None
+    """
+    for k, v in attrs.items():
+        attrs[k]["value"] = None
+    return attrs
+
+
+def set_values(attrs, doc, _extra_props=None):
+    """
+    Casts values for a whole document
+    """
+    for key_doc, value_doc in doc.items():
+        keys_cm = list(attrs.keys())
+        if key_doc in keys_cm:
+            value = unnester.cast(
+                attrs[key_doc]["type_cm"], value_doc)
+            if value == 'undefined' and _extra_props is not None:
+                _extra_props.update({key_doc: value_doc})
+            else:
+                attrs[key_doc]["value"] = value
+        else:
+            if _extra_props is not None:
+                _extra_props.update({key_doc: value_doc})
+    if _extra_props is not None:
+        return attrs, _extra_props
+    else:
+        return attrs
+
+
+def prepare_row_for_insert(attrs, doc, keys_cm):
+    _extra_props = {}
+    attrs = init_values(attrs)
+
+    (attrs, _extra_props) = set_values(attrs, doc, _extra_props)
+
+    if include_extra_props is True:
+        _extra_props = unnester.cast('jsonb', _extra_props)
+        attrs["extraProps"]["value"] = _extra_props
+
+    if len(docs) > 1:
+        attrs_pg = [v["name_cm"] for k, v in attrs.items()]
+        values = [v["value"] for k, v in attrs.items()]
+    else:
+        attrs_pg = [v["name_cm"]
+                    for k, v in attrs.items() if k in doc.keys()]
+        values = [v["value"]
+                  for k, v in attrs.items() if k in doc.keys()]
+        if len(doc.keys()) > len(attrs_pg) and include_extra_props:
+            attrs_pg.append('_extra_props')
+            values.append(_extra_props)
+    return attrs_pg, values
+
+
+def is_schema_changed(attrs_pg, types_pg, attrs_cm, types_cm):
+    equal_attrs = set(attrs_cm) == set(attrs_pg)
+    equal_types = set(types_cm) == set(types_pg)
+    if len(attrs_pg) and (equal_attrs and equal_types):
+        return False
+    return True
+
+
 class Relation():
     """
     This is the main parents class for transforming data.
@@ -43,48 +106,6 @@ class Relation():
         row.insert(self.db, self.schema, self.relation_name,
                    reduced_attributes, values)
 
-    def insert_bulk(self, docs):
-        """
-        Transforms document and inserts it into the corresponding table.
-        Parameters
-        ----------
-        doc : dict
-              the document we want to insert
-        TODO
-        CHECK if self.column_names and self.column_types are still the same
-        """
-        # This is needed because
-        # sometimes there is no value for attributes (null)
-        attributes_all = []
-
-        if len(docs) != 0:
-            attributes_all = list(docs[0].keys())
-
-        for doc in docs:
-            attributes = list(doc.keys())
-            diff = list(set(attributes) - set(attributes_all))
-            attributes_all = attributes_all + diff
-        attributes_all = [attr.lower() for attr in attributes_all]
-
-        result = []
-
-        for doc in docs:
-            attributes = list(doc.keys())
-            (reduced_attributes, values) = self.get_attrs_and_vals(attributes,
-                                                                   doc)
-            diff = list(set(attributes_all) - set(reduced_attributes))
-            # needed to keep the order
-            for d in diff:
-                reduced_attributes.append(d)
-                values.append(None)
-            dict_sorted = sorted(dict(zip(reduced_attributes, values)).items())
-            values = (*[x[1] for x in dict_sorted],)
-
-            result.append(values)
-        attributes_all.sort()
-        row.insert_bulk(self.db, self.schema, self.relation_name,
-                        attributes_all, result, unset)
-
     def insert_config_bulk(self, docs, attrs,
                            include_extra_props=True, unset=[]):
         """
@@ -102,36 +123,7 @@ class Relation():
         if type(docs) is not list:
             docs = [docs]
         for doc in docs:
-            _extra_props = {}
-            for k, v in attrs.items():
-                attrs[k]["value"] = None
-            for key_doc, value_doc in doc.items():
-                keys_conf = list(attrs.keys())
-                if key_doc in keys_conf:
-                    value = unnester.cast(
-                        attrs[key_doc]["type_conf"], value_doc)
-                    if value == 'undefined':
-                        _extra_props.update({key_doc: value_doc})
-                    else:
-                        attrs[key_doc]["value"] = value
-                else:
-                    _extra_props.update({key_doc: value_doc})
-            if include_extra_props is True:
-                _extra_props = unnester.cast('jsonb', _extra_props)
-                attrs["extraProps"]["value"] = _extra_props
-
-            if len(docs) > 1:
-                attrs_pg = [v["name_conf"] for k, v in attrs.items()]
-                values = [v["value"] for k, v in attrs.items()]
-            else:
-                attrs_pg = [v["name_conf"]
-                            for k, v in attrs.items() if k in doc.keys()]
-                values = [v["value"]
-                          for k, v in attrs.items() if k in doc.keys()]
-                if len(doc.keys()) > len(attrs_pg) and include_extra_props:
-                    attrs_pg.append('_extra_props')
-                    values.append(_extra_props)
-
+            (attrs_pg, values) = prepare_row_for_insert(attrs, doc, keys_cm)
             result.append(tuple(values))
 
         if self.created is True:
@@ -160,26 +152,20 @@ class Relation():
         if type(docs) is not list:
             docs = [docs]
         for doc in docs:
-            for k, v in attrs.items():
-                attrs[k]["value"] = None
-            for key_doc, value_doc in doc.items():
-                keys_conf = list(attrs.keys())
-                if key_doc in keys_conf:
-                    value = unnester.cast(
-                        attrs[key_doc]["type_conf"], value_doc)
-                    if value != 'undefined':
-                        attrs[key_doc]["value"] = value
+            attrs = init_values(attrs)
+
+            (attrs) = set_values(attrs, doc)
 
             if len(docs) > 1:
-                attrs_pg = [v["name_conf"] for k, v in attrs.items()]
+                attrs_pg = [v["name_cm"] for k, v in attrs.items()]
                 values = [v["value"] for k, v in attrs.items()]
             else:
-                attrs_pg = [v["name_conf"]
+                attrs_pg = [v["name_cm"]
                             for k, v in attrs.items() if k in doc.keys()]
                 values = [v["value"]
                           for k, v in attrs.items() if k in doc.keys()]
                 for u in unset:
-                    attrs_pg.append(attrs[u]["name_conf"])
+                    attrs_pg.append(attrs[u]["name_cm"])
                     values.append(None)
             result.append(tuple(values))
 
@@ -212,26 +198,19 @@ class Relation():
         if type(docs) is not list:
             docs = [docs]
         for doc in docs:
-            for k, v in attrs.items():
-                attrs[k]["value"] = None
-            for key_doc, value_doc in doc.items():
-                keys_conf = list(attrs.keys())
-                if key_doc in keys_conf:
-                    value = unnester.cast(
-                        attrs[key_doc]["type_conf"], value_doc)
-                    if value != 'undefined':
-                        attrs[key_doc]["value"] = value
-
+            attrs = init_values(attrs)
+            (attrs) = set_values(
+                attrs, doc)
             if len(docs) > 1:
-                attrs_pg = [v["name_conf"] for k, v in attrs.items()]
+                attrs_pg = [v["name_cm"] for k, v in attrs.items()]
                 values = [v["value"] for k, v in attrs.items()]
             else:
-                attrs_pg = [v["name_conf"]
+                attrs_pg = [v["name_cm"]
                             for k, v in attrs.items() if k in doc.keys()]
                 values = [v["value"]
                           for k, v in attrs.items() if k in doc.keys()]
                 for u in unset:
-                    attrs_pg.append(attrs[u]["name_conf"])
+                    attrs_pg.append(attrs[u]["name_cm"])
                     values.append(None)
             result.append(tuple(values))
 
@@ -318,16 +297,97 @@ class Relation():
                 reduced_attributes, types)
         return reduced_attributes, values
 
-    def create(self):
-        table.create(self.db, self.schema, self.relation_name)
-
     def create_with_columns(self, attrs, types):
         table.create(self.db, self.schema, self.relation_name, attrs, types)
 
     def add_pk(self, attr):
         constraint.add_pk(self.db, self.schema, self.relation_name, attr)
 
-    def udpate_types(self, attrs_types_conf):
+    def columns_remove(self, attrs_pg, types_pg, attrs_cm, types_cm):
+        """
+        Check if attributes in Postgres exist in the collection map.
+        If not, remove the column.
+        """
+        temp_attrs_cm = []
+        temp_types_cm = []
+
+        for i in range(0, len(attrs_pg)):
+            try:
+                # check if attributes in PG are part of the collection map)
+                idx = attrs_cm.index(attrs_pg[i])
+            except ValueError:
+                # remove extra columns from PG (because they are no longer
+                # part of the collection map)
+                table.remove_column(
+                    self.db, self.schema, self.relation_name, attrs_pg[i])
+                attrs_pg[i] = None
+                types_pg[i] = None
+                continue
+            temp_attrs_cm.append(attrs_cm[idx])
+            temp_types_cm.append(types_cm[idx])
+            del attrs_cm[idx]
+            del types_cm[idx]
+
+        attrs_pg = [x for x in attrs_pg if x is not None]
+        types_pg = [x for x in types_pg if x is not None]
+
+        attrs_cm = temp_attrs_cm + (attrs_cm)
+        types_cm = temp_types_cm + (types_cm)
+
+        return attrs_pg, types_pg, attrs_cm, types_cm
+
+    def columns_add(self, attrs_pg, types_pg, attrs_cm, types_cm):
+        """
+        Adds columns to Postgres OR updates column types.
+        """
+        type_convert_fail = []
+
+        if set(attrs_cm).issubset(set(attrs_pg)):
+            # update types
+            for i in range(len(attrs_pg)):
+                if attrs_pg[i] in attrs_cm:
+                    # type from the db and type from the config file
+                    type_old = types_pg[i].lower()
+                    type_new = types_cm[i].lower()
+
+                    name_ts_no_tz = 'timestamp without time zone'
+                    name_ts = 'timestamp'
+                    if type_old == name_ts_no_tz and type_new == name_ts:
+                        continue
+                    elif type_old != type_new:
+                        # type was changed
+                        if type_checker.is_convertable(type_old, type_new):
+                            table.column_change_type(
+                                self.db,
+                                self.schema,
+                                self.relation_name,
+                                attrs_pg[i],
+                                type_new)
+                        else:
+                            type_convert_fail.append(
+                                (attrs_pg[i], type_old))
+                            continue
+            return type_convert_fail
+        else:
+            # add new columns
+            diff = list(set(attrs_cm) - set(attrs_pg))
+
+            # get type of new attributes
+            attrs_to_add = []
+            types_to_add = []
+            for d in diff:
+                attrs_to_add.append(d)
+                idx = attrs_cm.index(d)
+                types_to_add.append(types_cm[idx])
+            table.add_multiple_columns(
+                self.db,
+                self.schema,
+                self.relation_name,
+                attrs_to_add,
+                types_to_add
+            )
+
+    def update_schema(self, attrs_types_cm):
         """
         Checks if there were any changes in the schema and adds/changes
         attributes if needed.
@@ -341,8 +401,8 @@ class Relation():
         - check check is one is castable to the other
         """
 
-        attrs_conf = []
-        types_conf = []
+        attrs_cm = []
+        types_cm = []
         attrs_pg = []
         types_pg = []
         column_info = table.get_column_names_and_types(
@@ -355,94 +415,25 @@ class Relation():
             types_pg = [attrs_types_pg[k]
                         for k in sorted(attrs_types_pg.keys())]
 
-            attrs_conf = [attrs_types_conf[k]["name_conf"]
-                          for k in attrs_types_conf.keys()]
-            types_conf = [attrs_types_conf[k]["type_conf"]
-                          for k in attrs_types_conf.keys()]
+            attrs_cm = [attrs_types_cm[k]["name_cm"]
+                        for k in attrs_types_cm.keys()]
+            types_cm = [attrs_types_cm[k]["type_cm"]
+                        for k in attrs_types_cm.keys()]
 
             # if attributes from PG and the collection map are
             # the same, do nothing
-            equal_attrs = set(attrs_conf) == set(attrs_pg)
-            equal_types = set(types_conf) == set(types_pg)
-            if len(attrs_pg) and (equal_attrs and equal_types):
+            if is_schema_changed(attrs_pg, types_pg, attrs_cm, types_cm) is False:
                 return
 
-            temp_attrs_conf = []
-            temp_types_conf = []
+            (attrs_pg, types_pg, attrs_cm, types_cm) = self.columns_remove(
+                attrs_pg, types_pg, attrs_cm, types_cm)
 
-            for i in range(0, len(attrs_pg)):
-                try:
-                    # check if attributes in PG are part of the collection map)
-                    idx = attrs_conf.index(attrs_pg[i])
-                except ValueError:
-                    table.remove_column(
-                        self.db, self.schema, self.relation_name, attrs_pg[i])
-                    attrs_pg[i] = None
-                    types_pg[i] = None
-                    continue
-                temp_attrs_conf.append(attrs_conf[idx])
-                temp_types_conf.append(types_conf[idx])
-                del attrs_conf[idx]
-                del types_conf[idx]
-
-            # remove extra columns from PG (because they are no longer
-            # part of the collection map)
-            attrs_pg = [x for x in attrs_pg if x is not None]
-            types_pg = [x for x in types_pg if x is not None]
-
-            attrs_conf = temp_attrs_conf + (attrs_conf)
-            types_conf = temp_types_conf + (types_conf)
-
-            type_convert_fail = []
-
-            if set(attrs_conf).issubset(set(attrs_pg)):
-                # check types
-                for i in range(len(attrs_pg)):
-                    if attrs_pg[i] in attrs_conf:
-                        # type from the db and type from the config file
-                        type_old = types_pg[i].lower()
-                        type_new = types_conf[i].lower()
-
-                        name_ts_no_tz = 'timestamp without time zone'
-                        name_ts = 'timestamp'
-                        if type_old == name_ts_no_tz and type_new == name_ts:
-                            continue
-                        elif type_old != type_new:
-                            if type_checker.is_convertable(type_old, type_new):
-                                table.column_change_type(
-                                    self.db,
-                                    self.schema,
-                                    self.relation_name,
-                                    attrs_pg[i],
-                                    type_new)
-                            else:
-                                type_convert_fail.append(
-                                    (attrs_pg[i], type_old))
-                                continue
-                return type_convert_fail
-            else:
-                # check old attrs and new ones
-                diff = list(set(attrs_conf) - set(attrs_pg))
-
-                # get type of new attributes
-                attrs_to_add = []
-                types_to_add = []
-                for d in diff:
-                    attrs_to_add.append(d)
-                    idx = attrs_conf.index(d)
-                    types_to_add.append(types_conf[idx])
-                table.add_multiple_columns(
-                    self.db,
-                    self.schema,
-                    self.relation_name,
-                    attrs_to_add,
-                    types_to_add
-                )
+            self.columns_add(attrs_pg, types_pg, attrs_cm, types_cm)
         else:
-            attrs_conf = [v["name_conf"] for k, v in attrs_types_conf.items()]
-            types_conf = [v["type_conf"] for k, v in attrs_types_conf.items()]
+            attrs_cm = [v["name_cm"] for k, v in attrs_types_cm.items()]
+            types_cm = [v["type_cm"] for k, v in attrs_types_cm.items()]
             if self.exists() is False:
-                self.create_with_columns(attrs_conf, types_conf)
+                self.create_with_columns(attrs_cm, types_cm)
             return
         # TODO if table was dropped or schema was reset
         # then there is no need to have fun
