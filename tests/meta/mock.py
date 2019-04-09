@@ -279,26 +279,31 @@ data_mdb_employee = [
     {
         "firstName": "John",
         "lastName": "Snow",
+        "hair": "black"
     },
     {
 
         "firstName": "Arya",
         "lastName": "Start",
+        "hair": "brown"
     },
     {
 
         "firstName": "Sansa",
         "lastName": "Stark",
+        "hair": "ginger"
     },
     {
 
         "firstName": "Little",
         "lastName": "Finger",
+        "hair": "dark brown"
     },
     {
 
         "firstName": "The",
         "lastName": "Hound",
+        "hair": "brown"
     }
 ]
 
