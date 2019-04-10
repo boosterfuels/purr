@@ -5,6 +5,12 @@ body {
   font-weight: lighter;
   line-height: 1.8; }
 
+.navbar-toggle {
+  background-color: purple;
+  border: 1px solid #facfff; }
+  .navbar-toggle span {
+    background-color: #facfff; }
+
 .nav {
   background: #920d92; }
   .nav li > a {
