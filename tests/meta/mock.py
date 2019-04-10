@@ -315,3 +315,12 @@ attr_details = {
     'extraProps': {'name_cm': '_extra_props', 'type_cm': 'jsonb', 'value': None},
     'signupCode': {'name_cm': 'signup_code', 'type_cm': 'text', 'value': None}
 }
+
+
+attr_details_with_values = {
+    '_id': {'name_cm': 'id', 'type_cm': 'text', 'value': '12345'},
+    'active': {'name_cm': 'active', 'type_cm': 'boolean', 'value': True},
+    'domains': {'name_cm': 'domains', 'type_cm': 'jsonb', 'value': {"one": "two"}},
+    'extraProps': {'name_cm': '_extra_props', 'type_cm': 'jsonb', 'value':  {"three": "four", "five": "six"}},
+    'signupCode': {'name_cm': 'signup_code', 'type_cm': 'text', 'value': "I am a text"}
+}
