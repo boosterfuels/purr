@@ -1,12 +1,10 @@
 import psycopg2
-import sys
 from etl.monitor import logger
 
 
 def create(db, schema, name, attrs=[], types=[]):
     """
-    Open a cursor to perform database operations
-    Create table with specific name.
+    Creates a table in Postgres.
     Parameters
     ----------
     name : str

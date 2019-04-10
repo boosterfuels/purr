@@ -1,12 +1,4 @@
-import psycopg2
-from bson.json_util import dumps
-
-from etl.load import init_pg as pg, table
 from etl.monitor import logger
-import datetime
-from psycopg2.extras import execute_values
-
-# Open a cursor to perform database operations
 
 
 def create_type_notification(db, name):

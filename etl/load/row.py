@@ -2,6 +2,7 @@ from etl.monitor import logger
 from psycopg2.extras import execute_values
 import json
 
+
 def insert(db, schema, table, attrs, values):
     """
     Inserts a row into a specific table of the PG database.

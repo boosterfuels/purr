@@ -3,11 +3,13 @@ import psycopg2.extras
 import time
 from etl.monitor import logger
 
+CURR_FILE = "[INIT_PG]"
+
 
 class PgConnection:
 
     def __init__(self, conn_details, ttw=1):
-        logger.info("[INIT_PG] Connecting to %s" % conn_details)
+        logger.info("%s Connecting to %s" % (CURR_FILE, conn_details))
 
         # time to wait before attempt to reconnect
         self.ttw = ttw
@@ -17,16 +19,17 @@ class PgConnection:
         try:
             self.conn = psycopg2.connect(self.conn_details)
             self.cur = self.conn.cursor()
-            logger.info("[INIT_PG] Connected to Postgres.")
+            logger.info("%s Connected to Postgres." % (CURR_FILE))
             self.ttw = 1
         except Exception as ex:
             self.attempt_to_reconnect = True
             logger.error(
                 """
-                [INIT_PG] Could not connect to Postgres.
+                %s Could not connect to Postgres.
                 Reconnecting in %s seconds...
+                Details: %s
                 """
-                % self.ttw
+                % (CURR_FILE, self.ttw, ex)
             )
             time.sleep(self.ttw)
 
@@ -40,14 +43,14 @@ class PgConnection:
                 self.cur.execute(cmd)
                 self.conn.commit()
 
-        except (psycopg2.InterfaceError, psycopg2.OperationalError) as exc:
+        except (psycopg2.InterfaceError, psycopg2.OperationalError):
             self.handle_interface_and_oper_error()
         except Exception as ex:
             logger.error(
                 """
-                [INIT_PG] Executing query without fetch failed.
+                %s Executing query without fetch failed.
                 Details: %s
-                """ % ex)
+                """ % (CURR_FILE, ex))
 
     def execute_cmd_with_fetch(self, cmd, values=None):
         try:
@@ -58,17 +61,17 @@ class PgConnection:
                 self.conn.commit()
             return self.cur.fetchall()
 
-        except (psycopg2.InterfaceError, psycopg2.OperationalError) as exc:
+        except (psycopg2.InterfaceError, psycopg2.OperationalError):
             self.handle_interface_and_oper_error()
         except Exception as ex:
             logger.error(
                 """
-                [INIT_PG] Executing query with fetch failed.
+                %s Executing query with fetch failed.
                 Details: %s
-                """ % ex)
+                """ % (CURR_FILE, ex))
 
     def poll(self):
-        self.cur.execute(cmd)
+        self.cur.execute()
         self.cur.commit()
 
     def notifies(self):
@@ -79,10 +82,6 @@ class PgConnection:
         self.cur.close()
 
     def handle_interface_and_oper_error(self):
-        logger.error(
-            """
-            [INIT_PG] Executing query failed. MOGRIFIED: %s
-            """ % self.cur.mogrify(cmd))
-        logger.error("[INIT_PG] Trying to reconnect to Postgres...")
+        logger.error("%s Trying to reconnect to Postgres..." % (CURR_FILE))
         self.attempt_to_reconnect = True
         self.__init__(self.conn_details, self.ttw * 2)

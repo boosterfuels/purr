@@ -1,4 +1,3 @@
-import psycopg2
 from etl.monitor import logger
 
 
