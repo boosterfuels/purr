@@ -88,24 +88,6 @@ class Relation():
         self.created = table.exists(self.db, self.schema, self.relation_name)
         return self.created
 
-    def insert(self, doc):
-        attributes = list(doc.keys())
-
-        """
-    Transforms document and inserts it into the corresponding table.
-    Parameters
-    ----------
-    doc : dict
-          the document we want to insert
-    TODO
-    CHECK if self.column_names and self.column_types are still the same, do not
-    """
-        # This is needed because
-        # sometimes there is no value for attributes (null)
-        (reduced_attributes, values) = self.get_attrs_and_vals(attributes, doc)
-        row.insert(self.db, self.schema, self.relation_name,
-                   reduced_attributes, values)
-
     def insert_bulk(self, docs, attrs,
                            include_extra_props=True, unset=[]):
         """
