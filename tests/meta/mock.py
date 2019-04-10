@@ -50,9 +50,17 @@ collection_map = 'purr_collection_map'
 attrs_company = ["id", "active", "domains", "signup_code"]
 types_company = ["TEXT", "BOOLEAN", "JSONB", "TEXT"]
 
-attrs_types = []
+attrs_types_company = []
 for i in range(len(attrs_company)):
-    attrs_types.append("%s %s" % (attrs_company[i], types_company[i]))
+    attrs_types_company.append("%s %s" % (attrs_company[i], types_company[i]))
+
+attrs_employee = ["id", "first_name", "last_name", "hair"]
+types_employee = ["TEXT", "TEXT", "TEXT", "TEXT"]
+
+attrs_types_employee = []
+for i in range(len(attrs_employee)):
+    attrs_types_employee.append("%s %s" % (attrs_employee[i], types_employee[i]))
+
 
 # --- COLLECTION INFORMATION ---
 coll_name_company = 'Company'
@@ -60,7 +68,6 @@ fields_company = ["_id", "active", "domains", "signupCode"]
 
 coll_name_employee = 'Employee'
 fields_employee = ["firstName", "lastName", "hair"]
-attrs_employee = ["first_name", "last_name", "hair"]
 
 
 # --- QUERIES ---
@@ -71,7 +78,8 @@ query = {
     "table_drop_purr_cm": "DROP TABLE IF EXISTS %s;" % collection_map,
     "table_drop_company": "DROP TABLE IF EXISTS %s;" % rel_name_company,
     "table_drop_employee": "DROP TABLE IF EXISTS %s;" % rel_name_employee,
-    "table_create_company": "CREATE TABLE %s(%s);" % (rel_name_company, ', '.join(attrs_types)),
+    "table_create_company": "CREATE TABLE %s(%s);" % (rel_name_company, ', '.join(attrs_types_company)),
+    "table_create_employee": "CREATE TABLE %s(%s);" % (rel_name_employee, ', '.join(attrs_types_employee)),
     "table_check_company_columns": """
         SELECT DISTINCT column_name, data_type FROM information_schema.columns
         WHERE table_name = '%s'
