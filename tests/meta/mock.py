@@ -50,9 +50,17 @@ collection_map = 'purr_collection_map'
 attrs_company = ["id", "active", "domains", "signup_code"]
 types_company = ["TEXT", "BOOLEAN", "JSONB", "TEXT"]
 
-attrs_types = []
+attrs_types_company = []
 for i in range(len(attrs_company)):
-    attrs_types.append("%s %s" % (attrs_company[i], types_company[i]))
+    attrs_types_company.append("%s %s" % (attrs_company[i], types_company[i]))
+
+attrs_employee = ["id", "first_name", "last_name", "hair"]
+types_employee = ["TEXT", "TEXT", "TEXT", "TEXT"]
+
+attrs_types_employee = []
+for i in range(len(attrs_employee)):
+    attrs_types_employee.append("%s %s" % (attrs_employee[i], types_employee[i]))
+
 
 # --- COLLECTION INFORMATION ---
 coll_name_company = 'Company'
@@ -60,7 +68,6 @@ fields_company = ["_id", "active", "domains", "signupCode"]
 
 coll_name_employee = 'Employee'
 fields_employee = ["firstName", "lastName", "hair"]
-attrs_employee = ["first_name", "last_name", "hair"]
 
 
 # --- QUERIES ---
@@ -71,7 +78,8 @@ query = {
     "table_drop_purr_cm": "DROP TABLE IF EXISTS %s;" % collection_map,
     "table_drop_company": "DROP TABLE IF EXISTS %s;" % rel_name_company,
     "table_drop_employee": "DROP TABLE IF EXISTS %s;" % rel_name_employee,
-    "table_create_company": "CREATE TABLE %s(%s);" % (rel_name_company, ', '.join(attrs_types)),
+    "table_create_company": "CREATE TABLE %s(%s);" % (rel_name_company, ', '.join(attrs_types_company)),
+    "table_create_employee": "CREATE TABLE %s(%s);" % (rel_name_employee, ', '.join(attrs_types_employee)),
     "table_check_company_columns": """
         SELECT DISTINCT column_name, data_type FROM information_schema.columns
         WHERE table_name = '%s'
@@ -279,34 +287,48 @@ data_mdb_employee = [
     {
         "firstName": "John",
         "lastName": "Snow",
+        "hair": "black"
     },
     {
 
         "firstName": "Arya",
         "lastName": "Start",
+        "hair": "brown"
     },
     {
 
         "firstName": "Sansa",
         "lastName": "Stark",
+        "hair": "ginger"
     },
     {
 
         "firstName": "Little",
         "lastName": "Finger",
+        "hair": "dark brown"
     },
     {
 
         "firstName": "The",
         "lastName": "Hound",
+        "hair": "brown"
     }
 ]
 
 
 attr_details = {
-    '_id': {'name_conf': 'id', 'type_conf': 'text', 'value': None},
-    'active': {'name_conf': 'active', 'type_conf': 'boolean', 'value': None},
-    'domains': {'name_conf': 'domains', 'type_conf': 'jsonb', 'value': None},
-    'extraProps': {'name_conf': '_extra_props', 'type_conf': 'jsonb', 'value': None},
-    'signupCode': {'name_conf': 'signup_code', 'type_conf': 'text', 'value': None}
+    '_id': {'name_cm': 'id', 'type_cm': 'text', 'value': None},
+    'active': {'name_cm': 'active', 'type_cm': 'boolean', 'value': None},
+    'domains': {'name_cm': 'domains', 'type_cm': 'jsonb', 'value': None},
+    'extraProps': {'name_cm': '_extra_props', 'type_cm': 'jsonb', 'value': None},
+    'signupCode': {'name_cm': 'signup_code', 'type_cm': 'text', 'value': None}
+}
+
+
+attr_details_with_values = {
+    '_id': {'name_cm': 'id', 'type_cm': 'text', 'value': '12345'},
+    'active': {'name_cm': 'active', 'type_cm': 'boolean', 'value': True},
+    'domains': {'name_cm': 'domains', 'type_cm': 'jsonb', 'value': {"one": "two"}},
+    'extraProps': {'name_cm': '_extra_props', 'type_cm': 'jsonb', 'value':  {"three": "four", "five": "six"}},
+    'signupCode': {'name_cm': 'signup_code', 'type_cm': 'text', 'value': "I am a text"}
 }

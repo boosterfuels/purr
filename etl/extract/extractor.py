@@ -271,30 +271,31 @@ class Extractor():
             try:
                 if (i+1) % nr_of_transferred == 0 and i+1 >= nr_of_transferred:
                     if self.include_extra_props is True:
-                        r.insert_config_bulk(
+                        r.insert_bulk(
                             transferring,
                             self.attr_details,
                             self.include_extra_props)
                     else:
-                        r.insert_config_bulk_no_extra_props(
+                        r.insert_bulk_no_extra_props(
                             transferring,
                             self.attr_details,
                             self.include_extra_props)
                     transferring = []
                 if i + 1 == nr_of_docs and (i + 1) % nr_of_transferred != 0:
                     if self.include_extra_props is True:
-                        r.insert_config_bulk(
+                        r.insert_bulk(
                             transferring,
                             self.attr_details,
                             self.include_extra_props)
                     else:
-                        r.insert_config_bulk_no_extra_props(
+                        r.insert_bulk_no_extra_props(
                             transferring,
                             self.attr_details,
                             self.include_extra_props)
                         logger.info(
                             "%s Finished collection %s: %d docs"
-                            % (coll, i + 1))
+                            % (CURR_FILE,
+                               coll, i + 1))
                         transferring = []
             except Exception as ex:
                 logger.error("""%s Transfer unsuccessful. %s""" % (
@@ -354,10 +355,10 @@ class Extractor():
         # TODO remove this stuff with the extra props
         try:
             if self.include_extra_props is True:
-                r.insert_config_bulk(
+                r.insert_bulk(
                     docs, self.attr_details, self.include_extra_props, unset)
             else:
-                r.insert_config_bulk_no_extra_props_tailed(
+                r.insert_bulk_no_extra_props_tailed(
                     docs, self.attr_details, self.include_extra_props, unset)
         except Exception as ex:
             logger.error("""
@@ -409,10 +410,10 @@ class Extractor():
         # TODO remove this stuff with the extra props.
         try:
             if self.include_extra_props is True:
-                r.insert_config_bulk(
+                r.insert_bulk(
                     docs, self.attr_details, self.include_extra_props, unset)
             else:
-                r.insert_config_bulk_no_extra_props_tailed(
+                r.insert_bulk_no_extra_props_tailed(
                     docs, self.attr_details, self.include_extra_props, unset)
         except Exception as ex:
             logger.error("""
@@ -423,9 +424,9 @@ class Extractor():
             logger.error('%s\n' % docs)
 
     def prepare_attr_details(self,
-                             attrs_conf,
+                             attrs_cm,
                              attrs_mdb,
-                             types_conf,
+                             types_cm,
                              type_x_props_pg=None):
         '''
         Adds extra properties field to the attribute details (attr_details).
@@ -438,11 +439,11 @@ class Extractor():
 
         Parameters
         ----------
-        attrs_conf : list
+        attrs_cm : list
                     : attribute names from config file
         attrs_mdb : list
                     : field names of MongoDB document
-        types_conf : list
+        types_cm : list
                     : types from config files
         extra_props_type : string
                     : type of the extra property
@@ -458,15 +459,15 @@ class Extractor():
         '''
         if self.include_extra_props is True:
 
-            attrs_conf.append(name_extra_props_pg)
+            attrs_cm.append(name_extra_props_pg)
             attrs_mdb.append(name_extra_props_mdb)
-            types_conf.append(type_x_props_pg)
+            types_cm.append(type_x_props_pg)
 
         self.attr_details = {}
         for i in range(0, len(attrs_mdb)):
             details = {}
-            details["name_conf"] = attrs_conf[i]
-            details["type_conf"] = types_conf[i]
+            details["name_cm"] = attrs_cm[i]
+            details["type_cm"] = types_cm[i]
             details["value"] = None
             self.attr_details[attrs_mdb[i]] = details
         return self.attr_details
@@ -505,7 +506,7 @@ class Extractor():
 
         self.add_extra_props(attrs_original, attrs_new, types)
         # Check if changing type was unsuccessful.
-        failed = r.udpate_types(self.attr_details)
+        failed = r.update_schema(self.attr_details)
         self.handle_failed_type_update(failed)
 
         return r
@@ -515,10 +516,10 @@ class Extractor():
             for tuf in failed:
                 name_pg = tuf[0]
                 name_mdb = [
-                    attr for attr in self.attr_details if self.attr_details[attr]["name_conf"] == name_pg][0]
+                    attr for attr in self.attr_details if self.attr_details[attr]["name_cm"] == name_pg][0]
                 type_orig = tuf[1].lower()
-                type_new = self.attr_details[name_mdb]["type_conf"].lower()
-                self.attr_details[name_mdb]["type_conf"] = type_orig
+                type_new = self.attr_details[name_mdb]["type_cm"].lower()
+                self.attr_details[name_mdb]["type_cm"] = type_orig
                 logger.warn("""
                     %s Type conversion is not possible for column '%s'.
                     Skipping conversion %s -> %s.""" %
@@ -532,17 +533,17 @@ class Extractor():
         # Mongo fields, Postgres columns and their types
         self.attr_details = {}
         attrs_mdb = attrs_original
-        attrs_conf = attrs_new
-        types_conf = types
+        attrs_cm = attrs_new
+        types_cm = types
 
         if self.include_extra_props is True:
-            attrs_conf.append(name_extra_props_pg)
-            types_conf.append(type_x_props)
+            attrs_cm.append(name_extra_props_pg)
+            types_cm.append(type_x_props)
             attrs_mdb.append(name_extra_props_mdb)
 
         for i in range(len(attrs_mdb)):
             details = {}
-            details["name_conf"] = attrs_conf[i]
-            details["type_conf"] = types[i]
+            details["name_cm"] = attrs_cm[i]
+            details["type_cm"] = types[i]
             details["value"] = None
             self.attr_details[attrs_mdb[i]] = details

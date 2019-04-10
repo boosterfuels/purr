@@ -1,33 +1,31 @@
-import psycopg2
-from bson.json_util import dumps
-
-from etl.load import init_pg as pg, table
 from etl.monitor import logger
-import datetime
 from psycopg2.extras import execute_values
 import json
 
-# Open a cursor to perform database operations
-
-
 def insert(db, schema, table, attrs, values):
     """
-    Inserts a row defined by attributes and values into a specific
-    table of the PG database.
+    Inserts a row into a specific table of the PG database.
 
     Parameters
     ----------
-    table_name : string
-    attrs :     string[]
-    values :    string[]
-
+    db : obj
+       : database connection object
+    schema : string
+           : name of schema
+    table : string
+          : name of table
+    attrs : string[]
+          : attributes (column names)
+    values : string[]
+           : values to insert; its length must be equal to len(attrs)
     Returns
     -------
     -
 
     Example
     -------
-    insert('Audience', [attributes], [values])
+    insert('pg', 'public', 'company', attributes, values)
+    TODO: schema should default to public
     """
     temp = []
     for v in values:
@@ -57,29 +55,33 @@ def insert(db, schema, table, attrs, values):
 
 def insert_bulk(db, schema, table, attrs, values):
     """
-    Inserts a row defined by attributes and values into a specific
-    table of the PG database.
+    Inserts multiple rows into a specific table of the PG database.
 
     Parameters
     ----------
-    table_name : string
-    attrs :     string[]
-    values :    string[]
-
+    db : obj
+       : database connection object
+    schema : string
+           : name of schema
+    table : string
+          : name of table
+    attrs : string[]
+          : attributes (column names)
+    values : string[][]
+           : values to insert
     Returns
     -------
     -
 
     Example
     -------
-    insert('Audience', [attributes], [values])
+    insert('pg', 'public', 'company', attributes, values)
+    TODO: schema should default to public
     """
     # prepare attributes for insert
-    attrs_reduced = ', '.join([('"%s"' % a) for a in attrs])
     attrs = ', '.join([('"%s"' % a) for a in attrs])
 
     # default primary key in Postgres is name_of_table_pkey
-    constraint = '%s_pkey' % table
     cmd = "INSERT INTO %s.%s (%s) VALUES %s;" % (
         schema, table.lower(), attrs, '%s')
     try:
@@ -205,7 +207,6 @@ def upsert_transfer_info(db, schema, table, attrs, row):
 
     placeholder = []
 
-    values = []
     for r in row:
         if type(r) is list and type(r[0]) is dict:
             for item in r:
