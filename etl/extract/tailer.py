@@ -12,6 +12,8 @@ INSERT = "i"
 UPDATE = "u"
 DELETE = "d"
 
+CURR_FILE = "[TAILER]"
+
 
 class Tailer(extractor.Extractor):
     """
@@ -49,6 +51,7 @@ class Tailer(extractor.Extractor):
             else:
                 return False
         except Exception as ex:
+            logger.error("%s Deatils %s" % (CURR_FILE, ex))
             return False
 
     def flush(self, docs, oper, r):
@@ -59,10 +62,9 @@ class Tailer(extractor.Extractor):
         docs_useful = []
 
         if oper == INSERT:
-            logger.info("[TAILER] Inserting %s documents" % (len(docs)))
-            # logger.info("[TAILER] %s" % (docs))
+            logger.info("%s Inserting %s documents" % (CURR_FILE, len(docs)))
 
-            # TODO: add functionality which includes extra props
+            # TODO: check extra props
             for doc in docs:
                 docs_useful.append(doc["o"])
             try:
@@ -70,12 +72,12 @@ class Tailer(extractor.Extractor):
             except Exception as ex:
                 logger.info(
                     """
-                    [TAILER] Inserting multiple documents failed: %s
-                    """ % (docs))
+                    %s Inserting multiple documents failed: %s.
+                    Details: %s
+                    """ % (CURR_FILE, docs, ex))
 
         elif oper == UPDATE:
-            logger.info("[TAILER] Updating %s documents" % (len(docs)))
-            # logger.info("%s" % (docs))
+            logger.info("%s Updating %s documents" % (CURR_FILE, len(docs)))
             r.created = True
             docs_id = []
             for doc in docs:
@@ -111,11 +113,11 @@ class Tailer(extractor.Extractor):
                 super().update_multiple(docs_useful, r, docs[0]["coll_name"])
             except Exception as ex:
                 logger.info(
-                    "[TAILER] Updating multiple documents failed: %s" % (docs))
+                    """%s Updating multiple documents failed: %s.
+                    Details: %s""" % (CURR_FILE, docs, ex))
 
         elif oper == DELETE:
-            logger.info("[TAILER] Deleting %s documents" % (len(docs)))
-            # logger.info("%s" % (docs))
+            logger.info("%s Deleting %s documents" % (CURR_FILE, len(docs)))
             ids = []
             for doc in docs:
                 ids.append(doc["o"])
@@ -123,7 +125,8 @@ class Tailer(extractor.Extractor):
                 r.delete(ids)
             except Exception as ex:
                 logger.info(
-                    "[TAILER] Deleting multiple documents failed: %s" % (docs))
+                    """%s Deleting multiple documents failed: %s.
+                    Details: %s""" % (CURR_FILE, docs, ex))
 
     def transform_and_load_many(self, docs_details):
         """
@@ -146,8 +149,8 @@ class Tailer(extractor.Extractor):
         r = relation.Relation(self.pg, self.schema, table_name_pg, True)
 
         oper = docs_details[0]["op"]
-        logger.info("[TAILER] [%s] [%s]" % (
-            table_name_mdb, oper
+        logger.info("%s [%s] [%s]" % (
+            CURR_FILE, table_name_mdb, oper
         ))
 
         docs_with_equal_oper = []
@@ -192,7 +195,7 @@ class Tailer(extractor.Extractor):
                     self.pg, self.schema, t
                 )
                 logger.info(
-                    "[TAILER] Updated latest_successful_ts: %d" % t)
+                    "%s Updated latest_successful_ts: %d" % (CURR_FILE, t))
             return datetime.utcnow()
 
     def start(self, dt=None):
@@ -210,9 +213,6 @@ class Tailer(extractor.Extractor):
         (2)
         start(dt)
         """
-        if dt is None:
-            start = datetime.utcnow()
-
         client = self.mdb.client
         oplog = client.local.oplog.rs
 
@@ -228,7 +228,8 @@ class Tailer(extractor.Extractor):
                     latest_ts = int((list(res)[0])[0])
                     dt = latest_ts
                     logger.info(
-                        """[TAILER] Stopping. Next time, bring more cookies.""")
+                        """%s Stopping. Next time, bring more cookies."""
+                        % (CURR_FILE))
                     raise SystemExit()
                 else:
                     loop = True
@@ -250,14 +251,16 @@ class Tailer(extractor.Extractor):
                 if type(dt) is int:
                     dt = datetime.utcfromtimestamp(
                         dt).strftime('%Y-%m-%d %H:%M:%S')
-                logger.info("[TAILER] Started tailing from %s." % str(dt))
-                logger.info("[TAILER] Timestamp: %s" % datetime.utcnow())
+                logger.info("%s Started tailing from %s." %
+                            (CURR_FILE, str(dt)))
+                logger.info("%s Timestamp: %s" %
+                            (CURR_FILE, datetime.utcnow()))
 
                 docs = []
                 while cursor.alive and self.pg.attempt_to_reconnect is False:
                     if self.stop_tailing is True:
                         logger.info(
-                            "[TAILER] Meow")
+                            "%s Meow" % (CURR_FILE))
                         break
                     try:
                         for doc in cursor:
@@ -269,18 +272,20 @@ class Tailer(extractor.Extractor):
                         seconds = datetime.utcnow().second
                         if (seconds > SECONDS_BETWEEN_FLUSHES/3 and len(docs)):
                             logger.info("""
-                            [TAILER] Flushing after %s seconds.
+                            %s Flushing after %s seconds.
                             Number of documents: %s
-                            """ % (seconds, len(docs)))
+                            """ % (CURR_FILE, seconds, len(docs)))
                             self.handle_multiple(docs, updated_at)
                             docs = []
                     except Exception as ex:
-                        logger.error("[TAILER] Cursor error %s" % ex)
+                        logger.error("%s Cursor error %s" % (CURR_FILE, ex))
                 cursor.close()
                 continue
         except StopIteration as e:
-            logger.error("[TAILER] Tailing was stopped unexpectedly: %s" % e)
+            logger.error("%s Tailing was stopped unexpectedly: %s" %
+                         (CURR_FILE, e))
 
     def stop(self):
-        logger.info("[TAILER] Tailing is stopped due to schema change.")
+        logger.info("%s Tailing is stopped due to schema change." %
+                    (CURR_FILE))
         self.stop_tailing = True
