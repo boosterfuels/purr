@@ -1,9 +1,4 @@
-import psycopg2
-from bson.json_util import dumps
-
-from etl.load import init_pg as pg, table
 from etl.monitor import logger
-import datetime
 from psycopg2.extras import execute_values
 import json
 
@@ -28,6 +23,7 @@ def insert(db, schema, table, attrs, values):
     Example
     -------
     insert('Audience', [attributes], [values])
+    TODO: schema should default to public
     """
     temp = []
     for v in values:
@@ -75,11 +71,9 @@ def insert_bulk(db, schema, table, attrs, values):
     insert('Audience', [attributes], [values])
     """
     # prepare attributes for insert
-    attrs_reduced = ', '.join([('"%s"' % a) for a in attrs])
     attrs = ', '.join([('"%s"' % a) for a in attrs])
 
     # default primary key in Postgres is name_of_table_pkey
-    constraint = '%s_pkey' % table
     cmd = "INSERT INTO %s.%s (%s) VALUES %s;" % (
         schema, table.lower(), attrs, '%s')
     try:
@@ -205,7 +199,6 @@ def upsert_transfer_info(db, schema, table, attrs, row):
 
     placeholder = []
 
-    values = []
     for r in row:
         if type(r) is list and type(r[0]) is dict:
             for item in r:
