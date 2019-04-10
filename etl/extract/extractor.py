@@ -1,16 +1,9 @@
-import pymongo
-import time
-
-from etl.extract import collection, transfer_info
+from etl.extract import collection
 from etl.extract import collection_map as cm
-from etl.load import table, row, constraint, schema
+from etl.load import table, schema
 from etl.monitor import logger
 
 from etl.transform import relation, type_checker as tc, config_parser as cp
-
-from datetime import datetime
-from bson import Timestamp
-import json
 
 name_extra_props_pg = "_extra_props"
 name_extra_props_mdb = "extraProps"
@@ -429,9 +422,10 @@ class Extractor():
                              types_cm,
                              type_x_props_pg=None):
         '''
-        Adds extra properties field to the attribute details (attr_details).
-        Extra properties it is not part of the original document and it needs to 
-        be added in this separate step.
+        Adds extra properties field to the attribute details:
+        (attr_details).
+        Extra properties are not part of the original document
+        and they need to be added in this separate step.
         Returns
         -------
         attr_details : list
@@ -538,7 +532,7 @@ class Extractor():
 
         if self.include_extra_props is True:
             attrs_cm.append(name_extra_props_pg)
-            types_cm.append(type_x_props)
+            types_cm.append(types)
             attrs_mdb.append(name_extra_props_mdb)
 
         for i in range(len(attrs_mdb)):

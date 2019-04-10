@@ -1,15 +1,8 @@
-import psycopg2
-import time
-
-from etl.load import table, row, constraint, schema, procedure
+from etl.load import table, row, procedure
 from etl.monitor import logger
 from datetime import datetime
-import json
 import collections
-from bson.json_util import ObjectId
-import re
 from etl.extract import collection
-from etl.monitor import logger
 from etl.transform import type_checker as tc
 
 import yaml
@@ -119,7 +112,6 @@ def determine_types(mongo, name_db):
                 ':extra_props': 'JSONB'
             }
         }
-        columns = []
         docs = collection.get_docs_for_type_check(mongo, coll)
         types = {}
         logger.info("%s Reading samples..." % (CURR_FILE))

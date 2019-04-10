@@ -1,8 +1,7 @@
 from threading import Thread
-from etl.extract import collection, extractor, tailer, transfer_info
-from etl.extract import init_mongo as mongodb, transfer, notification
+from etl.extract import tailer, transfer_info
 from etl.transform import config_parser as cp
-from etl.load import schema, init_pg as postgres
+from etl.load import schema
 from datetime import datetime
 from etl.monitor import logger
 
@@ -27,7 +26,6 @@ class TransferThread(Thread):
     def run(self):
         # collections which will be transferred
         setup_pg = self.settings["postgres"]
-        setup_mdb = self.settings["mongo"]
 
         collections = cp.config_collection_names(self.coll_config)
 

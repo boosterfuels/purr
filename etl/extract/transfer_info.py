@@ -1,11 +1,7 @@
-import psycopg2
 import time
 
-from etl.load import table, row, constraint, schema, procedure
+from etl.load import table, row
 from etl.monitor import logger
-from datetime import datetime
-import json
-import collections
 
 
 def create_stat_table(db, schema):

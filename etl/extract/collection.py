@@ -1,7 +1,7 @@
 from etl.monitor import logger
-from etl.extract import init_mongo
 import pymongo
 from bson import ObjectId
+
 
 def check(db, colls_requested):
     """
@@ -83,7 +83,8 @@ def get_by_name(db, name, size=20000):
         docs = bz.batch_size(size)
     except Exception as ex:
         logger.error(
-            '[COLLECTION] Loading data from collection %s failed.' % name)
+            """[COLLECTION] Loading data from collection %s failed.
+            Details: %s""" % (name, ex))
     return docs
 
 
@@ -123,8 +124,9 @@ def get_docs_for_type_check(db, name, nr_of_docs=100):
             '$natural', pymongo.DESCENDING
         ).skip(0).limit(nr_of_docs)
     except Exception as ex:
-        logger.error(
-            '[COLLECTION] Loading data from collection %s failed.' % name)
+        logger.error("""
+          [COLLECTION] Loading data from collection %s failed.
+          Details: %s""" % (name, ex))
     return docs
 
 
@@ -170,7 +172,8 @@ def get_by_name_reduced(db, name, fields, size=20000):
         docs = bz.batch_size(size)
     except Exception as ex:
         logger.error(
-            '[COLLECTION] Loading data from collection %s failed.' % name)
+            """[COLLECTION] Loading data from collection %s failed.
+            Details: %s""" % (name, ex))
     return docs
 
 
@@ -179,7 +182,8 @@ def get_all(db):
         return db.collection_names(include_system_collections=False)
     except Exception as ex:
         logger.error(
-            '[COLLECTION] Loading collection names failed.')
+            """[COLLECTION] Loading collection names failed.
+            Details:%s""" % (ex))
 
 
 def get_doc_by_id(db, name, id):
