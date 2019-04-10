@@ -1,6 +1,4 @@
-from bson import ObjectId
 import json
-import datetime
 
 
 def cast(column_type, value):
@@ -35,7 +33,7 @@ def cast(column_type, value):
     elif column_type == 'double precision':
         try:
             new_value = float(str(value))
-        except ValueError as e:
+        except ValueError:
             new_value = 'undefined'
 
     elif column_type == 'jsonb':

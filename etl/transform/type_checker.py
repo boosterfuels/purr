@@ -1,8 +1,4 @@
-from bson.json_util import ObjectId
-import datetime
 import re
-from etl.extract import collection
-from etl.monitor import logger
 
 
 def get_type_pg(item):

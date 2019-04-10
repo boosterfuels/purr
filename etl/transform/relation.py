@@ -1,10 +1,6 @@
-import pymongo
-
 from etl.load import table, row, constraint
-from etl.transform import type_checker, keyword_checker
-from etl.transform import config_parser, unnester
-
-reserved = keyword_checker.get_keywords()
+from etl.transform import type_checker
+from etl.transform import unnester
 
 
 def init_values(attrs):
@@ -38,7 +34,7 @@ def set_values(attrs, doc, _extra_props=None):
         return attrs
 
 
-def prepare_row_for_insert(attrs, doc, keys_cm):
+def prepare_row_for_insert(attrs, doc, include_extra_props=None):
     _extra_props = {}
     attrs = init_values(attrs)
 
@@ -48,17 +44,12 @@ def prepare_row_for_insert(attrs, doc, keys_cm):
         _extra_props = unnester.cast('jsonb', _extra_props)
         attrs["extraProps"]["value"] = _extra_props
 
-    if len(docs) > 1:
-        attrs_pg = [v["name_cm"] for k, v in attrs.items()]
-        values = [v["value"] for k, v in attrs.items()]
-    else:
-        attrs_pg = [v["name_cm"]
-                    for k, v in attrs.items() if k in doc.keys()]
-        values = [v["value"]
-                  for k, v in attrs.items() if k in doc.keys()]
-        if len(doc.keys()) > len(attrs_pg) and include_extra_props:
-            attrs_pg.append('_extra_props')
-            values.append(_extra_props)
+    attrs_pg = [v["name_cm"]
+                for k, v in attrs.items() if k in doc.keys()]
+    values = [v["value"] for k, v in attrs.items() if k in doc.keys()]
+    if len(doc.keys()) > len(attrs_pg) and include_extra_props:
+        attrs_pg.append('_extra_props')
+        values.append(_extra_props)
     return attrs_pg, values
 
 
@@ -89,7 +80,7 @@ class Relation():
         return self.created
 
     def insert_bulk(self, docs, attrs,
-                           include_extra_props=True, unset=[]):
+                    include_extra_props=True, unset=[]):
         """
         Transforms document and inserts it into the corresponding table.
         Parameters
@@ -105,7 +96,7 @@ class Relation():
         if type(docs) is not list:
             docs = [docs]
         for doc in docs:
-            (attrs_pg, values) = prepare_row_for_insert(attrs, doc, keys_cm)
+            (attrs_pg, values) = prepare_row_for_insert(attrs, doc)
             result.append(tuple(values))
 
         if self.created is True:
@@ -116,7 +107,7 @@ class Relation():
                             self.relation_name, attrs_pg, result)
 
     def insert_bulk_no_extra_props(self, docs, attrs,
-                                          include_extra_props=True, unset=[]):
+                                   include_extra_props=True, unset=[]):
         """
         Transforms document and inserts it into the corresponding table.
         Parameters
@@ -159,10 +150,10 @@ class Relation():
                             self.relation_name, attrs_pg, result)
 
     def insert_bulk_no_extra_props_tailed(self,
-                                                 docs,
-                                                 attrs,
-                                                 include_extra_props=True,
-                                                 unset=[]):
+                                          docs,
+                                          attrs,
+                                          include_extra_props=True,
+                                          unset=[]):
         """
         Transforms document and inserts it into the corresponding table.
         Parameters
@@ -212,72 +203,6 @@ class Relation():
             ids.append(str(docs["_id"]))
 
         row.delete(self.db, self.schema, self.relation_name, ids)
-
-    def get_attrs_and_vals(self, attributes, doc):
-        """
-        Gets all attributes and values needed to insert or update one raw
-        """
-        reduced_attributes = []
-        values = []
-        types = []
-        col_names_types = table.get_column_names_and_types(
-            self.db, self.schema, self.relation_name)
-
-        for attr_name, attr_type in col_names_types:
-            if attr_name not in self.column_names:
-                self.column_names.append(attr_name.lower())
-                self.column_types.append(attr_type.lower())
-
-        for attr in attributes:
-            # Add an underscore to the attribute if it is
-            # a reserved word in PG.
-            if attr in reserved:
-                attr = '_' + attr
-
-            (value, column_type) = type_checker.get_type_pg(doc[attr])
-
-            # Jump over nulls because there is no point to add a type
-            # until a value exists. We need a value to determine the type and
-            # a default type would require change of schema.
-
-            if value == 'null' or column_type is None:
-                continue
-
-            value = unnester.cast(column_type, value)
-            values.append(value)
-
-            attr = attr.lower()
-
-            if len(self.column_names) != 0:
-                if attr not in self.column_names:
-                    table.add_column(self.db, self.schema,
-                                     self.relation_name, attr, column_type)
-                else:
-                    # Check if types are equal.
-                    idx_original = self.column_names.index(attr)
-                    type_orig = self.column_types[idx_original]
-                    type_new = column_type
-
-                    if type_orig != type_new:
-                        if attr_new is not None:
-                            if attr_new not in self.column_names:
-                                table.add_column(
-                                    self.db, self.schema, self.relation_name,
-                                    attr_new, type_new)
-                                self.column_names.append(attr_new)
-                                self.column_types.append(type_new)
-                            attr = attr_new
-
-            reduced_attributes.append(attr)
-            if len(self.column_names) == 0:
-                types.append(column_type)
-
-        if len(self.column_names) == 0:
-            # - get column names and their types
-            table.add_multiple_columns(
-                self.db, self.schema, self.relation_name,
-                reduced_attributes, types)
-        return reduced_attributes, values
 
     def create_with_columns(self, attrs, types):
         table.create(self.db, self.schema, self.relation_name, attrs, types)
@@ -404,7 +329,10 @@ class Relation():
 
             # if attributes from PG and the collection map are
             # the same, do nothing
-            if is_schema_changed(attrs_pg, types_pg, attrs_cm, types_cm) is False:
+            schema_changed = is_schema_changed(
+                attrs_pg, types_pg, attrs_cm, types_cm)
+
+            if schema_changed is False:
                 return
 
             (attrs_pg, types_pg, attrs_cm, types_cm) = self.columns_remove(
