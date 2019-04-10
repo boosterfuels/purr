@@ -1,13 +1,10 @@
 import time
-import sys
-from datetime import datetime
 import os
-from etl.extract import collection, extractor, tailer, transfer
-from etl.extract import init_mongo as mongodb, transfer_info, notification
+from etl.extract import extractor, transfer
+from etl.extract import init_mongo as mongodb, notification
 from etl.extract import collection_map as cm
-from etl.load import schema, init_pg as postgres
+from etl.load import init_pg as postgres
 from etl.monitor import logger
-from etl.transform import config_parser as cp, type_checker as tc
 import pkg_resources
 
 
