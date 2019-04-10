@@ -324,6 +324,10 @@ code {
     margin-bottom: 30px; } }
 
 @media (max-width: 768px) {
+  .side-by-side {
+    width: 100%;
+    display: flex;
+    justify-content: space-evenly; }
   .contributors .card-deck .card {
     margin-bottom: 30px; }
   .contributors div {

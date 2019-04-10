@@ -1,291 +1,279 @@
 <!DOCTYPE html>
 <html class="no-js gr__localhost" lang="en">
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title>Purr</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <base href="." />
-    <link rel=icon href=/images/cat_sitting.png>
-    <link
-      rel="stylesheet"
-      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
-      integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
-      crossorigin="anonymous"
-    />
 
-    <!--[htmlclean-protect]-->
-    <!-- inject:css -->
-    <link rel="stylesheet" href="css/style.css" />
-    <!-- endinject -->
-    <!--[/htmlclean-protect]-->
-  </head>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <title>Purr</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel=icon href=/images/cat_sitting.png> <link rel="stylesheet"
+    href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+    integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous" />
 
-  <body class="documentation">
-    <!--[htmlclean-protect]-->
-    <!-- inject:js -->
-    <script src="gulpfile.js"></script>
-    <script src="js/script.js"></script>
-    <!-- endinject -->
-    <!--[/htmlclean-protect]-->
-    <button onclick="topFunction()" id="btn-sticky" title="Go to top">
-      <span class="glyphicon glyphicon-chevron-up" aria-hidden="true"></span>
-    </button>
-    <nav class="nav nav-pills">
-      <div class="container-fluid">
-        <div class="navbar-header">
-          <img class="logo" src="images/logo_purr.png" alt="" />
-          <a class="navbar-brand" href="#">Purr</a>
-        </div>
-        <ul class="nav navbar-nav"></ul>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+    integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+    crossorigin="anonymous"></script>
+
+  <base href="." />
+  <!--[htmlclean-protect]-->
+  <!-- inject:css -->
+  <link rel="stylesheet" href="css/style.css" />
+  <!-- endinject -->
+  <!--[/htmlclean-protect]-->
+</head>
+
+<body class="documentation">
+  <!--[htmlclean-protect]-->
+  <!-- inject:js -->
+  <script src="gulpfile.js"></script>
+  <script src="js/script.js"></script>
+  <!-- endinject -->
+  <!--[/htmlclean-protect]-->
+  <button onclick="topFunction()" id="btn-sticky" title="Go to top">
+    <span class="glyphicon glyphicon-chevron-up" aria-hidden="true"></span>
+  </button>
+  <nav class="nav nav-pills">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <img class="logo" src="images/logo_purr.png" alt="" />
+        <a class="navbar-brand" href="#">Purr</a>
+        <button class="navbar-toggle collapsed" data-toggle="collapse" data-target="#mobile">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+      </div>
+      <div class="collapse navbar-collapse" id="mobile">
+
         <ul class="nav navbar-nav navbar-right">
           <li class="nav-item">
-            <a data-scroll="" href="#" class="nav-link">Home</a>
+            <a data-scroll="" href="#home" class="nav-link">Home</a>
           </li>
           <li class="nav-item">
             <a data-scroll="" href="#about" class="nav-link">About</a>
           </li>
           <li class="nav-item ">
-            <a data-scroll="" href="#get_started" class="nav-link get-started"
-              >Get started</a
-            >
+            <a data-scroll="" href="#get_started" class="nav-link get-started">Get started</a>
           </li>
           <li class="nav-item">
             <a data-scroll="" href="#contribute" class="nav-link">Contribute</a>
           </li>
           <li class="nav-item">
-            <a data-scroll="" href="#contact" class="nav-link disabled"
-              >Contact</a
-            >
+            <a data-scroll="" href="#contact" class="nav-link disabled">Contact</a>
           </li>
         </ul>
       </div>
-    </nav>
+    </div>
 
-    <div id="docs" class="content">
-      <div class="row row-dark align-middle vertical-center">
-        <div class="col-md-1"></div>
-        <div class="col-md-10">
-          <h1>
-            Documentation
-          </h1>
-          <h3>purr v1.0</h3>
-        </div>
-        <div class="col-md-1"></div>
+  </nav>
+
+
+  <div id="docs" class="content">
+    <div class="row row-dark align-middle vertical-center">
+      <div class="col-md-1"></div>
+      <div class="col-md-10">
+        <h1>
+          Documentation
+        </h1>
+        <h3>purr v1.0</h3>
       </div>
+      <div class="col-md-1"></div>
+    </div>
 
-      <div class="row banner">
-        <div class="col-md-1"></div>
-        <div class="col-md-10">
-          <a
-            data-scroll=""
-            href="https://github.com/boosterfuels/purr"
-            target="_blank"
-            class="nav-link button-light"
-            >View on Github</a
-          >
-        </div>
-        <div class="col-md-1"></div>
+    <div class="row banner">
+      <div class="col-md-1"></div>
+      <div class="col-md-10">
+        <a data-scroll="" href="https://github.com/boosterfuels/purr" target="_blank" class="nav-link button-light">View
+          on Github</a>
       </div>
+      <div class="col-md-1"></div>
+    </div>
 
-      <div class="row row-light">
-        <div class="col-md-1"></div>
-        <div class="col-md-10">
-          <div class="col-md-4 menu">
-            <ol class="bullet">
-              <!-- <li><a href="#">Getting started</a></li> -->
-              <li><a href="docs.html#introduction">Introduction</a></li>
-              <li>
-                <a href="docs.html#download">Download & Install</a>
+    <div class="row row-light">
+      <div class="col-md-1"></div>
+      <div class="col-md-10">
+        <div class="col-md-4 menu">
+          <ol class="bullet">
+            <!-- <li><a href="#">Getting started</a></li> -->
+            <li><a href="docs.html#introduction">Introduction</a></li>
+            <li>
+              <a href="docs.html#download">Download & Install</a>
 
+              <ol>
+                <li><a href="docs.html#install_pip">Pip</a></li>
+                <li>
+                  <a href="docs.html#install_github">Github</a>
+                </li>
+              </ol>
+            </li>
+
+            <!-- <li><a href="docs.html#support">Support</a></li> -->
+            <li><a href="docs.html#quickstart">Quickstart</a></li>
+            <li>
+              <a href="docs.html#collmap">Collection Map</a>
+              <ol>
+                <li><a href="docs.html#structure">Structure</a></li>
                 <ol>
-                  <li><a href="docs.html#install_pip">Pip</a></li>
+                  <li><a href="docs.html#datatypes">Data types</a></li>
                   <li>
-                    <a href="docs.html#install_github">Github</a>
+                    <a href="docs.html#extraprops">Extra properties</a>
                   </li>
                 </ol>
-              </li>
+                <li>
+                  <a href="docs.html#generate_collmap">Generating the map</a>
+                </li>
+                <li>
+                  <a href="docs.html#update_collmap">Updating the map</a>
+                </li>
+              </ol>
+            </li>
 
-              <!-- <li><a href="docs.html#support">Support</a></li> -->
-              <li><a href="docs.html#quickstart">Quickstart</a></li>
-              <li>
-                <a href="docs.html#collmap">Collection Map</a>
-                <ol>
-                  <li><a href="docs.html#structure">Structure</a></li>
+            <li>
+              <a href="docs.html#setup">Setup</a>
+              <ol>
+                <li>
+                  <a href="docs.html#settings_general">General Settings</a>
+                </li>
+                <li>
+                  <a href="docs.html#settings_postgres">Settings for PostgreSQL</a>
+                </li>
+                <li>
+                  <a href="docs.html#settings_mongo">Settings for MongoDB</a>
+                </li>
+              </ol>
+            </li>
+
+            <li><a href="docs.html#tailing">Tailing</a></li>
+            <li><a href="docs.html#output">Output</a></li>
+            <li>
+              <a href="docs.html#contribute">Contribute</a>
+              <ol>
+                <li><a href="docs.html#contributor_list">Contributors</a></li>
+                <li>
+                  <a href="docs.html#guidelines">Guidelines</a>
                   <ol>
-                    <li><a href="docs.html#datatypes">Data types</a></li>
                     <li>
-                      <a href="docs.html#extraprops">Extra properties</a>
+                      <a href="docs.html#pep_conventions">PEP 8 Conventions</a>
                     </li>
-                  </ol>
-                  <li>
-                    <a href="docs.html#generate_collmap">Generating the map</a>
-                  </li>
-                  <li>
-                    <a href="docs.html#update_collmap">Updating the map</a>
-                  </li>
-                </ol>
-              </li>
+                    <li>
+                      <a href="docs.html#metrics">Code Metrics</a>
+                    </li>
 
-              <li>
-                <a href="docs.html#setup">Setup</a>
-                <ol>
-                  <li>
-                    <a href="docs.html#settings_general">General Settings</a>
-                  </li>
-                  <li>
-                    <a href="docs.html#settings_postgres"
-                      >Settings for PostgreSQL</a
-                    >
-                  </li>
-                  <li>
-                    <a href="docs.html#settings_mongo">Settings for MongoDB</a>
-                  </li>
-                </ol>
-              </li>
-
-              <li><a href="docs.html#tailing">Tailing</a></li>
-              <li><a href="docs.html#output">Output</a></li>
-              <li>
-                <a href="docs.html#contribute">Contribute</a>
-                <ol>
-                  <li><a href="docs.html#contributor_list">Contributors</a></li>
-                  <li>
-                    <a href="docs.html#guidelines">Guidelines</a>
-                    <ol>
-                      <li>
-                        <a href="docs.html#pep_conventions"
-                          >PEP 8 Conventions</a
-                        >
-                      </li>
-                      <li>
-                        <a href="docs.html#metrics">Code Metrics</a>
-                      </li>
-
-                      <li><a href="docs.html#cleanup">Cleanup</a></li>
-                      <li>
-                        <a href="docs.html#commit_messages">Commit Messages</a>
-                      </li>
-                      <li>
-                        <a href="docs.html#submitting_pr">Submitting a PR</a>
-                      </li>
-                      <!-- <li>
+                    <li><a href="docs.html#cleanup">Cleanup</a></li>
+                    <li>
+                      <a href="docs.html#commit_messages">Commit Messages</a>
+                    </li>
+                    <li>
+                      <a href="docs.html#submitting_pr">Submitting a PR</a>
+                    </li>
+                    <!-- <li>
                         <a href="">
                           Documentation
                         </a>
                       </li> -->
-                    </ol>
-                  </li>
-                  <li>
-                    <a href="docs.html#plans">Plans</a>
-                  </li>
-                </ol>
-              </li>
-            </ol>
-          </div>
-          <div class="col-md-8 docs-text">
-            <h2 id="introduction">
-              1. Introduction
-            </h2>
-            <p>
-              Purr is an easy to use, open-source ETL tool which transfers data
-              from MongoDB to PostgreSQL.
-            </p>
-            <p>Purr is the right choice if you want to</p>
-            <ul>
-              <li>migrate from MongoDB to PostgreSQL</li>
-              <li>
-                use BI tools like Periscope but want to keep using MongoDB at
-                the same time
-              </li>
-            </ul>
-            <!-- Purr is written using the Python programming language.  -->
-            <p>
-              Purr is released under the terms of the
-              <a href="https://github.com/boosterfuels/purr/blob/master/LICENCE"
-                >MIT License</a
-              >.
-              <!-- use from both free and proprietary software. -->
-            </p>
-            <h4 id="features">1.1 Features</h4>
-            <ul>
-              <li>
-                continue syncing with MongoDB after data transfer is finished
-              </li>
-              <li>
-                generate the schema based on existing MongoDB collections
-              </li>
-              <li>
-                update the schema while Purr is syncing PostgreSQL with MongoDB
-              </li>
-              <li>
-                transfer data to a custom schema in Postgres
-              </li>
-              <li>
-                when (re)starting:
-                <ul>
-                  <li>update, drop or trucate the existing tables,</li>
-                  <li>
-                    create or empty the whole schema etc.
-                  </li>
-                  <li>
-                    start syncing with MongoDB from a specific timestamp
-                  </li>
-                </ul>
-              </li>
-            </ul>
-            <div class="row vertical-center">
-              <div class="col-md">
-                <div class="cat-mobile">
-                  <img
-                    class="center-block hr-cat"
-                    src="images/cats/cat_2.png"
-                    alt=""
-                  />
-                </div>
+                  </ol>
+                </li>
+                <li>
+                  <a href="docs.html#plans">Plans</a>
+                </li>
+              </ol>
+            </li>
+          </ol>
+        </div>
+        <div class="col-md-8 docs-text">
+          <h2 id="introduction">
+            1. Introduction
+          </h2>
+          <p>
+            Purr is an easy to use, open-source ETL tool which transfers data
+            from MongoDB to PostgreSQL.
+          </p>
+          <p>Purr is the right choice if you want to</p>
+          <ul>
+            <li>migrate from MongoDB to PostgreSQL</li>
+            <li>
+              use BI tools like Periscope but want to keep using MongoDB at
+              the same time
+            </li>
+          </ul>
+          <!-- Purr is written using the Python programming language.  -->
+          <p>
+            Purr is released under the terms of the
+            <a href="https://github.com/boosterfuels/purr/blob/master/LICENCE">MIT License</a>.
+            <!-- use from both free and proprietary software. -->
+          </p>
+          <h4 id="features">1.1 Features</h4>
+          <ul>
+            <li>
+              continue syncing with MongoDB after data transfer is finished
+            </li>
+            <li>
+              generate the schema based on existing MongoDB collections
+            </li>
+            <li>
+              update the schema while Purr is syncing PostgreSQL with MongoDB
+            </li>
+            <li>
+              transfer data to a custom schema in Postgres
+            </li>
+            <li>
+              when (re)starting:
+              <ul>
+                <li>update, drop or trucate the existing tables,</li>
+                <li>
+                  create or empty the whole schema etc.
+                </li>
+                <li>
+                  start syncing with MongoDB from a specific timestamp
+                </li>
+              </ul>
+            </li>
+          </ul>
+          <div class="row vertical-center">
+            <div class="col-md">
+              <div class="cat-mobile">
+                <img class="center-block hr-cat" src="images/cats/cat_2.png" alt="" />
               </div>
             </div>
-            <h2 id="download">
-              2. Download & Install
-            </h2>
-            <p>The current stable release is 1.0.0</p>
+          </div>
+          <h2 id="download">
+            2. Download & Install
+          </h2>
+          <p>The current stable release is 1.0.0</p>
 
-            <h4 id="install_pip">Install using pip</h4>
-            <p>
-              Purr is available on
-              <a href="https://test.pypi.org/project/purr/" target="_blank"
-                >PyPI</a
-              >. Make sure to have an up-to-date pip:
-            </p>
-            <code>
+          <h4 id="install_pip">Install using pip</h4>
+          <p>
+            Purr is available on
+            <a href="https://test.pypi.org/project/purr/" target="_blank">PyPI</a>. Make sure to have an up-to-date pip:
+          </p>
+          <code>
               pip install -U pip
             </code>
-            <p>
-              Install Purr:
-            </p>
-            <code>
+          <p>
+            Install Purr:
+          </p>
+          <code>
               pip install purrito
             </code>
-            <h4 id="install_github">Installing from source</h4>
+          <h4 id="install_github">Installing from source</h4>
 
-            <p>
-              You can also download Purr from Github and install from source:
-            </p>
-            <ul>
-              <li>
-                clone the<a
-                  href="https://github.com/boosterfuels/purr"
-                  target="_blank"
-                  >repo</a
-                >
-              </li>
-              <li>
-                <p>
-                  in the same folder where the setup.py file is located, type:
-                </p>
-                <code>python3 setup.py install</code>
-              </li>
-              <!-- <li>start MongoDB as a replica set and Postgres</li> -->
-              <!-- <li>
+          <p>
+            You can also download Purr from Github and install from source:
+          </p>
+          <ul>
+            <li>
+              clone the<a href="https://github.com/boosterfuels/purr" target="_blank">repo</a>
+            </li>
+            <li>
+              <p>
+                in the same folder where the setup.py file is located, type:
+              </p>
+              <code>python3 setup.py install</code>
+            </li>
+            <!-- <li>start MongoDB as a replica set and Postgres</li> -->
+            <!-- <li>
                 <p>
                   generate the collection map
                 </p>
@@ -298,20 +286,16 @@
                   ://localhost:27017 -n booster -t -td</code
                 >
               </li> -->
-            </ul>
-            <div class="row vertical-center">
-              <div class="col-md">
-                <div class="cat-mobile">
-                  <img
-                    class="center-block hr-cat"
-                    src="images/cats/cat_1.png"
-                    alt=""
-                  />
-                </div>
+          </ul>
+          <div class="row vertical-center">
+            <div class="col-md">
+              <div class="cat-mobile">
+                <img class="center-block hr-cat" src="images/cats/cat_1.png" alt="" />
               </div>
             </div>
+          </div>
 
-            <!-- <h2 id="support">3. Support</h2>
+          <!-- <h2 id="support">3. Support</h2>
             <p>MongoDB 3.4</p>
             <p>PostgreSQL 9.6</p>
             <div class="row vertical-center">
@@ -326,88 +310,81 @@
               </div>
             </div> -->
 
-            <h2 id="quickstart">3. Quickstart</h2>
-            <h4>With Docker</h4>
-            <div>
-              <!-- Once you created your collection map, you should have a running
+          <h2 id="quickstart">3. Quickstart</h2>
+          <h4>With Docker</h4>
+          <div>
+            <!-- Once you created your collection map, you should have a running
                 MongoDB instance as a source and Postgres as a target database.
                 You can start Purr using command line options or you can create
                 another YAML file to organize your settings. The collection map
                 and the setup file should not be mixed. -->
-              If you have Docker installed, check out our
-              <a href="https://github.com/boosterfuels/purr-examples">example</a
-              >.
-              <!-- `docker compose up` `docker compose down` -->
-              <h4>Without Docker</h4>
+            If you have Docker installed, check out our
+            <a href="https://github.com/boosterfuels/purr-examples">example</a>.
+            <!-- `docker compose up` `docker compose down` -->
+            <h4>Without Docker</h4>
 
-              <ol>
-                <li>
-                  <p>Install Purr using <b>pip</b>:</p>
-                  <code>
+            <ol>
+              <li>
+                <p>Install Purr using <b>pip</b>:</p>
+                <code>
                     pip install purrito
                   </code>
-                </li>
-                <li>
-                  Start MongoDB as a
-                  <a href="https://docs.mongodb.com/manual/replication"
-                    >replica set</a
-                  >
-                </li>
-                <li>
-                  <p>
-                    Generate the collection map that will describe the database
-                    schema:
-                  </p>
-                  <code>purr -m -mdb mongodb://localhost:27017 -n db_name</code>
-                </li>
-                <li>Start PostgreSQL</li>
-                <li id="purr_start">
-                  <p>
-                    To start the data transfer, type:
-                  </p>
-                  <code>
+              </li>
+              <li>
+                Start MongoDB as a
+                <a href="https://docs.mongodb.com/manual/replication">replica set</a>
+              </li>
+              <li>
+                <p>
+                  Generate the collection map that will describe the database
+                  schema:
+                </p>
+                <code>purr -m -mdb mongodb://localhost:27017 -n db_name</code>
+              </li>
+              <li>Start PostgreSQL</li>
+              <li id="purr_start">
+                <p>
+                  To start the data transfer, type:
+                </p>
+                <code>
                     purr -cf collections.yml -pg
                     postgres://localhost:5432/postgres -mdb
                     mongodb://localhost:27017 -n db_name -t
                   </code>
-                </li>
-              </ol>
-              <p>
-                Purr transfers all collections to the <code>public</code> schema
-                and starts tailing the oplog.
-              </p>
-              <p>
-                Changes to any documents in MongoDB should be applied to the
-                corresponding rows in PostgreSQL.
-              </p>
-            </div>
+              </li>
+            </ol>
+            <p>
+              Purr transfers all collections to the <code>public</code> schema
+              and starts tailing the oplog.
+            </p>
+            <p>
+              Changes to any documents in MongoDB should be applied to the
+              corresponding rows in PostgreSQL.
+            </p>
+          </div>
 
-            <div class="row vertical-center">
-              <div class="col-md">
-                <div class="cat-mobile">
-                  <img
-                    class="center-block hr-cat"
-                    src="images/cats/cat_3.png"
-                    alt=""
-                  />
-                </div>
+          <div class="row vertical-center">
+            <div class="col-md">
+              <div class="cat-mobile">
+                <img class="center-block hr-cat" src="images/cats/cat_3.png" alt="" />
               </div>
             </div>
+          </div>
 
-            <h2 id="collmap">4. The Collection Map</h2>
-            <code>
+          <h2 id="collmap">4. The Collection Map</h2>
+          <code>
               -cf, --collection-file
             </code>
-            <p>
-              The collection map is a YAML file which contains information about
-              the database and the collections that will be transferred. The
-              collections that are not part of the map will be ignored when
-              loading data into Postgres.
-            </p>
-            <p>
-              The map should have the following structure:
-            </p>
-            <pre>
+          <p>
+            The collection map is a YAML file which contains information about
+            the database and the collections that will be transferred. The
+            collections that are not part of the map will be ignored when
+            loading data into Postgres.
+          </p>
+          <p>
+            The map should have the following structure:
+          </p>
+          <pre>
               mongo_database_name:
                 Collection1:
                   :columns:
@@ -433,9 +410,9 @@
                     :table: collection2
                     :extra_props: JSONB
             </pre>
-            <h5>Example setup.yml</h5>
+          <h5>Example setup.yml</h5>
 
-            <pre>
+          <pre>
               test_db:
                 Cat:
                   :columns:
@@ -458,14 +435,14 @@
                     :table: cat
                     :extra_props: JSONB
             </pre>
-            <p>
-              Explanation: When connecting to the MongoDB instance, Purr looks
-              for the database name in the collection map
-              (<i>my_mongo_database</i>). Collection <i>Cat</i> will be
-              transferred to table <i>cat</i> (described under :meta -> :table).
-              Table <i>cat</i> will have 6 columns with the following types:
-            </p>
-            <pre>
+          <p>
+            Explanation: When connecting to the MongoDB instance, Purr looks
+            for the database name in the collection map
+            (<i>my_mongo_database</i>). Collection <i>Cat</i> will be
+            transferred to table <i>cat</i> (described under :meta -> :table).
+            Table <i>cat</i> will have 6 columns with the following types:
+          </p>
+          <pre>
               id: text
               name: text
               active: boolean
@@ -473,154 +450,154 @@
               created_at: text
               extra_props: jsonb
             </pre>
-            <h4 id="datatypes">
-              Data Types
-            </h4>
-            <p>
-              Purr uses 5 different data types when creating rows for a table:
-            </p>
-            <ul>
-              <li>boolean</li>
-              <li>double precision</li>
-              <li>text</li>
-              <li>timestamp</li>
-              <li>jsonb</li>
-            </ul>
-            <h5>
-              Type Conversion
-            </h5>
-            <p>
-              When starting Purr, the collection map is inserted into a table
-              called <code>purr_transfer_info</code>. After changing any column
-              type in the map, Purr tries to apply the changes to the tables in
-              Postgres.
-              <!-- The old
+          <h4 id="datatypes">
+            Data Types
+          </h4>
+          <p>
+            Purr uses 5 different data types when creating rows for a table:
+          </p>
+          <ul>
+            <li>boolean</li>
+            <li>double precision</li>
+            <li>text</li>
+            <li>timestamp</li>
+            <li>jsonb</li>
+          </ul>
+          <h5>
+            Type Conversion
+          </h5>
+          <p>
+            When starting Purr, the collection map is inserted into a table
+            called <code>purr_transfer_info</code>. After changing any column
+            type in the map, Purr tries to apply the changes to the tables in
+            Postgres.
+            <!-- The old
               collection map is located in the table
               <code>purr_transfer_info</code> which is compared to the new one. -->
-              <!-- In case of updated column types Purr tries to update the column
+            <!-- In case of updated column types Purr tries to update the column
               definition.  -->
-              This is sometimes rejected by Postgres and in that case, an error
-              will be logged.
-            </p>
-            <p>
-              The following table shows which conversions can happen without an
-              error
-            </p>
-            <!-- wtf: -->
-            <!-- rows = A columns = B converting A to B -->
-            <div class="table-responsive">
-              <table class="table">
+            This is sometimes rejected by Postgres and in that case, an error
+            will be logged.
+          </p>
+          <p>
+            The following table shows which conversions can happen without an
+            error
+          </p>
+          <!-- wtf: -->
+          <!-- rows = A columns = B converting A to B -->
+          <div class="table-responsive">
+            <table class="table">
+              <tr>
+                <th></th>
+                <th>boolean</th>
+                <th>double precision</th>
+                <th>text</th>
+                <th>timestamp</th>
+                <th>jsonb</th>
+              </tr>
+              <tbody>
                 <tr>
-                  <th></th>
-                  <th>boolean</th>
-                  <th>double precision</th>
-                  <th>text</th>
-                  <th>timestamp</th>
-                  <th>jsonb</th>
+                  <td>boolean</td>
+                  <td>✓</td>
+                  <td></td>
+                  <td>✓</td>
+                  <td></td>
+                  <td>✓</td>
                 </tr>
-                <tbody>
-                  <tr>
-                    <td>boolean</td>
-                    <td>✓</td>
-                    <td></td>
-                    <td>✓</td>
-                    <td></td>
-                    <td>✓</td>
-                  </tr>
-                  <tr>
-                    <td>double precision</td>
-                    <td></td>
-                    <td>✓</td>
-                    <td>✓</td>
-                    <td></td>
-                    <td>✓</td>
-                  </tr>
-                  <tr>
-                    <td>text</td>
-                    <td></td>
-                    <td></td>
-                    <td>✓</td>
-                    <td></td>
-                    <td>✓</td>
-                  </tr>
-                  <tr>
-                    <td>timestamp</td>
-                    <td></td>
-                    <td></td>
-                    <td>✓</td>
-                    <td>✓</td>
-                    <td>✓</td>
-                  </tr>
+                <tr>
+                  <td>double precision</td>
+                  <td></td>
+                  <td>✓</td>
+                  <td>✓</td>
+                  <td></td>
+                  <td>✓</td>
+                </tr>
+                <tr>
+                  <td>text</td>
+                  <td></td>
+                  <td></td>
+                  <td>✓</td>
+                  <td></td>
+                  <td>✓</td>
+                </tr>
+                <tr>
+                  <td>timestamp</td>
+                  <td></td>
+                  <td></td>
+                  <td>✓</td>
+                  <td>✓</td>
+                  <td>✓</td>
+                </tr>
 
-                  <tr>
-                    <td>jsonb</td>
-                    <td></td>
-                    <td></td>
-                    <td>✓</td>
-                    <td></td>
-                    <td>✓</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+                <tr>
+                  <td>jsonb</td>
+                  <td></td>
+                  <td></td>
+                  <td>✓</td>
+                  <td></td>
+                  <td>✓</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
 
-            <p>
-              Conversions that have ✔, can be easily handled by Postgres.
-              <!-- When
+          <p>
+            Conversions that have ✔, can be easily handled by Postgres.
+            <!-- When
               you assign a new type and your data is not castable to your new
               type, Purr will have to handle that situation on its own. Purr
               will rename your inconsistent column to column_name_old and create
               a new one with the new data type under column_name. This way we
               can make sure that you will not lose any data and you can continue
               working on your new column. -->
-              <!-- Purr will restart collection transfer for that specific collection
+            <!-- Purr will restart collection transfer for that specific collection
               and will try to cast your values so they fit into your new column.
               If casting cannot be done, you will have NULLs instead of a value. -->
-            </p>
+          </p>
 
-            <!-- Keeping the old version of a column gives more control over the
+          <!-- Keeping the old version of a column gives more control over the
               data: you decide what to do with the values which could not be
               casted and inserted into the new column. When restarting Purr
               again, the old column will not be deleted but they will not be
               updated anymore so you can decide later what to do with it. since
               it's not part of the collection map. Feel free to drop the old
               column at any moment (if you are sure that you don't need it). -->
-            <!-- <p>
+          <!-- <p>
               When Purr is tailing and a type change happens, Purr will try to
               cast the data to the new type. If that is not successful, Purr
               will log a warning and continue with the tailing.
             </p> -->
 
-            <h4>Extra properties</h4>
-            <p>
-              It is not necessary to have definition for every key in the
-              collection map. In that case, a column named
-              <code>_extra_properties</code> with type <code>JSONB</code> can be
-              created in PostgreSQL. Every key and value that lacks the
-              definition can be merged together forming a new value and inserted
-              into this column.
+          <h4>Extra properties</h4>
+          <p>
+            It is not necessary to have definition for every key in the
+            collection map. In that case, a column named
+            <code>_extra_properties</code> with type <code>JSONB</code> can be
+            created in PostgreSQL. Every key and value that lacks the
+            definition can be merged together forming a new value and inserted
+            into this column.
 
-              <!-- Having extra properties means that
+            <!-- Having extra properties means that
               values which are not defined in the collection map will be part of
               a column named extra_props with type defined based on the
               collection map.  -->
-              <!-- Extra properties consist of keys and their corresponding values
+            <!-- Extra properties consist of keys and their corresponding values
               that have no type definition in the collection map. These values
               are merged together to form a new attribute called -->
-              <!-- <code>extra_properties</code> with the <code>JSONB</code> data
+            <!-- <code>extra_properties</code> with the <code>JSONB</code> data
                 type.  -->
-              Purr does not transfer extra properties by default because it
-              slows down the data transfer.
-            </p>
-            <p>
-              To include extra properties, start Purr with option
-              <code>-ex</code>.
-            </p>
-            <!-- <p>
+            Purr does not transfer extra properties by default because it
+            slows down the data transfer.
+          </p>
+          <p>
+            To include extra properties, start Purr with option
+            <code>-ex</code>.
+          </p>
+          <!-- <p>
               If you already have an extra_props column but you restarted Purr
               without this option, all columns named extra_props one by one.
             </p> -->
-            <!-- <ul>
+          <!-- <ul>
               <li>
                 drop column extra_props for Collection1
               </li>
@@ -630,7 +607,7 @@
               </li>
             </ul> -->
 
-            <!-- <p>
+          <!-- <p>
               Example: start Purr using a setup file and collections described
               in collections.yml
             </p>
@@ -657,38 +634,38 @@
               Mongo as a replicaset.
             </p> -->
 
-            <h3>
-              Generating the map
-              <!-- <span class="label label-success font-middle">NEW</span> -->
-            </h3>
-            <p>
-              Writing a collection map might be exhausting, especially when
-              there are lots of collections to transfer. Generating the
-              collection map can save a lot of time. Here is how it works:
-            </p>
+          <h3>
+            Generating the map
+            <!-- <span class="label label-success font-middle">NEW</span> -->
+          </h3>
+          <p>
+            Writing a collection map might be exhausting, especially when
+            there are lots of collections to transfer. Generating the
+            collection map can save a lot of time. Here is how it works:
+          </p>
 
-            <p>
-              When starting Purr, by adding the flag
-              <code>-m</code> (<code>--map</code>) and the Mongo connection
-              information:
-            </p>
-            <code>purr -m -mdb mongodb://localhost:27017 -n db_name</code>
-            <p>
-              Purr generates the YAML file with the collection definitions. In
-              case the data file can be changed before starting the data
-              transfer Here are some things to keep in mind for generating a
-              collection map:
-            </p>
-            <ul>
-              <li>
-                Purr expects collection and field names in camelCase and outputs
-                them in snake_case. This may cause some issues when a document
-                has <code>_id</code> and <code>id</code> fields, both will be
-                converted to <code>id</code>. Having two columns with the same
-                name is not possible in Postgres, therefore duplicates are not
-                allowed in the collection map and any reoccurences of the same
-                column names will be ignored.
-                <pre>
+          <p>
+            When starting Purr, by adding the flag
+            <code>-m</code> (<code>--map</code>) and the Mongo connection
+            information:
+          </p>
+          <code>purr -m -mdb mongodb://localhost:27017 -n db_name</code>
+          <p>
+            Purr generates the YAML file with the collection definitions. In
+            case the data file can be changed before starting the data
+            transfer Here are some things to keep in mind for generating a
+            collection map:
+          </p>
+          <ul>
+            <li>
+              Purr expects collection and field names in camelCase and outputs
+              them in snake_case. This may cause some issues when a document
+              has <code>_id</code> and <code>id</code> fields, both will be
+              converted to <code>id</code>. Having two columns with the same
+              name is not possible in Postgres, therefore duplicates are not
+              allowed in the collection map and any reoccurences of the same
+              column names will be ignored.
+              <pre>
                     name_db:
                       name_coll:
                         :columns:
@@ -698,19 +675,18 @@
                         - :source: jellyFish
                           :type: TEXT
                           jelly_fish: null
-                  </pre
-                >
-              </li>
-              <li>
-                there is no definition for extra properties when generating the
-                map
-                <p class="note">Note: we may add them later</p>
-              </li>
-              <li>
-                a generated collection map will have a column name equal to
-                <code>null</code> which can be left out when writing the
-                collection map alone:
-                <pre>
+                  </pre>
+            </li>
+            <li>
+              there is no definition for extra properties when generating the
+              map
+              <p class="note">Note: we may add them later</p>
+            </li>
+            <li>
+              a generated collection map will have a column name equal to
+              <code>null</code> which can be left out when writing the
+              collection map alone:
+              <pre>
                   name_db:
                     name_coll:
                       :columns:
@@ -718,234 +694,228 @@
                         :type: TEXT
                         <b>id: null</b>
                 </pre>
-              </li>
-              <li>collections with no documents are skipped</li>
-              <li>
-                Purr takes a collection sample which consists of the last 100
-                documents of each collection and checks each key and value it
-                finds. After that, it determines the type for each value in a
-                document and records it. If inconsistent data was found and
-                values with different types belong to the same key, Purr will
-                choose the type which occured the most frequently.
-              </li>
-            </ul>
-            <p>
-              After generating the collection map, start the data tranfer as
-              explained <a href="docs.html#purr_start">earlier</a>.
-            </p>
+            </li>
+            <li>collections with no documents are skipped</li>
+            <li>
+              Purr takes a collection sample which consists of the last 100
+              documents of each collection and checks each key and value it
+              finds. After that, it determines the type for each value in a
+              document and records it. If inconsistent data was found and
+              values with different types belong to the same key, Purr will
+              choose the type which occured the most frequently.
+            </li>
+          </ul>
+          <p>
+            After generating the collection map, start the data tranfer as
+            explained <a href="docs.html#purr_start">earlier</a>.
+          </p>
 
-            <h3 id="update_collmap">Updating the map</h3>
+          <h3 id="update_collmap">Updating the map</h3>
 
-            <p>
-              Sooner or later you will need to change your collection map. If
-              you restart Purr and keep your existing schema, your tables'
-              fields in PG will be compared to the ones in your collection map.
-            </p>
-            <ul>
-              <li>
-                Adding a new attribute will make Purr update your entire
-                collection.
-              </li>
-              <li>Removing an attribute drops the column.</li>
-              <li>
-                Changing a column name will drop the old column, create the new
-                one and update your entire collection.
-              </li>
-              <li>
-                Changing a column type will result with an attempt to ALTER the
-                column. If the attempt was unsuccessful, Purr will try to
-                convert your data to JSONB.
-              </li>
-            </ul>
-            <p>
-              What about the tables in my Postgres database that were in the
-              schema before using Purr?
-            </p>
-            <p>
-              If you have any existing tables in your schema that you want to be
-              left alone, make sure that you
-            </p>
-            <ul>
-              <li>
-                don't include those tables in your collection map as a target
-                (:meta: :table: cat)
-              </li>
-              <li>
-                set schema_reset to false
-              </li>
-              <li>
-                set table_drop to false
-              </li>
-              <li>
-                set table_truncate to false
-              </li>
-            </ul>
+          <p>
+            Sooner or later you will need to change your collection map. If
+            you restart Purr and keep your existing schema, your tables'
+            fields in PG will be compared to the ones in your collection map.
+          </p>
+          <ul>
+            <li>
+              Adding a new attribute will make Purr update your entire
+              collection.
+            </li>
+            <li>Removing an attribute drops the column.</li>
+            <li>
+              Changing a column name will drop the old column, create the new
+              one and update your entire collection.
+            </li>
+            <li>
+              Changing a column type will result with an attempt to ALTER the
+              column. If the attempt was unsuccessful, Purr will try to
+              convert your data to JSONB.
+            </li>
+          </ul>
+          <p>
+            What about the tables in my Postgres database that were in the
+            schema before using Purr?
+          </p>
+          <p>
+            If you have any existing tables in your schema that you want to be
+            left alone, make sure that you
+          </p>
+          <ul>
+            <li>
+              don't include those tables in your collection map as a target
+              (:meta: :table: cat)
+            </li>
+            <li>
+              set schema_reset to false
+            </li>
+            <li>
+              set table_drop to false
+            </li>
+            <li>
+              set table_truncate to false
+            </li>
+          </ul>
 
-            <div class="row vertical-center">
-              <div class="col-md">
-                <div class="cat-mobile">
-                  <img
-                    class="center-block hr-cat"
-                    src="images/cats/cat_5.png"
-                    alt=""
-                  />
-                </div>
+          <div class="row vertical-center">
+            <div class="col-md">
+              <div class="cat-mobile">
+                <img class="center-block hr-cat" src="images/cats/cat_5.png" alt="" />
               </div>
             </div>
+          </div>
 
-            <h2>5. Setup</h2>
-            <p>
-              <!-- There are many options for Purr -->
-              <!-- Without the collection map Purr cannot be started. -->
-              <!-- Once the collection map is created, the data transfer can start. -->
-              <!-- This requires a source (MongoDB) and a target (PostgreSQL)
+          <h2>5. Setup</h2>
+          <p>
+            <!-- There are many options for Purr -->
+            <!-- Without the collection map Purr cannot be started. -->
+            <!-- Once the collection map is created, the data transfer can start. -->
+            <!-- This requires a source (MongoDB) and a target (PostgreSQL)
               database. 
               Purr can be started by using command line options.
                or you can  -->
-              There are multiple options which can be set on the command line
-              but things can easily get messy. In some situations, it is better
-              to organize these settings into a separate file.
-              <!-- create another YAML file to organize your settings. The collection
+            There are multiple options which can be set on the command line
+            but things can easily get messy. In some situations, it is better
+            to organize these settings into a separate file.
+            <!-- create another YAML file to organize your settings. The collection
               map and the setup file should not be mixed. -->
-            </p>
-            <h3>Setup file</h3>
-            <p>
-              <code>-h, --help </code>show help message
-              <code>-sf, --setup-file </code>
-            </p>
-            <p>
-              The setup file is a YAML file that contains:
-            </p>
-            <ul>
-              <li>settings for PostgreSQL</li>
-              <li>settings for MongoDB</li>
-              <li>general settings</li>
-            </ul>
-            <h4 id="settings_postgres">
-              Settings for PostgreSQL
-            </h4>
-            <ul>
-              <li><code>db_name</code>: name of database</li>
-              <li><code>connection</code>: connection string to database</li>
-              <li>
-                <code>schema_name</code>: name of schema where the collections
-                will be transfered to
-              </li>
-              <li>
-                <code>schema_reset</code>:
-                <ul>
-                  <li>
-                    true: drop the existing schema and create a new one with the
-                    same name
-                  </li>
-                  <li>false: keep the existing schema</li>
-                </ul>
-              </li>
-              <li>
-                <code>table_truncate</code>: truncate all tables in the
-                collection map before starting data transfer
-              </li>
-              <li>
-                <code>table_drop</code>: drop table before starting data
-                transfer
-              </li>
-            </ul>
-            <h4 id="settings_mongo">
-              Settings for MongoDB
-            </h4>
-            <ul>
-              <li><code>db_name</code>: name of database</li>
-              <li><code>connection</code>: connection string to database</li>
-            </ul>
-            <h4 id="settings_general">General Settings</h4>
-            <ul>
-              <li>
-                <code>tailing</code>: keep tailing the oplog after collection
-                transfer is finished
-              </li>
-              <li>
-                <code>include_extra_props</code>: include properties which are
-                not described in the collection map
-              </li>
-            </ul>
-            <p></p>
-            <code> purr -sf path/to/setup.yml -cf path/to/collections.yml</code>
-            <h3>Command line options</h3>
-            <p>
-              You can set all the variables from the previous section using the
-              command line. Passing connection strings to MongoDB and Postgres
-              is mandatory.
-            </p>
-            <ul>
-              <li>
-                <code>-sf</code> or <code>--setup-file</code>: path to the setup
-                file if exists
-              </li>
-              <li>
-                <code>-cf</code> or <code>--collection-file</code>: path to the
-                collection file if exists
-              </li>
+          </p>
+          <h3>Setup file</h3>
+          <p>
+            <code>-h, --help </code>show help message
+            <code>-sf, --setup-file </code>
+          </p>
+          <p>
+            The setup file is a YAML file that contains:
+          </p>
+          <ul>
+            <li>settings for PostgreSQL</li>
+            <li>settings for MongoDB</li>
+            <li>general settings</li>
+          </ul>
+          <h4 id="settings_postgres">
+            Settings for PostgreSQL
+          </h4>
+          <ul>
+            <li><code>db_name</code>: name of database</li>
+            <li><code>connection</code>: connection string to database</li>
+            <li>
+              <code>schema_name</code>: name of schema where the collections
+              will be transfered to
+            </li>
+            <li>
+              <code>schema_reset</code>:
+              <ul>
+                <li>
+                  true: drop the existing schema and create a new one with the
+                  same name
+                </li>
+                <li>false: keep the existing schema</li>
+              </ul>
+            </li>
+            <li>
+              <code>table_truncate</code>: truncate all tables in the
+              collection map before starting data transfer
+            </li>
+            <li>
+              <code>table_drop</code>: drop table before starting data
+              transfer
+            </li>
+          </ul>
+          <h4 id="settings_mongo">
+            Settings for MongoDB
+          </h4>
+          <ul>
+            <li><code>db_name</code>: name of database</li>
+            <li><code>connection</code>: connection string to database</li>
+          </ul>
+          <h4 id="settings_general">General Settings</h4>
+          <ul>
+            <li>
+              <code>tailing</code>: keep tailing the oplog after collection
+              transfer is finished
+            </li>
+            <li>
+              <code>include_extra_props</code>: include properties which are
+              not described in the collection map
+            </li>
+          </ul>
+          <p></p>
+          <code> purr -sf path/to/setup.yml -cf path/to/collections.yml</code>
+          <h3>Command line options</h3>
+          <p>
+            You can set all the variables from the previous section using the
+            command line. Passing connection strings to MongoDB and Postgres
+            is mandatory.
+          </p>
+          <ul>
+            <li>
+              <code>-sf</code> or <code>--setup-file</code>: path to the setup
+              file if exists
+            </li>
+            <li>
+              <code>-cf</code> or <code>--collection-file</code>: path to the
+              collection file if exists
+            </li>
 
-              <li>
-                <code>-td</code> or <code>--table-drop</code>: defaults to false
-              </li>
-              <li>
-                <code>-tt</code> or <code>--table-truncate</code>: defaults to
-                false
-              </li>
-              <li>
-                <code>-sr</code> or <code>--schema-reset</code>: defaults to
-                false
-              </li>
-              <li>
-                <code>-sn</code> or <code>--schema-name</code>: defaults to
-                public
-              </li>
-              <li>
-                <code>-pg</code> or <code>--pg-connection</code>: connection
-                string to PG database (*)
-              </li>
-              <li>
-                <code>-mdb</code> or <code>--mongo-connection</code>: connection
-                string to Mongo database (*)
-              </li>
-              <li>
-                <code>-n</code> or <code>--mongo-db-name</code>: equivalent of
-                db_name for MongoDB (*)
-              </li>
-              <li>
-                <code>-t</code> or <code>--tail</code>: equivalent of tailing;
-                defaults to false
-              </li>
-              <li>
-                <code>-s</code> or <code>--start</code>: equivalent of
-                tailing_from; type should be date, defaults to None
-              </li>
+            <li>
+              <code>-td</code> or <code>--table-drop</code>: defaults to false
+            </li>
+            <li>
+              <code>-tt</code> or <code>--table-truncate</code>: defaults to
+              false
+            </li>
+            <li>
+              <code>-sr</code> or <code>--schema-reset</code>: defaults to
+              false
+            </li>
+            <li>
+              <code>-sn</code> or <code>--schema-name</code>: defaults to
+              public
+            </li>
+            <li>
+              <code>-pg</code> or <code>--pg-connection</code>: connection
+              string to PG database (*)
+            </li>
+            <li>
+              <code>-mdb</code> or <code>--mongo-connection</code>: connection
+              string to Mongo database (*)
+            </li>
+            <li>
+              <code>-n</code> or <code>--mongo-db-name</code>: equivalent of
+              db_name for MongoDB (*)
+            </li>
+            <li>
+              <code>-t</code> or <code>--tail</code>: equivalent of tailing;
+              defaults to false
+            </li>
+            <li>
+              <code>-s</code> or <code>--start</code>: equivalent of
+              tailing_from; type should be date, defaults to None
+            </li>
 
-              <li>
-                <code>-tsdb</code> or <code>--start-from-tsdb</code>: equivalent
-                of tailing_from_db; defaults to false
-              </li>
+            <li>
+              <code>-tsdb</code> or <code>--start-from-tsdb</code>: equivalent
+              of tailing_from_db; defaults to false
+            </li>
 
-              <li>
-                <code>-ex</code> or <code>--include-extra-properties</code>:
-                defaults to false
-              </li>
-            </ul>
+            <li>
+              <code>-ex</code> or <code>--include-extra-properties</code>:
+              defaults to false
+            </li>
+          </ul>
 
-            <p>Starting Purr without using a setup file:</p>
-            <code
-              >purr -cf path/to/collections.yml -pg
+          <p>Starting Purr without using a setup file:</p>
+          <code>purr -cf path/to/collections.yml -pg
               postgres://127.0.0.1:5432/postgres -mdb mongodb://localhost:27017
-              -n mongo_db_name -t</code
-            >
+              -n mongo_db_name -t</code>
 
-            <p class="note">
-              <i>Variables followed by (*) are mandatory.</i>
-            </p>
+          <p class="note">
+            <i>Variables followed by (*) are mandatory.</i>
+          </p>
 
-            <h5>Example setup.yml</h5>
-            <pre>
+          <h5>Example setup.yml</h5>
+          <pre>
                postgres: 
                   db_name: my_pg_database
                   connection: postgres://127.0.0.1:5432/postgres
@@ -958,259 +928,226 @@
                   connection: mongodb://localhost:27017
                tailing: true
                include_extra_props: true
-              </pre
-            >
-            <div class="row vertical-center">
-              <div class="col-md">
-                <div class="cat-mobile">
-                  <img
-                    class="center-block hr-cat"
-                    src="images/cats/cat_4.png"
-                    alt=""
-                  />
-                </div>
+              </pre>
+          <div class="row vertical-center">
+            <div class="col-md">
+              <div class="cat-mobile">
+                <img class="center-block hr-cat" src="images/cats/cat_4.png" alt="" />
               </div>
             </div>
+          </div>
 
-            <h2 id="tailing">6. Tailing</h2>
+          <h2 id="tailing">6. Tailing</h2>
 
-            <p>There are two types of tailing:</p>
-            <ul>
-              <li>
-                tailing which is preceded by collection transfer
-              </li>
-              <li>
-                tailing from specific timestamp (only if collections exist)
-              </li>
-            </ul>
+          <p>There are two types of tailing:</p>
+          <ul>
+            <li>
+              tailing which is preceded by collection transfer
+            </li>
+            <li>
+              tailing from specific timestamp (only if collections exist)
+            </li>
+          </ul>
 
-            <p>
-              Tailing without collection transfer must have a starting point
-              defined by the user. This starting point can be a timestamp which
-              can be passed using <code>-ts</code> datetime. Purr creates a
-              table called purr_info where it saves the current Unix epoch time.
-              This timestamp is updated every couple of minutes. The update
-              happens only if the current document is successfully transfered.
-              When an error occurs, you can be sure that Purr saved the latest
-              successful timestamp to purr_info and can continue tailing the
-              oplog from -tsdb. purr_info is always created when you first start
-              Purr. If you do not add any timestamps to -s:
-            </p>
+          <p>
+            Tailing without collection transfer must have a starting point
+            defined by the user. This starting point can be a timestamp which
+            can be passed using <code>-ts</code> datetime. Purr creates a
+            table called purr_info where it saves the current Unix epoch time.
+            This timestamp is updated every couple of minutes. The update
+            happens only if the current document is successfully transfered.
+            When an error occurs, you can be sure that Purr saved the latest
+            successful timestamp to purr_info and can continue tailing the
+            oplog from -tsdb. purr_info is always created when you first start
+            Purr. If you do not add any timestamps to -s:
+          </p>
 
-            <ul>
-              <li>
-                the current timestamp will be inserted
-              </li>
-              <li>
-                it will read the latest timestamp and check if the oplog has any
-                new entries
-              </li>
-              <li>
-                if the timestamp is "too old", Purr updates all collections
-              </li>
-            </ul>
-            <p>if the timestamp is "too old", Purr updates all collections</p>
-            <ul>
-              <li>the latest timestamp will be inserted into purr_info</li>
-            </ul>
+          <ul>
+            <li>
+              the current timestamp will be inserted
+            </li>
+            <li>
+              it will read the latest timestamp and check if the oplog has any
+              new entries
+            </li>
+            <li>
+              if the timestamp is "too old", Purr updates all collections
+            </li>
+          </ul>
+          <p>if the timestamp is "too old", Purr updates all collections</p>
+          <ul>
+            <li>the latest timestamp will be inserted into purr_info</li>
+          </ul>
 
-            <div class="row vertical-center">
-              <div class="col-md">
-                <div class="cat-mobile">
-                  <img
-                    class="center-block hr-cat"
-                    src="images/cats/cat_7.png"
-                    alt=""
-                  />
-                </div>
+          <div class="row vertical-center">
+            <div class="col-md">
+              <div class="cat-mobile">
+                <img class="center-block hr-cat" src="images/cats/cat_7.png" alt="" />
               </div>
             </div>
-            <h2 id="output">7. Output</h2>
-            <p>
-              Purr will log a warning if it could not transfer a document.
-            </p>
+          </div>
+          <h2 id="output">7. Output</h2>
+          <p>
+            Purr will log a warning if it could not transfer a document.
+          </p>
 
-            <h4>
-              Connectivity issues
-            </h4>
-            <p>
-              When starting for the first time, Purr creates a table called
-              <i>purr_info</i>. This table contains a timestamp which is
-              refreshed every couple of minutes in case of a successful
-              transfer. If Purr is disconnected from the database, it waits a
-              couple of seconds before attempting to reconnect. If succeeded,
-              Purr first checks purr_info for the latest timestamp it managed to
-              save and continues tailing from there.
-            </p>
-            <div class="row vertical-center">
-              <div class="col-md">
-                <div class="cat-mobile">
-                  <img
-                    class="center-block hr-cat"
-                    src="images/cats/cat_6.png"
-                    alt=""
-                  />
-                </div>
+          <h4>
+            Connectivity issues
+          </h4>
+          <p>
+            When starting for the first time, Purr creates a table called
+            <i>purr_info</i>. This table contains a timestamp which is
+            refreshed every couple of minutes in case of a successful
+            transfer. If Purr is disconnected from the database, it waits a
+            couple of seconds before attempting to reconnect. If succeeded,
+            Purr first checks purr_info for the latest timestamp it managed to
+            save and continues tailing from there.
+          </p>
+          <div class="row vertical-center">
+            <div class="col-md">
+              <div class="cat-mobile">
+                <img class="center-block hr-cat" src="images/cats/cat_6.png" alt="" />
               </div>
             </div>
-            <h2 id="contribute">
-              8. Contribute
-            </h2>
-            Purr is an open-source project that was built using Python. If you
-            would like to contribute, check out our guidelines
-            <h3>Our most valuable contributors</h3>
-            <div id="contributors" class="row contributors vertical-center">
-              <div class="content-body">
-                <div>
-                  <!-- <h5 class="title">
+          </div>
+          <h2 id="contribute">
+            8. Contribute
+          </h2>
+          Purr is an open-source project that was built using Python. If you
+          would like to contribute, check out our guidelines
+          <h3>Our most valuable contributors</h3>
+          <div id="contributors" class="row contributors vertical-center">
+            <div class="content-body">
+              <div>
+                <!-- <h5 class="title">
                     Our most valuable contributors
                   </h5> -->
-                  <!-- <p class="desc">
+                <!-- <p class="desc">
                     Meet the people developing on Purr
                   </p> -->
+              </div>
+              <div class="card-deck">
+                <div class="card grow">
+                  <div class="card-body">
+                    <h4 class="card-title">Towelie</h4>
+                    <p class="card-text">
+                      helps us think out of the box
+                    </p>
+                    <div class="image-center ">
+                      <img src="images/towelie.png" />
+                    </div>
+                    <div class="button-center go">
+                      <a class="btn btn-primary button-center button-light">BIO</a>
+                    </div>
+                  </div>
                 </div>
-                <div class="card-deck">
-                  <div class="card grow">
-                    <div class="card-body">
-                      <h4 class="card-title">Towelie</h4>
-                      <p class="card-text">
-                        helps us think out of the box
-                      </p>
-                      <div class="image-center ">
-                        <img src="images/towelie.png" />
-                      </div>
-                      <div class="button-center go">
-                        <a class="btn btn-primary button-center button-light"
-                          >BIO</a
-                        >
-                      </div>
+                <div class="card grow">
+                  <div class="card-body">
+                    <h4 class="card-title">Kenny McCormick</h4>
+                    <p class="card-text">
+                      specializes in removing dead code
+                    </p>
+                    <div class="image-center ">
+                      <img src="images/kenny.png" />
                     </div>
-                  </div>
-                  <div class="card grow">
-                    <div class="card-body">
-                      <h4 class="card-title">Kenny McCormick</h4>
-                      <p class="card-text">
-                        specializes in removing dead code
-                      </p>
-                      <div class="image-center ">
-                        <img src="images/kenny.png" />
-                      </div>
 
-                      <div class="button-center go">
-                        <a class="btn btn-primary button-center button-light"
-                          >BIO</a
-                        >
-                      </div>
+                    <div class="button-center go">
+                      <a class="btn btn-primary button-center button-light">BIO</a>
                     </div>
                   </div>
-                  <div class="card grow">
-                    <div class="card-body">
-                      <h4 class="card-title">Kyle Broflovski</h4>
-                      <p class="card-text">
-                        makes sure we learn something every day
-                      </p>
-                      <div class="image-center ">
-                        <img class="" src="images/kyle.png" alt="" />
-                      </div>
-                      <div class=" button-center go">
-                        <a
-                          class="btn btn-primary button-center button-light"
-                          href="docs.html"
-                          >BIO</a
-                        >
-                      </div>
+                </div>
+                <div class="card grow">
+                  <div class="card-body">
+                    <h4 class="card-title">Kyle Broflovski</h4>
+                    <p class="card-text">
+                      makes sure we learn something every day
+                    </p>
+                    <div class="image-center ">
+                      <img class="" src="images/kyle.png" alt="" />
+                    </div>
+                    <div class=" button-center go">
+                      <a class="btn btn-primary button-center button-light" href="docs.html">BIO</a>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
+          </div>
 
-            <h3 id="guidelines">Guidelines</h3>
-            <p>
-              Contributing to Purr is a great way to learn more about MongoDB,
-              Python and PostgreSQL
-            </p>
-            <h4 id="pep_conventions">PEP 8 Conventions</h4>
-            <p>
-              To make sure you follow
-              <a
-                href="https://www.python.org/dev/peps/pep-0008/"
-                target="_blank"
-                >PEP 8</a
-              >, use
-              <a href="https://pypi.org/project/pycodestyle/">pycodestyle</a>
-              (previously <i>pep8</i> ). Pycodestyle is a tool that checks your
-              code against style conventions in PEP 8.
-            </p>
-            <h4 id="cleanup">Cleanup</h4>
+          <h3 id="guidelines">Guidelines</h3>
+          <p>
+            Contributing to Purr is a great way to learn more about MongoDB,
+            Python and PostgreSQL
+          </p>
+          <h4 id="pep_conventions">PEP 8 Conventions</h4>
+          <p>
+            To make sure you follow
+            <a href="https://www.python.org/dev/peps/pep-0008/" target="_blank">PEP 8</a>, use
+            <a href="https://pypi.org/project/pycodestyle/">pycodestyle</a>
+            (previously <i>pep8</i> ). Pycodestyle is a tool that checks your
+            code against style conventions in PEP 8.
+          </p>
+          <h4 id="cleanup">Cleanup</h4>
 
-            <p>
-              We like to clean up our code to make sure that no unused functions
-              were left behind. We expect you to do the same so the code can be
-              cleaner, easier to understand and also easier to maintain.
-              <a href="https://pypi.org/project/vulture/">Vulture</a> is a great
-              tool to eliminate unused code. Remember, YAGNI :)
-            </p>
-            <pre>
+          <p>
+            We like to clean up our code to make sure that no unused functions
+            were left behind. We expect you to do the same so the code can be
+            cleaner, easier to understand and also easier to maintain.
+            <a href="https://pypi.org/project/vulture/">Vulture</a> is a great
+            tool to eliminate unused code. Remember, YAGNI :)
+          </p>
+          <pre>
                 def unused_function():
                   print("Delete me!")                     
             </pre>
-            <h4 id="metrics">Code Metrics</h4>
-            <p>
-              Radon is an awesome tool which computes various code metrics like
-              raw metrics, cyclomatic complexity, etc. Check out their
-              <a href="https://radon.readthedocs.io/en/latest/" target="_blank"
-                >docs</a
-              >
-              and see how you can write code that is easier to read and
-              maintain.
-            </p>
-            <h4 id="commit_messages">Commit Messages</h4>
-            <p>
-              When it comes to commit messages, we love to follow
-              <a
-                href="https://github.com/angular/angular/blob/master/CONTRIBUTING.md#commit"
-                >rules</a
-              >
-              defined by Angular so our commit messages make more sense and also
-              easier to read:
-            </p>
-            <pre>
+          <h4 id="metrics">Code Metrics</h4>
+          <p>
+            Radon is an awesome tool which computes various code metrics like
+            raw metrics, cyclomatic complexity, etc. Check out their
+            <a href="https://radon.readthedocs.io/en/latest/" target="_blank">docs</a>
+            and see how you can write code that is easier to read and
+            maintain.
+          </p>
+          <h4 id="commit_messages">Commit Messages</h4>
+          <p>
+            When it comes to commit messages, we love to follow
+            <a href="https://github.com/angular/angular/blob/master/CONTRIBUTING.md#commit">rules</a>
+            defined by Angular so our commit messages make more sense and also
+            easier to read:
+          </p>
+          <pre>
               feat(extractor): adding slack integration 
               test(tailer): updating test for checking types
             </pre>
-            <h4 id="submitting_pr">Submitting a PR</h4>
-            <p>
-              ...
-            </p>
-            <h3 id="plans">Plans</h3>
-            <p>
-              In the future, we would like to add some new features to Purr.
-            </p>
-            <ul>
-              <li>slack integration</li>
-              <li>data transfer from multiple MongoDB instances</li>
-              <li>exposing an API</li>
-              <li>...</li>
-            </ul>
-          </div>
-        </div>
-        <div class="col-md-1"></div>
-      </div>
-      <div class="row vertical-center">
-        <div class="col-md">
-          <div class="cat-mobile">
-            <img
-              class="center-block hr-cat"
-              src="images/cats/cat_6.png"
-              alt=""
-            />
-          </div>
+          <h4 id="submitting_pr">Submitting a PR</h4>
+          <p>
+            ...
+          </p>
+          <h3 id="plans">Plans</h3>
+          <p>
+            In the future, we would like to add some new features to Purr.
+          </p>
+          <ul>
+            <li>slack integration</li>
+            <li>data transfer from multiple MongoDB instances</li>
+            <li>exposing an API</li>
+            <li>...</li>
+          </ul>
         </div>
       </div>
-      <div class="footer">
-        <p>2019 <span>Booster Fuels</span>, Inc., All Rights Reserved</p>
+      <div class="col-md-1"></div>
+    </div>
+    <div class="row vertical-center">
+      <div class="col-md">
+        <div class="cat-mobile">
+          <img class="center-block hr-cat" src="images/cats/cat_6.png" alt="" />
+        </div>
       </div>
     </div>
-  </body>
+    <div class="footer">
+      <p>2019 <span>Booster Fuels</span>, Inc., All Rights Reserved</p>
+    </div>
+  </div>
+</body>
+
 </html>
