@@ -92,6 +92,6 @@ def generate_collection_map(settings_mdb):
 
     logger.info("PID=%s" % os.getpid())
     mongo = mongodb.MongoConnection(settings_mdb)
-    coll_map = cm.determine_types(mongo.conn, settings_mdb["db_name"])
+    coll_map = cm.create_map(mongo.conn, settings_mdb["db_name"])
     cm.create_file(coll_map)
-    # mongo.disconnect()
+    mongo.disconnect()
