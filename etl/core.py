@@ -8,7 +8,7 @@ from etl.monitor import logger
 import pkg_resources
 
 
-def start(settings, coll_config):
+def start(settings, coll_map):
     """
     Starts Purr.
     Returns
@@ -21,17 +21,24 @@ def start(settings, coll_config):
              : basic settings for both PG and MongoDB
              (connection strings, schema name)
 
-    coll_config : dict
+    coll_map : dict
                 : config file for collections
 
     TODO
     ----
     - create table with attributes and types
     """
+
     logger.info("Starting Purr v%s ..." %
                 pkg_resources.require("purr")[0].version)
 
     logger.info("PID=%s" % os.getpid())
+
+    mode_tailing = False
+    if settings["tailing"] or settings["tailing_from"] or settings["tailing_from"]:
+        mode_tailing = True
+
+    logger.info("TAILING=%s" % ("ON" if mode_tailing else "OFF"))
 
     setup_pg = settings["postgres"]
     setup_mdb = settings["mongo"]
@@ -40,17 +47,25 @@ def start(settings, coll_config):
     mongo = mongodb.MongoConnection(setup_mdb)
 
     cm.create_table(
-        pg, coll_config, setup_pg["schema_name"])
+        pg, coll_map, setup_pg["schema_name"])
 
     ex = extractor.Extractor(
-        pg, mongo.conn, setup_pg, settings, coll_config)
+        pg, mongo.conn, setup_pg, settings, coll_map)
+
+    if mode_tailing:
+        handle_coll_map_changes(settings, coll_map, pg, mongo, ex)
+    else:
+        transfer.start(ex, coll_map)
+
+
+def handle_coll_map_changes(settings, coll_map, pg, mongo, ex):
     THREADS = []
     try:
         thr_notification = notification.NotificationThread(pg)
         THREADS.append(thr_notification)
         thr_notification.start()
         thr_transfer = transfer.TransferThread(
-            settings, coll_config, pg, mongo, ex)
+            settings, coll_map, pg, mongo, ex)
         THREADS.append(thr_transfer)
         thr_transfer.start()
         while True:
@@ -62,7 +77,7 @@ def start(settings, coll_config):
                 thr_transfer.join(3)
 
                 thr_transfer = transfer.TransferThread(
-                    settings, coll_config, pg, mongo, ex)
+                    settings, coll_map, pg, mongo, ex)
                 THREADS.append(thr_transfer)
                 thr_transfer.settings["tailing"] = False
                 thr_transfer.settings["tailing_from_db"] = True
@@ -70,7 +85,6 @@ def start(settings, coll_config):
                 thr_transfer.start()
         thr_notification.join(3)  # wait for 3 seconds
         thr_transfer.join(3)
-
     except (KeyboardInterrupt, SystemExit):
         logger.error('[CORE] Stopping all threads.')
         for t in THREADS:

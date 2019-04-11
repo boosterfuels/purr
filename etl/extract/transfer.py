@@ -6,6 +6,18 @@ from datetime import datetime
 from etl.monitor import logger
 
 
+def start(extractor, coll_config):
+    collections = cp.config_collection_names(coll_config)
+    if collections is None:
+        logger.error(
+            """
+                [TRANSFER] No collections found.
+                Check your collection names in the setup file.
+                """)
+        return
+    extractor.transfer(collections)
+
+
 class TransferThread(Thread):
     new = False
 
@@ -27,16 +39,6 @@ class TransferThread(Thread):
         # collections which will be transferred
         setup_pg = self.settings["postgres"]
 
-        collections = cp.config_collection_names(self.coll_config)
-
-        if collections is None:
-            logger.error(
-                """
-                [TRANSFER] No collections found.
-                Check your collection names in the setup file.
-                """)
-            return
-
         start_date_time = datetime.utcnow()
 
         tailing_cmd = self.settings["tailing_from"]
@@ -51,9 +53,7 @@ class TransferThread(Thread):
                 schema.reset(self.pg, setup_pg["schema_name"])
 
             transfer_info.create_stat_table(self.pg, setup_pg["schema_name"])
-
-            # Skip collection transfer if started in tailing mode.
-            self.extractor.transfer(collections)
+            start(self.extractor, self.coll_config)
         self.tail(start_date_time)
 
     def stop(self):
