@@ -47,22 +47,6 @@ def get_type_pg(item):
     return item, pg_type
 
 
-def rename(name_old, type_orig, type_new):
-    name_new = None
-    if type_equal(type_orig, type_new) is True:
-        return name_new
-    elif type_new == 'text':
-        if type_orig not in ['character', 'text']:
-            name_new = "%s_t" % name_old
-    elif type_new == 'float':
-        name_new = "%s_f" % name_old
-    elif type_new == 'boolean':
-        name_new = "%s_b" % name_old
-    elif type_new == 'integer':
-        name_new = "%s_i" % name_old
-    return name_new
-
-
 def type_equal(old, new):
     equal_char = ('char' in old and 'char' in new)
     equal_array = (old == 'array' and new == 'jsonb')
