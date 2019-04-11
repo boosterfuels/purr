@@ -12,27 +12,27 @@ def init_values(attrs):
     return attrs
 
 
-def set_values(attrs, doc, _extra_props=None):
+def set_values(attr_details, doc, _extra_props=None):
     """
     Casts values for a whole document
     """
     for key, field_value in doc.items():
-        keys_cm = list(attrs.keys())
+        keys_cm = list(attr_details.keys())
         if key in keys_cm:
-            field_type = attrs[key]["type_cm"]
+            field_type = attr_details[key]["type_cm"]
             value = unnester.cast(
                 field_value, field_type)
             if value == 'undefined' and _extra_props is not None:
-                _extra_props.update({key_doc: field_value})
+                _extra_props.update({key: field_value})
             else:
-                attrs[key]["value"] = value
+                attr_details[key]["value"] = value
         else:
             if _extra_props is not None:
                 _extra_props.update({key: field_value})
     if _extra_props is not None:
-        return attrs, _extra_props
+        return attr_details, _extra_props
     else:
-        return attrs
+        return attr_details
 
 
 def prepare_row_for_insert(attrs, doc, include_extra_props=None):
@@ -79,7 +79,7 @@ class Relation():
         return self.created
 
     def insert_bulk(self, docs, attrs,
-                    include_extra_props=True, unset=[]):
+                    include_extra_props=True):
         """
         Transforms document and inserts it into the corresponding table.
         Parameters
@@ -105,7 +105,7 @@ class Relation():
                             self.relation_name, attrs_pg, result)
 
     def insert_bulk_no_extra_props(self, docs, attrs,
-                                   include_extra_props=True, unset=[]):
+                                   include_extra_props=True):
         """
         Transforms document and inserts it into the corresponding table.
         Parameters
@@ -122,7 +122,7 @@ class Relation():
             docs = [docs]
         for doc in docs:
             attrs = init_values(attrs)
-            (attrs) = set_values(attrs, doc)
+            attrs = set_values(attrs, doc)
 
             if len(docs) > 1:
                 attrs_pg = [v["name_cm"] for k, v in attrs.items()]
@@ -132,9 +132,6 @@ class Relation():
                             for k, v in attrs.items() if k in doc.keys()]
                 values = [v["value"]
                           for k, v in attrs.items() if k in doc.keys()]
-                for u in unset:
-                    attrs_pg.append(attrs[u]["name_cm"])
-                    values.append(None)
             result.append(tuple(values))
 
         if self.created is True or len(docs) == 1:
@@ -147,16 +144,13 @@ class Relation():
     def insert_bulk_no_extra_props_tailed(self,
                                           docs,
                                           attrs,
-                                          include_extra_props=True,
-                                          unset=[]):
+                                          include_extra_props=True):
         """
         Transforms document and inserts it into the corresponding table.
         Parameters
         ----------
         docs : dict
               the documents we want to insert
-         unset: string[]
-              list of fields to unset
         TODO
         CHECK if self.column_names and self.column_types are still the same
         """
@@ -177,9 +171,6 @@ class Relation():
                             for k, v in attrs.items() if k in doc.keys()]
                 values = [v["value"]
                           for k, v in attrs.items() if k in doc.keys()]
-                for u in unset:
-                    attrs_pg.append(attrs[u]["name_cm"])
-                    values.append(None)
             result.append(tuple(values))
 
         if self.created is True or len(docs) == 1:

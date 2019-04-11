@@ -24,6 +24,9 @@ def cast(value, column_type):
     if value is None:
         return new_value
 
+    if value == '$unset':
+        return value
+
     column_type = column_type.lower()
 
     if column_type == 'text':

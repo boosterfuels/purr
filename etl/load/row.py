@@ -114,7 +114,7 @@ def upsert_bulk(db, schema, table, attrs, rows):
 
     Example
     -------
-    upsert_bulk(db, 'public', 'audience', [attributes], [values])
+    upsert_bulk(db, 'public', 'employee', [attributes], [values])
     Note: command is different for Postgres v10+:
     cmd = "INSERT INTO %s.%s (%s) VALUES (%s) ON CONFLICT ON CONSTRAINT %s
     DO UPDATE SET (%s) = ROW(%s);"
@@ -158,12 +158,15 @@ def upsert_bulk_tail(db, schema, table, attrs, rows):
     """
     Inserts a row defined by attributes and values into a specific
     table of the PG database.
+    Checks for values that are unset during tailing.
 
     Parameters
     ----------
-    table_name : string
-    attrs :     string[]
-    values :    string[]
+    db : object
+    schema : string
+    table : string
+    attrs : string[]
+    rows : string[]
 
     Returns
     -------
@@ -171,7 +174,7 @@ def upsert_bulk_tail(db, schema, table, attrs, rows):
 
     Example
     -------
-    insert('Audience', [attributes], [values])
+    upsert_bulk_tail(pg, 'public', 'employee', [attributes], [values])
     """
     try:
         for i in range(0, len(rows)):
@@ -179,7 +182,7 @@ def upsert_bulk_tail(db, schema, table, attrs, rows):
             values = []
             attrs_reduced = []
             for j in range(0, len(attrs)):
-                if row[j] == 'unset':
+                if row[j] == '$unset':
                     values.append(None)
                     attrs_reduced.append(attrs[j])
                 elif row[j] is not None:
@@ -265,7 +268,7 @@ def delete(db, schema, table_name, ids):
 
     Example
     -------
-    delete(db, schema, 'Audience', ObjectId("5acf593eed101e0c1266e32b"))
+    delete(db, 'public', 'employee', "5acf593eed101e0c1266e32b")
 
     """
     oids = "','".join(ids)

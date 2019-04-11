@@ -139,7 +139,8 @@ class Extractor():
                 )
 
             self.add_columns(source_persistent, added,
-                             name_coll, name_table, fields_new, coll_map_cur[i])
+                             name_coll, name_table, fields_new,
+                             coll_map_cur[i])
 
             self.remove_columns(source_persistent, removed,
                                 name_coll, name_table, fields_new)
@@ -330,7 +331,7 @@ class Extractor():
                     i+1, coll))
             i += 1
 
-    def insert_multiple(self, docs, r, coll, unset=[]):
+    def insert_multiple(self, docs, r, coll):
         '''
         Transfers multiple documents with different fields
         (not whole collections).
@@ -377,10 +378,10 @@ class Extractor():
         try:
             if self.include_extra_props is True:
                 r.insert_bulk(
-                    docs, self.attr_details, self.include_extra_props, unset)
+                    docs, self.attr_details, self.include_extra_props)
             else:
                 r.insert_bulk_no_extra_props_tailed(
-                    docs, self.attr_details, self.include_extra_props, unset)
+                    docs, self.attr_details, self.include_extra_props)
         except Exception as ex:
             logger.error("""
             %s Transferring to %s was unsuccessful.
@@ -391,7 +392,7 @@ class Extractor():
                 r.relation_name, ex))
             logger.error("%s\n" % docs)
 
-    def update_multiple(self, docs, r, coll, unset=[]):
+    def update_multiple(self, docs, r, coll):
         '''
         Upserts multiple documents with different fields.
         Parameters
@@ -402,8 +403,6 @@ class Extractor():
             relation in PG
         coll : string
              : collection name
-        unset : list
-                list of fields that must be removed
         Returns
         -------
         -
@@ -413,7 +412,6 @@ class Extractor():
         Example
         -------
         '''
-
         (attrs_new, attrs_original, types, relation_name,
          type_x_props_pg) = cp.config_fields(self.coll_def, coll)
         if types == []:
@@ -432,10 +430,10 @@ class Extractor():
         try:
             if self.include_extra_props is True:
                 r.insert_bulk(
-                    docs, self.attr_details, self.include_extra_props, unset)
+                    docs, self.attr_details, self.include_extra_props)
             else:
                 r.insert_bulk_no_extra_props_tailed(
-                    docs, self.attr_details, self.include_extra_props, unset)
+                    docs, self.attr_details, self.include_extra_props)
         except Exception as ex:
             logger.error("""
             %s Transferring to %s was unsuccessful. Exception: %s
@@ -457,7 +455,11 @@ class Extractor():
         Returns
         -------
         attr_details : list
-                      : attribute details with extra property
+                      : details for mapping each field
+                      - name of the field (in mongodb)
+                      - name in the collection map (for pg)
+                      - type in the collection map (for pg)
+                      - default value
 
         Parameters
         ----------
@@ -492,6 +494,9 @@ class Extractor():
             details["type_cm"] = types_cm[i]
             details["value"] = None
             self.attr_details[attrs_mdb[i]] = details
+        import pprint
+        print("ATTRS")
+        pprint.pprint(self.attr_details)
         return self.attr_details
 
     def adjust_columns(self, coll):

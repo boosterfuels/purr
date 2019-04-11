@@ -15,6 +15,42 @@ DELETE = "d"
 CURR_FILE = "[TAILER]"
 
 
+def prepare_docs_for_update(docs):
+    docs_useful = []
+    docs_id = []
+    for doc in docs:
+        already_updating = False
+        unset = {}
+        doc_useful = {}
+        temp = doc["o"]
+
+        if "o2" in doc.keys():
+            if "_id" in doc["o2"].keys():
+                doc_useful["_id"] = str(doc["o2"]["_id"])
+                if (doc_useful["_id"] in docs_id):
+                    already_updating = True
+                else:
+                    docs_id.append(str(doc_useful["_id"]))
+
+        if "$set" in temp.keys():
+            doc_useful.update(temp["$set"])
+        if "$unset" in temp.keys():
+            for k, v in temp["$unset"].items():
+                unset[k] = '$unset'
+            doc_useful.update(unset)
+
+        # merging values with the same ID because there cannot be
+        # multiple updates of the same row in one statement
+        if already_updating is True:
+            for i in range(0, len(docs_useful)):
+                if docs_useful[i]["_id"] == doc_useful["_id"]:
+                    docs_useful[i] = dict(docs_useful[i], **doc_useful)
+                    break
+        else:
+            docs_useful.append(doc_useful)
+    return docs_useful
+
+
 class Tailer(extractor.Extractor):
     """
     Class for extracting data from the oplog.
@@ -79,36 +115,8 @@ class Tailer(extractor.Extractor):
         elif oper == UPDATE:
             logger.info("%s Updating %s documents" % (CURR_FILE, len(docs)))
             r.created = True
-            docs_id = []
-            for doc in docs:
-                already_updating = False
-                unset = {}
-                doc_useful = {}
-                temp = doc["o"]
 
-                if "o2" in doc.keys():
-                    if "_id" in doc["o2"].keys():
-                        doc_useful["_id"] = str(doc["o2"]["_id"])
-                        if (doc_useful["_id"] in docs_id):
-                            already_updating = True
-                        else:
-                            docs_id.append(str(doc_useful["_id"]))
-
-                if "$set" in temp.keys():
-                    doc_useful.update(temp["$set"])
-                if "$unset" in temp.keys():
-                    for k, v in temp["$unset"].items():
-                        unset[k] = 'unset'
-                    doc_useful.update(unset)
-                # merging values with the same ID because there cannot be
-                # multiple updates of the same row in one statement
-                if already_updating is True:
-                    for i in range(0, len(docs_useful)):
-                        if docs_useful[i]["_id"] == doc_useful["_id"]:
-                            docs_useful[i] = dict(docs_useful[i], **doc_useful)
-                            break
-                else:
-                    docs_useful.append(doc_useful)
+            docs_useful = prepare_docs_for_update(docs)
             try:
                 super().update_multiple(docs_useful, r, docs[0]["coll_name"])
             except Exception as ex:
