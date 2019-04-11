@@ -69,8 +69,6 @@ class Relation():
     def __init__(self, pg, schema, relation, created=False):
         """Constructor for Relation"""
         self.relation_name = relation
-        self.column_names = []
-        self.column_types = []
         self.created = created
         self.db = pg
         self.schema = schema
@@ -88,7 +86,6 @@ class Relation():
         doc : dict
               the document we want to insert
         TODO add unset
-        CHECK if self.column_names and self.column_types are still the same
         """
         # This is needed because
         # sometimes there is no value for attributes (null)
@@ -116,8 +113,6 @@ class Relation():
               the documents we want to insert
          unset: string[]
               list of fields to unset
-        TODO
-        CHECK if self.column_names and self.column_types are still the same
         """
         # This is needed because
         # sometimes there is no value for attributes (null)
@@ -126,7 +121,6 @@ class Relation():
             docs = [docs]
         for doc in docs:
             attrs = init_values(attrs)
-
             (attrs) = set_values(attrs, doc)
 
             if len(docs) > 1:
