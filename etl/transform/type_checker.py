@@ -39,7 +39,7 @@ def get_type_pg(item):
     elif item_type is list:
         pg_type = 'jsonb'
 
-    elif item_type is type(None):
+    elif isinstance(item_type, type(None)):
         item = 'null'
     else:
         pg_type = 'jsonb'

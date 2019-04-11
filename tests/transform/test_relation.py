@@ -1,13 +1,6 @@
-import psycopg2
-import pymongo
-from etl.extract import extractor, extractor
-from etl.extract import collection
 from etl.transform import relation
-import pytest
 import unittest
-from bson import ObjectId
 from tests.meta import mock
-from etl.extract import collection_map as cm
 import copy
 
 mongo = mock.mongo
@@ -61,7 +54,7 @@ class TestRelation(unittest.TestCase):
         result = relation.is_schema_changed(
             attrs_pg, types_pg, attrs_cm, types_cm)
         print(attrs_pg, types_pg, attrs_cm, types_cm)
-        assert result == False
+        assert result is False
 
     def test_is_schema_changed_cm_new_column(self):
         attrs_pg = mock.attrs_company
@@ -73,7 +66,7 @@ class TestRelation(unittest.TestCase):
         result = relation.is_schema_changed(
             attrs_pg, types_pg, attrs_cm, types_cm)
         print(attrs_pg, types_pg, attrs_cm, types_cm)
-        assert result == True
+        assert result is True
 
     def test_is_schema_changed_pg_new_column(self):
         attrs_cm = mock.attrs_company
@@ -85,7 +78,7 @@ class TestRelation(unittest.TestCase):
         result = relation.is_schema_changed(
             attrs_pg, types_pg, attrs_cm, types_cm)
         print(attrs_pg, types_pg, attrs_cm, types_cm)
-        assert result == True
+        assert result is True
 
     def test_is_schema_changed_cm_removed_column(self):
         attrs_pg = mock.attrs_company
@@ -97,7 +90,7 @@ class TestRelation(unittest.TestCase):
         result = relation.is_schema_changed(
             attrs_pg, types_pg, attrs_cm, types_cm)
         print(attrs_pg, types_pg, attrs_cm, types_cm)
-        assert result == True
+        assert result is True
 
     def test_is_schema_changed_pg_removed_column(self):
         attrs_cm = mock.attrs_company
@@ -109,7 +102,7 @@ class TestRelation(unittest.TestCase):
         result = relation.is_schema_changed(
             attrs_pg, types_pg, attrs_cm, types_cm)
         print(attrs_pg, types_pg, attrs_cm, types_cm)
-        assert result == True
+        assert result is True
 
     def test_is_schema_changed_pg_updated_name(self):
         attrs_cm = mock.attrs_company
@@ -120,7 +113,7 @@ class TestRelation(unittest.TestCase):
         result = relation.is_schema_changed(
             attrs_pg, types_pg, attrs_cm, types_cm)
         print(attrs_pg, types_pg, attrs_cm, types_cm)
-        assert result == True
+        assert result is True
 
     def test_is_schema_changed_pg_updated_type(self):
         attrs_cm = mock.attrs_company
@@ -131,4 +124,4 @@ class TestRelation(unittest.TestCase):
         result = relation.is_schema_changed(
             attrs_pg, types_pg, attrs_cm, types_cm)
         print(attrs_pg, types_pg, attrs_cm, types_cm)
-        assert result == True
+        assert result is True

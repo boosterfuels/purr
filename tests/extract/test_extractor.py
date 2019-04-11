@@ -1,10 +1,6 @@
-import psycopg2
-import pymongo
-from etl.extract import extractor, extractor
 from etl.transform import relation
-import pytest
+from etl.extract import extractor
 import unittest
-from bson import ObjectId
 from tests.meta import mock
 from etl.extract import collection_map as cm
 import copy
@@ -31,7 +27,12 @@ def create_and_populate_company_pg():
     cursor.execute(query["table_create_company"])
 
     cursor.execute(
-        """insert into company(id, active, domains, signup_code) values('12345', 'true', '{"domain": ["pelotonland.com"]}', 'xfLfdsFD3S')""")
+        """insert into company(
+            id, active, domains, signup_code
+            ) values(
+                '12345', 'true',
+                '{"domain": ["pelotonland.com"]}',
+                'xfLfdsFD3S')""")
 
     cursor.close()
 
@@ -59,7 +60,7 @@ class TestExtractor(unittest.TestCase):
         cursor = pg.conn.cursor()
         cursor.execute(query["db_exists"])
         db_exists = cursor.fetchone()
-        assert db_exists[0] == True
+        assert db_exists[0] is True
         cursor.close()
 
     def test_update_table_def_change_type(self):
@@ -84,8 +85,11 @@ class TestExtractor(unittest.TestCase):
         assert res_db == res_expected
 
     def test_update_table_def_add_column(self):
-        res_expected = [('active', 'boolean'), ('domains', 'jsonb'),
-                        ('id', 'text'), ('signup_code', 'text'), ('updated_at', 'timestamp without time zone')]
+        res_expected = [
+            ('active', 'boolean'), ('domains', 'jsonb'),
+            ('id', 'text'), ('signup_code', 'text'),
+            ('updated_at', 'timestamp without time zone')
+        ]
 
         create_and_populate_company_pg()
         cursor = pg.conn.cursor()
@@ -383,7 +387,6 @@ class TestExtractor(unittest.TestCase):
         create_and_populate_company_mdb()
         cm.create_table(pg, mock.coll_config)
 
-        unset = []
         coll = mock.coll_names[0]
         rel = mock.rel_names[0]
         docs = []
@@ -442,10 +445,9 @@ class TestExtractor(unittest.TestCase):
         create_and_populate_company_mdb()
         cm.create_table(pg, mock.coll_config)
 
-        unset = []
         coll = mock.coll_names[0]
         rel = mock.rel_names[0]
-        docs = [] 
+        docs = []
         mock_updated = mock.data_mdb_company_updated
         for doc in mongo[coll].find():
             docs.append({

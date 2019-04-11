@@ -1,14 +1,6 @@
-import psycopg2
-import pymongo
-from etl.extract import extractor, extractor
 from etl.load import row
-from etl.transform import relation
-import pytest
 import unittest
-from bson import ObjectId
 from tests.meta import mock
-from etl.extract import collection_map as cm
-import copy
 
 pg = mock.pg
 query = mock.query
@@ -24,7 +16,10 @@ def reset_dataset_pg():
     cursor.execute(query["table_drop_employee"])
     cursor.execute(query["table_create_employee"])
     cursor.execute(
-        """insert into company(id, active, domains, signup_code) values('12345', 'true', '{"domain": ["pelotonland.com"]}', 'xfLfdsFD3S')""")
+        """insert into company(id, active, domains, signup_code)
+            values(
+            '12345', 'true', '{"domain": ["pelotonland.com"]}', 'xfLfdsFD3S'
+            )""")
     cursor.close()
 
 
