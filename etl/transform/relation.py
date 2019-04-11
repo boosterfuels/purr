@@ -16,18 +16,19 @@ def set_values(attrs, doc, _extra_props=None):
     """
     Casts values for a whole document
     """
-    for key_doc, value_doc in doc.items():
+    for key, field_value in doc.items():
         keys_cm = list(attrs.keys())
-        if key_doc in keys_cm:
+        if key in keys_cm:
+            field_type = attrs[key]["type_cm"]
             value = unnester.cast(
-                attrs[key_doc]["type_cm"], value_doc)
+                field_value, field_type)
             if value == 'undefined' and _extra_props is not None:
-                _extra_props.update({key_doc: value_doc})
+                _extra_props.update({key_doc: field_value})
             else:
-                attrs[key_doc]["value"] = value
+                attrs[key]["value"] = value
         else:
             if _extra_props is not None:
-                _extra_props.update({key_doc: value_doc})
+                _extra_props.update({key: field_value})
     if _extra_props is not None:
         return attrs, _extra_props
     else:
@@ -41,7 +42,7 @@ def prepare_row_for_insert(attrs, doc, include_extra_props=None):
     (attrs, _extra_props) = set_values(attrs, doc, _extra_props)
 
     if include_extra_props is True:
-        _extra_props = unnester.cast('jsonb', _extra_props)
+        _extra_props = unnester.cast(_extra_props, 'jsonb')
         attrs["extraProps"]["value"] = _extra_props
 
     attrs_pg = [v["name_cm"]

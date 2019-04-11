@@ -1,21 +1,23 @@
 import json
 
 
-def cast(column_type, value):
+def cast(value, column_type):
     '''
+    column_type: string
+    value: string
     Casts value based on required column type in collections.yml.
     When serializing ObjectId and datetime, a string is returned
     instead of objects with $oid and $date keys.
     Example:
-      { _id: { $oid: "56ac26cc05b37b4e1a4d2c22" } }
-      { _id: "56ac26cc05b37b4e1a4d2c22" }
+      { _id: { $oid: "56ac26cc05b37b4e1a4d2222" } }
+      { _id: "56ac26cc05b37b4e1a4d2222" }
 
     Parameters:
     -----------
-    column_type : string
-                  type of column
     value       : anything
                   value to cast
+    column_type : string
+                  type of column
     '''
     new_value = None
 
