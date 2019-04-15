@@ -512,11 +512,11 @@ class TestExtractor(unittest.TestCase):
 
         attribute_details = ex.prepare_attr_details(
             attrs, fields, types, type_extra_props_pg)
-        import pprint
+
         print("RESULT")
-        pprint.pprint(attribute_details)
+        print(attribute_details)
         print("MOCKED")
-        pprint.pprint(mock.attr_details)
+        print(mock.attr_details)
         del ex
         assert mock.attr_details == attribute_details
 
@@ -539,11 +539,11 @@ class TestExtractor(unittest.TestCase):
 
         attribute_details = ex.prepare_attr_details(
             attrs, fields, types)
-        import pprint
+
         print("RESULT")
-        pprint.pprint(attribute_details)
+        print(attribute_details)
         print("MOCKED")
-        pprint.pprint(mock.attr_details)
+        print(mock.attr_details)
         del ex
         mocked = copy.deepcopy(mock.attr_details)
         del mocked["extraProps"]

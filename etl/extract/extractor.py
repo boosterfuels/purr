@@ -494,9 +494,6 @@ class Extractor():
             details["type_cm"] = types_cm[i]
             details["value"] = None
             self.attr_details[attrs_mdb[i]] = details
-        import pprint
-        print("ATTRS")
-        pprint.pprint(self.attr_details)
         return self.attr_details
 
     def adjust_columns(self, coll):
