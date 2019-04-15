@@ -285,7 +285,7 @@ class Extractor():
 
         # Start transferring docs
         nr_of_docs = docs.count()
-        nr_of_transferred = 1000
+        nr_of_transferred = 500
         i = 0
         transferring = []
         for doc in docs:
@@ -323,7 +323,7 @@ class Extractor():
                 logger.error("""%s Transfer unsuccessful. %s""" % (
                     CURR_FILE,
                     ex))
-            if (i+1) % (nr_of_transferred*10) == 0:
+            if (i+1) % (nr_of_transferred) == 0:
                 logger.info("""
                    %s Transferred %d from collection %s
                    """ % (
