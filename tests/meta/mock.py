@@ -4,12 +4,12 @@ from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
 
 # ------ CONNECTION STRINGS ------
-conn_str_mongo = 'mongodb://localhost:27017'
-conn_str_pg = 'postgres://127.0.0.1:5432'
-
 
 NAME_DB = 'test_purrito'
 db_name_mongo = db_name_pg = NAME_DB
+
+conn_str_mongo = 'mongodb://localhost:27017'
+conn_str_pg = 'postgres://127.0.0.1:5432/%s' % NAME_DB
 
 # ------ CONNECTION ------
 
@@ -36,6 +36,8 @@ settings = {
     'typecheck_auto': None,
     'include_extra_props': None
 }
+
+schema = setup_pg["schema_name"]
 
 # --- RELATION INFORMATION ---
 
