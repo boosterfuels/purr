@@ -148,7 +148,11 @@ def upsert_bulk(db, schema, table, attrs, rows):
         db.cur.executemany(cmd, rows)
         db.conn.commit()
     except Exception as ex:
-        logger.error("[ROW] UPSERT failed: %s" % ex)
+        logger.error("[ROW] Relation: %s.%s; UPSERT failed: %s" %
+                     (schema, table, ex))
+        ids = [x[0] for x in values]
+        logger.error("[ROW] IDs: %s" % "".join(ids))
+
         if len(rows) <= NR_OF_ROWS_TO_DISPLAY:
             logger.error("[ROW] CMD:\n %s" % cmd, db.cur.mogrify())
             logger.error("[ROW] VALUES:\n %s" % rows)
