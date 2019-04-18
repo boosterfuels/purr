@@ -323,12 +323,12 @@ class Extractor():
                 logger.error("""%s Transfer unsuccessful. %s""" % (
                     CURR_FILE,
                     ex))
-            if (i+1) % (nr_of_transferred) == 0:
-                logger.info("""
-                   %s Transferred %d from collection %s
-                   """ % (
+            if (i+1) % (nr_of_transferred * 10) == 0:
+                logger.info("""%s %d/%d (%s)""" % (
                     CURR_FILE,
-                    i+1, coll))
+                    i+1,
+                    nr_of_docs,
+                    coll))
             i += 1
 
     def insert_multiple(self, docs, r, coll):

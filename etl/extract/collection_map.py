@@ -73,6 +73,7 @@ def create_table(db, coll_map, schema='public'):
     types = ["integer", "text", "text", "jsonb[]", "timestamp", "text"]
 
     try:
+        # TODO: make this fucntion accept string and list 
         table.drop(db, schema, [table_name])
         table.create(db, schema, table_name, attrs, types)
         logger.info("[TRANSFER INFO] Created table %s.%s." %
