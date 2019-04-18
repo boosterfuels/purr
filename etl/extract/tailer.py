@@ -96,12 +96,14 @@ class Tailer(extractor.Extractor):
         collection during tailing to Postgres
         """
         docs_useful = []
+        ids_log = []
 
         if oper == INSERT:
             logger.info("%s Inserting %s documents" % (CURR_FILE, len(docs)))
 
             # TODO: check extra props
             for doc in docs:
+                ids_log.append(str(doc["o"]["_id"]))
                 docs_useful.append(doc["o"])
             try:
                 super().insert_multiple(docs_useful, r, docs[0]["coll_name"])
@@ -117,6 +119,8 @@ class Tailer(extractor.Extractor):
             r.created = True
 
             docs_useful = prepare_docs_for_update(docs)
+            for doc in docs_useful:
+                ids_log.append(str(doc["_id"]))
             try:
                 super().update_multiple(docs_useful, r, docs[0]["coll_name"])
             except Exception as ex:
@@ -129,12 +133,24 @@ class Tailer(extractor.Extractor):
             ids = []
             for doc in docs:
                 ids.append(doc["o"])
+                ids_log.append(doc["o"]["id"])
             try:
                 r.delete(ids)
             except Exception as ex:
                 logger.info(
                     """%s Deleting multiple documents failed: %s.
                     Details: %s""" % (CURR_FILE, docs, ex))
+
+        log_entries = []
+        ts = round(time.time())
+        for id in ids_log:
+            row = [oper, r.relation_name, id, ts]
+            log_row = tuple(row)
+            log_entries.append(log_row)
+        try:
+            transfer_info.log_rows(self.pg, self.schema, log_entries)
+        except Exception as ex:
+            logger.error(ex)
 
     def transform_and_load_many(self, docs_details):
         """
@@ -276,6 +292,7 @@ class Tailer(extractor.Extractor):
                             op = doc["op"]
                             if op != "n" and self.coll_in_map(col) is True:
                                 docs.append(doc)
+                                print(doc["ns"])
                         time.sleep(1)
                         seconds = datetime.utcnow().second
                         if (seconds > SECONDS_BETWEEN_FLUSHES/3 and len(docs)):

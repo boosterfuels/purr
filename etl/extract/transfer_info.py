@@ -4,29 +4,29 @@ from etl.load import table, row
 from etl.monitor import logger
 
 
-def create_stat_table(db, schema):
+def create_stat_table(db, schema='public'):
     """
-  Adds primary key to a PostgreSQL table.
+    Creates a table that holds the timestamp of the
+    latest successfully inserted item.
+    Parameters
+    ----------
 
-  Parameters
-  ----------
+    Returns
+    -------
+    -
 
-  Returns
-  -------
-  -
+    Example
+    -------
+    create_stat_table(pg, 'purr')
 
-  Example
-  -------
-  create_stat_table(pg, 'purr')
-
-  """
+    """
     table_name = "purr_info"
     attrs = ["latest_successful_ts"]
     types = ["TEXT"]
     values = [int(time.time())]
     try:
         table.create(db, schema, table_name, attrs, types)
-        ts = get_latest_successful_ts(db, 'public')
+        ts = get_latest_successful_ts(db, schema)
         if len(ts) == 0:
             row.insert(db, schema, table_name, attrs, values)
         logger.info("[TRANSFER INFO] Created table %s." % (table_name))
@@ -35,7 +35,7 @@ def create_stat_table(db, schema):
             "[TRANSFER_INFO] Failed to create table %s: %s" % (table_name, ex))
 
 
-def get_latest_successful_ts(db, schema):
+def get_latest_successful_ts(db, schema='public'):
     """
   Get the timestamp of the latest successful transfer.
 
@@ -75,3 +75,60 @@ def update_latest_successful_ts(db, schema, dt):
             of the latest successful transfer: %s"""
             % (ex)
         )
+
+
+def create_log_table(db, schema='public'):
+    """
+    Logs the operation, relation name, object id and
+    timestamp for each entry of the oplog.
+
+    Parameters
+    ----------
+    db: connection obj
+    schema: name of the schema in Postgres
+    Returns
+    -------
+    -
+
+    Example
+    -------
+    create_log_table(pg, 'purr')
+
+    """
+    table_name = "purr_log"
+    attrs = ["operation", "relation", "id", "ts"]
+    types = ["TEXT", "TEXT", "TEXT", "INTEGER"]
+    values = [int(time.time())]
+    try:
+        table.create(db, schema, table_name, attrs, types)
+        logger.info("[TRANSFER INFO] Created table %s." % (table_name))
+    except Exception as ex:
+        logger.error(
+            "[TRANSFER_INFO] Failed to create table %s: %s" % (table_name, ex))
+
+
+def log_rows(db, schema, values):
+    """
+    Holds the operation, relation name, object id and
+    timestamp for each entry of the oplog.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+    -
+
+    Example
+    -------
+    create_log_table(pg, 'purr')
+
+    """
+    table_name = "purr_log"
+    attrs = ["operation", "relation", "id", "ts"]
+    try:
+        row.insert_bulk(db, schema, table_name, attrs, values)
+    except Exception as ex:
+        logger.error(
+            "[TRANSFER_INFO] Failed to insert logs into table %s: %s"
+            % (table_name, ex))
