@@ -14,8 +14,8 @@ class TestTailer(unittest.TestCase):
                  'op': 'u'}]
         mocked = [{'_id': '5caf5998a54d758375bd9928',
                    'active': True, 'name': True}]
-        docs_useful = tailer.prepare_docs_for_update(docs)
-        assert mocked == docs_useful
+        (docs_useful, merged) = tailer.prepare_docs_for_update(docs)
+        assert mocked == docs_useful and merged is False
 
     def test_prepare_docs_for_update_multiple_merged(self):
         docs = [{'coll_name': 'Company',
@@ -30,5 +30,6 @@ class TestTailer(unittest.TestCase):
                  'op': 'u'}]
         mocked = [{'_id': '5caf5998a54d758375bd9928',
                    'active': '$unset', 'name': 'stuffy'}]
-        docs_useful = tailer.prepare_docs_for_update(docs)
-        assert mocked == docs_useful
+        (docs_useful, merged) = tailer.prepare_docs_for_update(docs)
+
+        assert mocked == docs_useful and merged is True
