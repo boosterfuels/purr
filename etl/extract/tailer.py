@@ -19,7 +19,10 @@ def prepare_docs_for_update(docs):
     docs_useful = []
     docs_id = []
     for doc in docs:
-        already_updating = False
+        # It is possible that multiple versions of one document
+        # exist among these documents. they must be merged so they
+        # can be sent Postgres together as one entry.
+        merge_similar = False
         unset = {}
         doc_useful = {}
         temp = doc["o"]
@@ -28,7 +31,7 @@ def prepare_docs_for_update(docs):
             if "_id" in doc["o2"].keys():
                 doc_useful["_id"] = str(doc["o2"]["_id"])
                 if (doc_useful["_id"] in docs_id):
-                    already_updating = True
+                    merge_similar = True
                 else:
                     docs_id.append(str(doc_useful["_id"]))
 
@@ -41,14 +44,14 @@ def prepare_docs_for_update(docs):
 
         # merging values with the same ID because there cannot be
         # multiple updates of the same row in one statement
-        if already_updating is True:
+        if merge_similar is True:
             for i in range(0, len(docs_useful)):
                 if docs_useful[i]["_id"] == doc_useful["_id"]:
                     docs_useful[i] = dict(docs_useful[i], **doc_useful)
                     break
         else:
             docs_useful.append(doc_useful)
-    return docs_useful
+    return docs_useful, merge_similar
 
 
 class Tailer(extractor.Extractor):
@@ -97,6 +100,7 @@ class Tailer(extractor.Extractor):
         """
         docs_useful = []
         ids_log = []
+        merged = False
 
         if oper == INSERT:
             logger.info("%s Inserting %s documents" % (CURR_FILE, len(docs)))
@@ -118,7 +122,7 @@ class Tailer(extractor.Extractor):
             logger.info("%s Updating %s documents" % (CURR_FILE, len(docs)))
             r.created = True
 
-            docs_useful = prepare_docs_for_update(docs)
+            (docs_useful, merged) = prepare_docs_for_update(docs)
             for doc in docs_useful:
                 ids_log.append(str(doc["_id"]))
             try:
@@ -144,7 +148,7 @@ class Tailer(extractor.Extractor):
         log_entries = []
         ts = round(time.time())
         for id in ids_log:
-            row = [oper, r.relation_name, id, ts]
+            row = [oper, r.relation_name, id, ts, merged]
             log_row = tuple(row)
             log_entries.append(log_row)
         try:

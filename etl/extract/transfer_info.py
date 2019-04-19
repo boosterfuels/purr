@@ -96,9 +96,9 @@ def create_log_table(db, schema='public'):
 
     """
     table_name = "purr_log"
-    attrs = ["operation", "relation", "id", "ts"]
+    attrs = ["operation", "relation", "id", "ts", "merged"]
     pks = ["id", "ts"]
-    types = ["TEXT", "TEXT", "TEXT", "INTEGER"]
+    types = ["TEXT", "TEXT", "TEXT", "INTEGER", "BOOLEAN"]
     values = [int(time.time())]
     try:
         table.create(db, schema, table_name, attrs, types, pks)
@@ -126,7 +126,7 @@ def log_rows(db, schema, values):
 
     """
     table_name = "purr_log"
-    attrs = ["operation", "relation", "id", "ts"]
+    attrs = ["operation", "relation", "id", "ts", "merged"]
     try:
         row.insert_bulk(db, schema, table_name, attrs, values)
     except Exception as ex:
