@@ -21,9 +21,9 @@ def create_stat_table(db, schema='public'):
 
     """
     table_name = "purr_info"
-    attrs = ["latest_successful_ts"]
-    types = ["TEXT"]
-    values = [int(time.time())]
+    attrs = ["id", "relation", "latest_successful_ts"]
+    types = ["INTEGER", "TEXT", "TEXT"]
+    values = [0, None, int(time.time())]
     try:
         table.create(db, schema, table_name, attrs, types)
         ts = get_latest_successful_ts(db, schema)
@@ -101,6 +101,7 @@ def create_log_table(db, schema='public'):
     types = ["TEXT", "TEXT", "TEXT", "INTEGER", "BOOLEAN"]
     values = [int(time.time())]
     try:
+        table.drop(db, schema, [table_name])
         table.create(db, schema, table_name, attrs, types, pks)
         logger.info("[TRANSFER INFO] Created table %s." % (table_name))
     except Exception as ex:

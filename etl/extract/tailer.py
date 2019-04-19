@@ -296,7 +296,6 @@ class Tailer(extractor.Extractor):
                             op = doc["op"]
                             if op != "n" and self.coll_in_map(col) is True:
                                 docs.append(doc)
-                                print(doc["ns"])
                         time.sleep(1)
                         seconds = datetime.utcnow().second
                         if (seconds > SECONDS_BETWEEN_FLUSHES/3 and len(docs)):

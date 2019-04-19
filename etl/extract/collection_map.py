@@ -97,7 +97,6 @@ def create_table(db, coll_map, schema='public'):
 def get_types(docs):
     types = {}
     for doc in docs:
-        print(doc)
         fields = []
         for k, v in doc.items():
             name_column = tc.snake_case(k)
