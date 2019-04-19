@@ -97,10 +97,11 @@ def create_log_table(db, schema='public'):
     """
     table_name = "purr_log"
     attrs = ["operation", "relation", "id", "ts"]
+    pks = ["id", "ts"]
     types = ["TEXT", "TEXT", "TEXT", "INTEGER"]
     values = [int(time.time())]
     try:
-        table.create(db, schema, table_name, attrs, types)
+        table.create(db, schema, table_name, attrs, types, pks)
         logger.info("[TRANSFER INFO] Created table %s." % (table_name))
     except Exception as ex:
         logger.error(
