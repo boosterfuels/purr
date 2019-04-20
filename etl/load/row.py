@@ -140,7 +140,7 @@ def upsert_bulk(db, schema, table, attrs, rows):
 
     cmd = """
     INSERT INTO %s.%s (%s) VALUES (%s) ON CONFLICT ON CONSTRAINT %s
-    DO UPDATE SET (%s) = (%s);
+    DO UPDATE SET (%s) = ROW(%s);
     """ % (
         schema, table.lower(), attrs, temp,
         constraint, attrs_reduced, excluded)
@@ -150,7 +150,7 @@ def upsert_bulk(db, schema, table, attrs, rows):
     except Exception as ex:
         logger.error("[ROW] Relation: %s.%s; UPSERT failed: %s" %
                      (schema, table, ex))
-        ids = [x[0] for x in values]
+        ids = [x[0] for x in rows]
         logger.error("[ROW] IDs: %s" % "".join(ids))
 
         if len(rows) <= NR_OF_ROWS_TO_DISPLAY:
