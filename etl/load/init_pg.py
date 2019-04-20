@@ -41,7 +41,7 @@ class PgConnection:
                 self.cur.execute(cmd, values)
             else:
                 self.cur.execute(cmd)
-                self.conn.commit()
+            self.conn.commit()
 
         except (psycopg2.InterfaceError, psycopg2.OperationalError):
             self.handle_interface_and_oper_error()
@@ -67,6 +67,19 @@ class PgConnection:
             logger.error(
                 """
                 %s Executing query with fetch failed.
+                Details: %s
+                """ % (CURR_FILE, ex))
+
+    def execute_many_cmd(self, cmd, values):
+        try:
+            self.cur.executemany(cmd, values)
+            self.conn.commit()
+        except (psycopg2.InterfaceError, psycopg2.OperationalError):
+            self.handle_interface_and_oper_error()
+        except Exception as ex:
+            logger.error(
+                """
+                %s Executing many failed.
                 Details: %s
                 """ % (CURR_FILE, ex))
 

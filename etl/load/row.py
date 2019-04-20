@@ -145,16 +145,15 @@ def upsert_bulk(db, schema, table, attrs, rows):
         schema, table.lower(), attrs, temp,
         constraint, attrs_reduced, excluded)
     try:
-        db.cur.executemany(cmd, rows)
-        db.conn.commit()
+        db.execute_many_cmd(cmd, rows)
     except Exception as ex:
         logger.error("[ROW] Relation: %s.%s; UPSERT failed: %s" %
                      (schema, table, ex))
         ids = [x[0] for x in rows]
-        logger.error("[ROW] IDs: %s" % "".join(ids))
+        logger.error("[ROW] IDs: %s" % ", ".join(ids))
 
         if len(rows) <= NR_OF_ROWS_TO_DISPLAY:
-            logger.error("[ROW] CMD:\n %s" % cmd, db.cur.mogrify())
+            logger.error("[ROW] CMD:\n %s" % cmd)
             logger.error("[ROW] VALUES:\n %s" % rows)
 
 
@@ -198,7 +197,6 @@ def upsert_bulk_tail(db, schema, table, attrs, rows):
     except Exception as ex:
         logger.error("[ROW] UPSERT failed when tailing: %s" % ex)
         logger.error("[ROW] VALUES: %s" % values)
-        raise SystemExit()
 
 
 def upsert_transfer_info(db, schema, table, attrs, row):
