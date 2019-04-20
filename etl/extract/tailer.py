@@ -146,7 +146,7 @@ class Tailer(extractor.Extractor):
                     Details: %s""" % (CURR_FILE, docs, ex))
 
         log_entries = []
-        ts = round(time.time())
+        ts = time.time()
         for id in ids_log:
             row = [oper, r.relation_name, id, ts, merged]
             log_row = tuple(row)
@@ -255,10 +255,10 @@ class Tailer(extractor.Extractor):
                         self.pg, self.schema)
                     latest_ts = int((list(res)[0])[0])
                     dt = latest_ts
-                    logger.info(
+                    logger.error(
                         """%s Stopping. Next time, bring more cookies."""
                         % (CURR_FILE))
-                    raise SystemExit()
+                    raise Exception
                 else:
                     loop = True
 
@@ -286,12 +286,15 @@ class Tailer(extractor.Extractor):
 
                 docs = []
                 while cursor.alive and self.pg.attempt_to_reconnect is False:
+                    print("cursor alive")
                     if self.stop_tailing is True:
                         logger.info(
                             "%s Meow" % (CURR_FILE))
                         break
                     try:
                         for doc in cursor:
+                            print(doc)
+
                             col = doc["ns"]
                             op = doc["op"]
                             if op != "n" and self.coll_in_map(col) is True:
@@ -309,6 +312,7 @@ class Tailer(extractor.Extractor):
                         logger.error("%s Cursor error %s" % (CURR_FILE, ex))
                 cursor.close()
                 continue
+            print("It was a loop")
         except StopIteration as e:
             logger.error("%s Tailing was stopped unexpectedly: %s" %
                          (CURR_FILE, e))
