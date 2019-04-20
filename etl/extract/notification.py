@@ -52,4 +52,3 @@ class NotificationThread(Thread):
                     self.new = True
         except Exception as ex:
             logger.error("[NOTIFICATION] Details: %s" % ex)
-            return
