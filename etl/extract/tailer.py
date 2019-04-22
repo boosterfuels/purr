@@ -8,6 +8,8 @@ from etl.transform import relation
 from etl.monitor import logger
 from etl.extract import extractor, transfer_info
 
+import pprint
+
 INSERT = "i"
 UPDATE = "u"
 DELETE = "d"
@@ -119,6 +121,7 @@ class Tailer(extractor.Extractor):
                     """ % (CURR_FILE, docs, ex))
 
         elif oper == UPDATE:
+            pprint.pprint(docs)
             logger.info("%s Updating %s documents" % (CURR_FILE, len(docs)))
             r.created = True
 
@@ -137,7 +140,7 @@ class Tailer(extractor.Extractor):
             ids = []
             for doc in docs:
                 ids.append(doc["o"])
-                ids_log.append(doc["o"]["id"])
+                ids_log.append(str(doc["o"]["_id"]))
             try:
                 r.delete(ids)
             except Exception as ex:
@@ -258,7 +261,7 @@ class Tailer(extractor.Extractor):
                     logger.error(
                         """%s Stopping. Next time, bring more cookies."""
                         % (CURR_FILE))
-                    raise SystemExit()
+                    raise SystemExit
                 else:
                     loop = True
 

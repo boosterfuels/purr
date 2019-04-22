@@ -171,9 +171,14 @@ class Relation():
                             for k, v in attrs.items() if k in doc.keys()]
                 values = [v["value"]
                           for k, v in attrs.items() if k in doc.keys()]
+            print("VALUES:\n", values)
             result.append(tuple(values))
 
         if self.created is True or len(docs) == 1:
+            print(self.relation_name)
+            print(attrs_pg)
+            print(result)
+
             row.upsert_bulk_tail(self.db, self.schema,
                                  self.relation_name, attrs_pg, result)
         else:
