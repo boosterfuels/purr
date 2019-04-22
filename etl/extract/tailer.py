@@ -121,7 +121,6 @@ class Tailer(extractor.Extractor):
                     """ % (CURR_FILE, docs, ex))
 
         elif oper == UPDATE:
-            pprint.pprint(docs)
             logger.info("%s Updating %s documents" % (CURR_FILE, len(docs)))
             r.created = True
 
@@ -298,8 +297,9 @@ class Tailer(extractor.Extractor):
                             col = doc["ns"]
                             op = doc["op"]
                             if op != "n" and self.coll_in_map(col) is True:
+                                logger.info("%s -> %s:" % (col, op))
+                                pprint.pprint(docs)
                                 docs.append(doc)
-                                logger.info("%s -> %s" % (col, op))
                         time.sleep(1)
                         seconds = datetime.utcnow().second
                         if (seconds > SECONDS_BETWEEN_FLUSHES/3 and len(docs)):
