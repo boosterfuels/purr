@@ -220,13 +220,12 @@ class Tailer(extractor.Extractor):
             minutes_between_update = (
                 diff.seconds//60) % 60
             if minutes_between_update > 5:
-                t = int(time.time())
+                t = int(datetime.utcnow())
                 transfer_info.update_latest_successful_ts(
                     self.pg, self.schema, t
                 )
                 logger.info(
                     "%s Updated latest_successful_ts: %d" % (CURR_FILE, t))
-            return datetime.utcnow()
 
     def start(self, dt=None):
         """
@@ -269,8 +268,7 @@ class Tailer(extractor.Extractor):
                 if self.pg.attempt_to_reconnect is True:
                     res = transfer_info.get_latest_successful_ts(
                         self.pg, self.schema)
-                    latest_ts = int((list(res)[0])[0])
-                    dt = latest_ts
+                    dt = int((list(res)[0])[0])
                     self.pg.attempt_to_reconnect = False
 
                 cursor = oplog.find(
@@ -281,10 +279,8 @@ class Tailer(extractor.Extractor):
                 if type(dt) is int:
                     dt = datetime.utcfromtimestamp(
                         dt).strftime('%Y-%m-%d %H:%M:%S')
-                logger.info("%s Started tailing from %s." %
-                            (CURR_FILE, str(dt)))
-                logger.info("%s Timestamp: %s" %
-                            (CURR_FILE, datetime.utcnow()))
+                logger.info("%s Started tailing from %s.\nCurrent timestamp: %s" %
+                            (CURR_FILE, str(dt), datetime.utcnow()))
 
                 docs = []
                 while cursor.alive and self.pg.attempt_to_reconnect is False:
@@ -298,7 +294,6 @@ class Tailer(extractor.Extractor):
                             op = doc["op"]
                             if op != "n" and self.coll_in_map(col) is True:
                                 logger.info("%s -> %s:" % (col, op))
-                                pprint.pprint(docs)
                                 docs.append(doc)
                         time.sleep(1)
                         seconds = datetime.utcnow().second
