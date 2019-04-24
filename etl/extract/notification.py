@@ -38,6 +38,7 @@ class NotificationThread(Thread):
         running = True
         try:
             while running:
+                time.sleep(1)
                 if self.terminate is True:
                     break
                 db.commit()
