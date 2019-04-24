@@ -39,10 +39,13 @@ def prepare_docs_for_update(docs):
 
         if "$set" in temp.keys():
             doc_useful.update(temp["$set"])
+            for k, v in temp["$set"].items():
+                if v is None:
+                    unset[k] = "$unset"
         if "$unset" in temp.keys():
             for k, v in temp["$unset"].items():
                 unset[k] = '$unset'
-            doc_useful.update(unset)
+        doc_useful.update(unset)
 
         # merging values with the same ID because there cannot be
         # multiple updates of the same row in one statement
@@ -297,11 +300,12 @@ class Tailer(extractor.Extractor):
                                 docs.append(doc)
                         time.sleep(1)
                         seconds = datetime.utcnow().second
-                        if (seconds > SECONDS_BETWEEN_FLUSHES/3 and len(docs)):
+                        if (seconds > SECONDS_BETWEEN_FLUSHES/6 and len(docs)):
                             logger.info("""
                             %s Flushing after %s seconds.
                             Number of documents: %s
                             """ % (CURR_FILE, seconds, len(docs)))
+                            print(docs)
                             self.handle_multiple(docs, updated_at)
                             docs = []
                     except Exception as ex:

@@ -1,6 +1,7 @@
 import pymongo
 from etl.load import init_pg as postgres
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+from bson import Timestamp
 
 
 # ------ CONNECTION STRINGS ------
@@ -360,3 +361,57 @@ attr_details_with_values = {
                    'type_cm': 'text',
                    'value': "I am a text"}
 }
+
+
+oplog_entries_update = [
+    {
+        'ts': Timestamp(1556029671, 1),
+        't': 48,
+        'h': -4473962510602026742,
+        'v': 2,
+        'op': 'u',
+        'ns': 'test_purrito.Employee',
+        'o2': {'_id': '1'},
+        'o': {
+            '$set': {
+                'firstName': 'Janos',
+                'lastName': None
+            },
+            '$unset': {
+                'hair': True
+            }
+        },
+    },
+    {
+        'ts': Timestamp(1556029671, 2),
+        't': 48,
+        'h': -6116078169406119246,
+        'v': 2,
+        'op': 'u',
+        'ns': 'test_purrito.Company',
+        'o2': {
+            '_id': 2
+        },
+        'o': {
+            '$set': {
+                'domains': ['dragonglass.org']
+            }
+        }
+    },
+    {
+        'ts': Timestamp(1556029671, 1),
+        't': 48,
+        'h': -4473962510602026742,
+        'v': 2,
+        'op': 'u',
+        'ns': 'test_purrito.Employee',
+        'o2': {'_id': '2'},
+        'o': {
+            '$set': {
+                'firstName': 'Arja',
+                "lastName": "Stark",
+                'hair': 'blonde'
+            }
+        }
+    },
+]
