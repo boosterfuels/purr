@@ -81,7 +81,7 @@ class PgConnection:
         try:
             cur.executemany(cmd, values)
         except (psycopg2.InterfaceError, psycopg2.OperationalError):
-            handle_interface_and_oper_error()
+            self.handle_interface_and_oper_error()
         except Exception as ex:
             logger.error(
                 """
