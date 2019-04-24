@@ -151,39 +151,36 @@ class Relation():
         ----------
         docs : dict
               the documents we want to insert
-        TODO
-        CHECK if self.column_names and self.column_types are still the same
+        
         """
         # This is needed because
         # sometimes there is no value for attributes (null)
         result = []
         if type(docs) is not list:
             docs = [docs]
-        for doc in docs:
+        grouped_values = {}
+
+        for i in range(len(docs)):
+            attrs_pg = []
+            values = []
+            doc = docs[i]
             attrs = init_values(attrs)
             (attrs) = set_values(
                 attrs, doc)
-            if len(docs) > 1:
-                attrs_pg = [v["name_cm"] for k, v in attrs.items()]
-                values = [v["value"] for k, v in attrs.items()]
-            else:
-                attrs_pg = [v["name_cm"]
-                            for k, v in attrs.items() if k in doc.keys()]
-                values = [v["value"]
-                          for k, v in attrs.items() if k in doc.keys()]
-            print("VALUES:\n", values)
-            result.append(tuple(values))
 
-        if self.created is True or len(docs) == 1:
-            print(self.relation_name)
-            print(attrs_pg)
-            print(result)
+            attrs_pg = tuple([v["name_cm"]
+                              for k, v in attrs.items() if k in doc.keys()])
+            values = [v["value"]
+                      for k, v in attrs.items() if k in doc.keys()]
 
+            if attrs_pg not in grouped_values.keys():
+                grouped_values[attrs_pg] = []
+            grouped_values[attrs_pg].append(values)
+
+        for k, v in grouped_values.items():
+            attrs_pg = list(k)
             row.upsert_bulk_tail(self.db, self.schema,
-                                 self.relation_name, attrs_pg, result)
-        else:
-            row.insert_bulk(self.db, self.schema,
-                            self.relation_name, attrs_pg, result)
+                                 self.relation_name, attrs_pg, v)
 
     def delete(self, docs):
         ids = []
