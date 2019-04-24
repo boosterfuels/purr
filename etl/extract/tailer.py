@@ -8,8 +8,6 @@ from etl.transform import relation
 from etl.monitor import logger
 from etl.extract import extractor, transfer_info
 
-import pprint
-
 INSERT = "i"
 UPDATE = "u"
 DELETE = "d"
@@ -45,6 +43,13 @@ def prepare_docs_for_update(docs):
         if "$unset" in temp.keys():
             for k, v in temp["$unset"].items():
                 unset[k] = '$unset'
+        if "$set" not in temp.keys() and "$unset" not in temp.keys():
+            # case when the document was not updated 
+            # using a query, but the IDE e.g. Studio3T:
+            doc_useful.update(temp)
+            for k, v in temp.items():
+                if v is None:
+                    unset[k] = '$unset'
         doc_useful.update(unset)
 
         # merging values with the same ID because there cannot be
@@ -305,7 +310,6 @@ class Tailer(extractor.Extractor):
                             %s Flushing after %s seconds.
                             Number of documents: %s
                             """ % (CURR_FILE, seconds, len(docs)))
-                            print(docs)
                             self.handle_multiple(docs, updated_at)
                             docs = []
                     except Exception as ex:
