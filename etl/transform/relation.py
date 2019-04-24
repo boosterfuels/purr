@@ -151,7 +151,7 @@ class Relation():
         ----------
         docs : dict
               the documents we want to insert
-        
+
         """
         # This is needed because
         # sometimes there is no value for attributes (null)
@@ -343,3 +343,6 @@ class Relation():
         # we need to check if it is possible to convert the
         # old type into the new one.
         # Anything can be converted to JSONB.
+
+    def vacuum(self):
+        table.vacuum(self.db, self.schema, self.relation_name)

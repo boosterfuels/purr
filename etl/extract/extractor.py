@@ -330,6 +330,7 @@ class Extractor():
                     nr_of_docs,
                     coll))
             i += 1
+        r.vacuum()
 
     def insert_multiple(self, docs, r, coll):
         '''

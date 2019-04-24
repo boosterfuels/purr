@@ -2,6 +2,7 @@ import psycopg2
 import psycopg2.extras
 import time
 from etl.monitor import logger
+from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
 CURR_FILE = "[INIT_PG]"
 
@@ -18,6 +19,8 @@ class PgConnection:
             self.attempt_to_reconnect = False
         try:
             self.conn = psycopg2.connect(self.conn_details)
+            self.conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+
             self.cur = self.conn.cursor()
             logger.info("%s Connected to Postgres." % (CURR_FILE))
             self.ttw = 1
@@ -41,7 +44,6 @@ class PgConnection:
                 self.cur.execute(cmd, values)
             else:
                 self.cur.execute(cmd)
-            self.conn.commit()
 
         except (psycopg2.InterfaceError, psycopg2.OperationalError):
             self.handle_interface_and_oper_error()
@@ -58,7 +60,6 @@ class PgConnection:
                 self.cur.execute(cmd, values)
             else:
                 self.cur.execute(cmd)
-                self.conn.commit()
             return self.cur.fetchall()
 
         except (psycopg2.InterfaceError, psycopg2.OperationalError):
@@ -73,7 +74,6 @@ class PgConnection:
     def execute_many_cmd(self, cmd, values):
         try:
             self.cur.executemany(cmd, values)
-            self.conn.commit()
         except (psycopg2.InterfaceError, psycopg2.OperationalError):
             self.handle_interface_and_oper_error()
         except Exception as ex:
@@ -85,7 +85,6 @@ class PgConnection:
 
     def poll(self):
         self.cur.execute()
-        self.cur.commit()
 
     def notifies(self):
         return self.conn.notifies

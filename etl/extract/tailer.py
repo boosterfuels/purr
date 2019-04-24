@@ -301,7 +301,6 @@ class Tailer(extractor.Extractor):
                             col = doc["ns"]
                             op = doc["op"]
                             if op != "n" and self.coll_in_map(col) is True:
-                                logger.info("%s -> %s:" % (col, op))
                                 docs.append(doc)
                         time.sleep(1)
                         seconds = datetime.utcnow().second

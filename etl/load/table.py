@@ -280,3 +280,12 @@ def drop_trigger_type_notification(db, schema, table, name, proc):
         db.execute_cmd(cmd)
     except Exception as ex:
         logger.error("[TABLE] Dropping trigger '%s' failed: %s" % (name, ex))
+
+def vacuum(db, schema, table):
+    cmd = "VACUUM FULL ANALYZE %s.%s;" % (schema, table)
+    try:
+        logger.info("[TABLE] Vacuuming table '%s.%s'" % (schema, table))
+        db.execute_cmd(cmd)    
+    except Exception as ex:
+        logger.error("[TABLE] Vacuuming table '%s.%s' failed: %s" % (schema, table))
+

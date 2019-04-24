@@ -307,7 +307,6 @@ class TestExtractor(unittest.TestCase):
         cursor.execute(query["table_drop_purr_cm"])
         cursor.execute(query["table_drop_company"])
         cursor.execute(query["table_drop_employee"])
-        pg.conn.commit()
         create_and_populate_company_mdb()
         cm.create_table(pg, mock.coll_config)
 
@@ -347,7 +346,6 @@ class TestExtractor(unittest.TestCase):
         cursor.execute(query["table_drop_purr_cm"])
         cursor.execute(query["table_drop_company"])
         cursor.execute(query["table_drop_employee"])
-        pg.conn.commit()
         create_and_populate_company_mdb()
         cm.create_table(pg, mock.coll_config)
 
@@ -383,7 +381,6 @@ class TestExtractor(unittest.TestCase):
         cursor.execute(query["table_drop_purr_cm"])
         cursor.execute(query["table_drop_company"])
 
-        pg.conn.commit()
         create_and_populate_company_mdb()
         cm.create_table(pg, mock.coll_config)
 
@@ -441,7 +438,6 @@ class TestExtractor(unittest.TestCase):
         cursor.execute(query["table_drop_purr_cm"])
         cursor.execute(query["table_drop_company"])
 
-        pg.conn.commit()
         create_and_populate_company_mdb()
         cm.create_table(pg, mock.coll_config)
 
