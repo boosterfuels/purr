@@ -44,7 +44,7 @@ def prepare_docs_for_update(docs):
             for k, v in temp["$unset"].items():
                 unset[k] = '$unset'
         if "$set" not in temp.keys() and "$unset" not in temp.keys():
-            # case when the document was not updated 
+            # case when the document was not updated
             # using a query, but the IDE e.g. Studio3T:
             doc_useful.update(temp)
             for k, v in temp.items():
@@ -228,7 +228,7 @@ class Tailer(extractor.Extractor):
             minutes_between_update = (
                 diff.seconds//60) % 60
             if minutes_between_update > 5:
-                t = int(datetime.utcnow())
+                t = int(time.time())
                 transfer_info.update_latest_successful_ts(
                     self.pg, self.schema, t
                 )
@@ -254,7 +254,7 @@ class Tailer(extractor.Extractor):
         oplog = client.local.oplog.rs
 
         # Start reading the oplog
-        SECONDS_BETWEEN_FLUSHES = 55
+        SECONDS_BETWEEN_FLUSHES = 30
         try:
             updated_at = datetime.utcnow()
             loop = False
@@ -305,7 +305,7 @@ class Tailer(extractor.Extractor):
                                 docs.append(doc)
                         time.sleep(1)
                         seconds = datetime.utcnow().second
-                        if (seconds > SECONDS_BETWEEN_FLUSHES/6 and len(docs)):
+                        if (seconds > SECONDS_BETWEEN_FLUSHES and len(docs) or len(docs) > 50):
                             logger.info("""
                             %s Flushing after %s seconds.
                             Number of documents: %s
