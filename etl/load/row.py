@@ -86,10 +86,11 @@ def insert_bulk(db, schema, table, attrs, values):
     cmd = "INSERT INTO %s.%s (%s) VALUES %s;" % (
         schema, table.lower(), attrs, '%s')
     try:
-        execute_values(db.cur, cmd, values)
-        db.conn.commit()
+        cur = db.conn.cursor()
+        execute_values(cur, cmd, values)
+        cur.close()
     except Exception as ex:
-        logger.error("[ROW] INSERT failed: %s" % ex)
+        logger.error("[ROW] INSERT bulk failed: %s" % ex)
         logger.error("[ROW] CMD: %s" % cmd)
         logger.error("[ROW] VALUES: %s" % values)
         raise SystemExit()
@@ -192,7 +193,7 @@ def upsert_bulk_tail(db, schema, table, attrs, rows):
                     values.append(row[j])
                     attrs_reduced.append(attrs[j])
             upsert_bulk(db, schema, table, attrs_reduced, [tuple(values)])
-        db.conn.commit()
+
 
     except Exception as ex:
         logger.error("[ROW] UPSERT failed when tailing: %s" % ex)
@@ -244,13 +245,14 @@ def upsert_transfer_info(db, schema, table, attrs, row):
         constraint, attrs_reduced, excluded)
 
     try:
-        db.cur.execute(cmd, [temp_row])
-        db.conn.commit()
+        cur = db.conn.cursor()
+        cur.execute(cmd, [temp_row])
     except Exception as ex:
         logger.error("[ROW] UPSERT TRANSFER INFO failed: %s" % ex)
         logger.error("\n[ROW] CMD:\n %s" % cmd)
         logger.error("\n[ROW] VALUES:\n %s" % row)
         raise SystemExit()
+    cur.close()
 
 
 def delete(db, schema, table_name, ids):

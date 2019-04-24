@@ -39,11 +39,12 @@ class PgConnection:
             self.__init__(self.conn_details, self.ttw * 2)
 
     def execute_cmd(self, cmd, values=None):
+        cur = self.conn.cursor()
         try:
             if values is not None:
-                self.cur.execute(cmd, values)
+                cur.execute(cmd, values)
             else:
-                self.cur.execute(cmd)
+                cur.execute(cmd)
 
         except (psycopg2.InterfaceError, psycopg2.OperationalError):
             self.handle_interface_and_oper_error()
@@ -53,14 +54,17 @@ class PgConnection:
                 %s Executing query without fetch failed.
                 Details: %s
                 """ % (CURR_FILE, ex))
+        cur.close()
 
     def execute_cmd_with_fetch(self, cmd, values=None):
+        cur = self.conn.cursor()
+
         try:
             if values is not None:
-                self.cur.execute(cmd, values)
+                cur.execute(cmd, values)
             else:
-                self.cur.execute(cmd)
-            return self.cur.fetchall()
+                cur.execute(cmd)
+            return cur.fetchall()
 
         except (psycopg2.InterfaceError, psycopg2.OperationalError):
             self.handle_interface_and_oper_error()
@@ -70,21 +74,26 @@ class PgConnection:
                 %s Executing query with fetch failed.
                 Details: %s
                 """ % (CURR_FILE, ex))
+        cur.close()
 
     def execute_many_cmd(self, cmd, values):
+        cur = self.conn.cursor()
         try:
-            self.cur.executemany(cmd, values)
+            cur.executemany(cmd, values)
         except (psycopg2.InterfaceError, psycopg2.OperationalError):
-            self.handle_interface_and_oper_error()
+            handle_interface_and_oper_error()
         except Exception as ex:
             logger.error(
                 """
                 %s Executing many failed.
                 Details: %s
                 """ % (CURR_FILE, ex))
+        cur.close()
 
     def poll(self):
-        self.cur.execute()
+        cur = self.conn.cursor()
+        cur.execute()
+        cur.close()
 
     def notifies(self):
         return self.conn.notifies
