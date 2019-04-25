@@ -1,14 +1,6 @@
-import psycopg2
-import pymongo
-from etl.extract import extractor, extractor
 from etl.extract import collection
-from etl.transform import relation
-import pytest
 import unittest
-from bson import ObjectId
 from tests.meta import mock
-from etl.extract import collection_map as cm
-import copy
 
 mongo = mock.mongo
 colls = ["Company", "Employee"]
@@ -58,7 +50,7 @@ class TestCollections(unittest.TestCase):
         coll_name = "Employee"
         nr_of_docs = 2
         docs = collection.get_docs_for_type_check(
-            mongo, "Employee", nr_of_docs)
+            mongo, coll_name, nr_of_docs)
         result = []
         for doc in docs:
             result.append(doc)

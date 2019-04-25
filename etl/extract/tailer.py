@@ -7,12 +7,62 @@ from bson import Timestamp
 from etl.transform import relation
 from etl.monitor import logger
 from etl.extract import extractor, transfer_info
+import json
 
 INSERT = "i"
 UPDATE = "u"
 DELETE = "d"
 
 CURR_FILE = "[TAILER]"
+
+
+def prepare_docs_for_update(docs):
+    docs_useful = []
+    docs_id = []
+    for doc in docs:
+        # It is possible that multiple versions of one document
+        # exist among these documents. they must be merged so they
+        # can be sent Postgres together as one entry.
+        merge_similar = False
+        unset = {}
+        doc_useful = {}
+        temp = doc["o"]
+
+        if "o2" in doc.keys():
+            if "_id" in doc["o2"].keys():
+                doc_useful["_id"] = str(doc["o2"]["_id"])
+                if (doc_useful["_id"] in docs_id):
+                    merge_similar = True
+                else:
+                    docs_id.append(str(doc_useful["_id"]))
+
+        if "$set" in temp.keys():
+            doc_useful.update(temp["$set"])
+            for k, v in temp["$set"].items():
+                if v is None:
+                    unset[k] = "$unset"
+        if "$unset" in temp.keys():
+            for k, v in temp["$unset"].items():
+                unset[k] = '$unset'
+        if "$set" not in temp.keys() and "$unset" not in temp.keys():
+            # case when the document was not updated
+            # using a query, but the IDE e.g. Studio3T:
+            doc_useful.update(temp)
+            for k, v in temp.items():
+                if v is None:
+                    unset[k] = '$unset'
+        doc_useful.update(unset)
+
+        # merging values with the same ID because there cannot be
+        # multiple updates of the same row in one statement
+        if merge_similar is True:
+            for i in range(0, len(docs_useful)):
+                if docs_useful[i]["_id"] == doc_useful["_id"]:
+                    docs_useful[i] = dict(docs_useful[i], **doc_useful)
+                    break
+        else:
+            docs_useful.append(doc_useful)
+    return docs_useful, merge_similar
 
 
 class Tailer(extractor.Extractor):
@@ -60,12 +110,15 @@ class Tailer(extractor.Extractor):
         collection during tailing to Postgres
         """
         docs_useful = []
+        ids_log = []
+        merged = False
 
         if oper == INSERT:
             logger.info("%s Inserting %s documents" % (CURR_FILE, len(docs)))
 
             # TODO: check extra props
             for doc in docs:
+                ids_log.append(str(doc["o"]["_id"]))
                 docs_useful.append(doc["o"])
             try:
                 super().insert_multiple(docs_useful, r, docs[0]["coll_name"])
@@ -79,36 +132,10 @@ class Tailer(extractor.Extractor):
         elif oper == UPDATE:
             logger.info("%s Updating %s documents" % (CURR_FILE, len(docs)))
             r.created = True
-            docs_id = []
-            for doc in docs:
-                already_updating = False
-                unset = {}
-                doc_useful = {}
-                temp = doc["o"]
 
-                if "o2" in doc.keys():
-                    if "_id" in doc["o2"].keys():
-                        doc_useful["_id"] = str(doc["o2"]["_id"])
-                        if (doc_useful["_id"] in docs_id):
-                            already_updating = True
-                        else:
-                            docs_id.append(str(doc_useful["_id"]))
-
-                if "$set" in temp.keys():
-                    doc_useful.update(temp["$set"])
-                if "$unset" in temp.keys():
-                    for k, v in temp["$unset"].items():
-                        unset[k] = 'unset'
-                    doc_useful.update(unset)
-                # merging values with the same ID because there cannot be
-                # multiple updates of the same row in one statement
-                if already_updating is True:
-                    for i in range(0, len(docs_useful)):
-                        if docs_useful[i]["_id"] == doc_useful["_id"]:
-                            docs_useful[i] = dict(docs_useful[i], **doc_useful)
-                            break
-                else:
-                    docs_useful.append(doc_useful)
+            (docs_useful, merged) = prepare_docs_for_update(docs)
+            for doc in docs_useful:
+                ids_log.append(str(doc["_id"]))
             try:
                 super().update_multiple(docs_useful, r, docs[0]["coll_name"])
             except Exception as ex:
@@ -121,12 +148,33 @@ class Tailer(extractor.Extractor):
             ids = []
             for doc in docs:
                 ids.append(doc["o"])
+                ids_log.append(str(doc["o"]["_id"]))
             try:
                 r.delete(ids)
             except Exception as ex:
                 logger.info(
                     """%s Deleting multiple documents failed: %s.
                     Details: %s""" % (CURR_FILE, docs, ex))
+
+        log_entries = []
+        ts = time.time()
+        for i in range(len(ids_log)):
+            id = ids_log[i]
+            doc = None
+            try:
+                doc = str(docs_useful[i])
+            except:
+                logger.error("%s Converting log entry failed. Details: %s\n Document: " %
+                             (CURR_FILE, ex))
+                logger.error(docs_useful[i])
+            row = [oper, r.relation_name, id, ts,
+                   merged, doc]
+            log_row = tuple(row)
+            log_entries.append(log_row)
+        try:
+            transfer_info.log_rows(self.pg, self.schema, log_entries)
+        except Exception as ex:
+            logger.error("%s Logging failed. Details: %s" % (CURR_FILE, ex))
 
     def transform_and_load_many(self, docs_details):
         """
@@ -196,7 +244,6 @@ class Tailer(extractor.Extractor):
                 )
                 logger.info(
                     "%s Updated latest_successful_ts: %d" % (CURR_FILE, t))
-            return datetime.utcnow()
 
     def start(self, dt=None):
         """
@@ -217,7 +264,7 @@ class Tailer(extractor.Extractor):
         oplog = client.local.oplog.rs
 
         # Start reading the oplog
-        SECONDS_BETWEEN_FLUSHES = 55
+        SECONDS_BETWEEN_FLUSHES = 30
         try:
             updated_at = datetime.utcnow()
             loop = False
@@ -227,10 +274,10 @@ class Tailer(extractor.Extractor):
                         self.pg, self.schema)
                     latest_ts = int((list(res)[0])[0])
                     dt = latest_ts
-                    logger.info(
+                    logger.error(
                         """%s Stopping. Next time, bring more cookies."""
                         % (CURR_FILE))
-                    raise SystemExit()
+                    raise SystemExit
                 else:
                     loop = True
 
@@ -239,8 +286,7 @@ class Tailer(extractor.Extractor):
                 if self.pg.attempt_to_reconnect is True:
                     res = transfer_info.get_latest_successful_ts(
                         self.pg, self.schema)
-                    latest_ts = int((list(res)[0])[0])
-                    dt = latest_ts
+                    dt = int((list(res)[0])[0])
                     self.pg.attempt_to_reconnect = False
 
                 cursor = oplog.find(
@@ -251,10 +297,8 @@ class Tailer(extractor.Extractor):
                 if type(dt) is int:
                     dt = datetime.utcfromtimestamp(
                         dt).strftime('%Y-%m-%d %H:%M:%S')
-                logger.info("%s Started tailing from %s." %
-                            (CURR_FILE, str(dt)))
-                logger.info("%s Timestamp: %s" %
-                            (CURR_FILE, datetime.utcnow()))
+                logger.info("%s Started tailing from %s.\nCurrent timestamp: %s" %
+                            (CURR_FILE, str(dt), datetime.utcnow()))
 
                 docs = []
                 while cursor.alive and self.pg.attempt_to_reconnect is False:
@@ -270,7 +314,7 @@ class Tailer(extractor.Extractor):
                                 docs.append(doc)
                         time.sleep(1)
                         seconds = datetime.utcnow().second
-                        if (seconds > SECONDS_BETWEEN_FLUSHES/3 and len(docs)):
+                        if (seconds > SECONDS_BETWEEN_FLUSHES and len(docs) or len(docs) > 50):
                             logger.info("""
                             %s Flushing after %s seconds.
                             Number of documents: %s
@@ -278,7 +322,7 @@ class Tailer(extractor.Extractor):
                             self.handle_multiple(docs, updated_at)
                             docs = []
                     except Exception as ex:
-                        logger.error("%s Cursor error %s" % (CURR_FILE, ex))
+                        logger.error("%s Cursor error: %s" % (CURR_FILE, ex))
                 cursor.close()
                 continue
         except StopIteration as e:

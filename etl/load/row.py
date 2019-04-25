@@ -86,10 +86,11 @@ def insert_bulk(db, schema, table, attrs, values):
     cmd = "INSERT INTO %s.%s (%s) VALUES %s;" % (
         schema, table.lower(), attrs, '%s')
     try:
-        execute_values(db.cur, cmd, values)
-        db.conn.commit()
+        cur = db.conn.cursor()
+        execute_values(cur, cmd, values)
+        cur.close()
     except Exception as ex:
-        logger.error("[ROW] INSERT failed: %s" % ex)
+        logger.error("[ROW] INSERT bulk failed: %s" % ex)
         logger.error("[ROW] CMD: %s" % cmd)
         logger.error("[ROW] VALUES: %s" % values)
         raise SystemExit()
@@ -114,7 +115,7 @@ def upsert_bulk(db, schema, table, attrs, rows):
 
     Example
     -------
-    upsert_bulk(db, 'public', 'audience', [attributes], [values])
+    upsert_bulk(db, 'public', 'employee', [attributes], [values])
     Note: command is different for Postgres v10+:
     cmd = "INSERT INTO %s.%s (%s) VALUES (%s) ON CONFLICT ON CONSTRAINT %s
     DO UPDATE SET (%s) = ROW(%s);"
@@ -145,12 +146,15 @@ def upsert_bulk(db, schema, table, attrs, rows):
         schema, table.lower(), attrs, temp,
         constraint, attrs_reduced, excluded)
     try:
-        db.cur.executemany(cmd, rows)
-        db.conn.commit()
+        db.execute_many_cmd(cmd, rows)
     except Exception as ex:
-        logger.error("[ROW] UPSERT failed: %s" % ex)
+        logger.error("[ROW] Relation: %s.%s; UPSERT failed: %s" %
+                     (schema, table, ex))
+        ids = [x[0] for x in rows]
+        logger.error("[ROW] IDs: %s" % ", ".join(ids))
+
         if len(rows) <= NR_OF_ROWS_TO_DISPLAY:
-            logger.error("[ROW] CMD:\n %s" % cmd, db.cur.mogrify())
+            logger.error("[ROW] CMD:\n %s" % cmd)
             logger.error("[ROW] VALUES:\n %s" % rows)
 
 
@@ -158,12 +162,15 @@ def upsert_bulk_tail(db, schema, table, attrs, rows):
     """
     Inserts a row defined by attributes and values into a specific
     table of the PG database.
+    Checks for values that are unset during tailing.
 
     Parameters
     ----------
-    table_name : string
-    attrs :     string[]
-    values :    string[]
+    db : object
+    schema : string
+    table : string
+    attrs : string[]
+    rows : string[]
 
     Returns
     -------
@@ -171,7 +178,7 @@ def upsert_bulk_tail(db, schema, table, attrs, rows):
 
     Example
     -------
-    insert('Audience', [attributes], [values])
+    upsert_bulk_tail(pg, 'public', 'employee', [attributes], [values])
     """
     try:
         for i in range(0, len(rows)):
@@ -179,19 +186,18 @@ def upsert_bulk_tail(db, schema, table, attrs, rows):
             values = []
             attrs_reduced = []
             for j in range(0, len(attrs)):
-                if row[j] == 'unset':
+                if row[j] == '$unset':
                     values.append(None)
                     attrs_reduced.append(attrs[j])
                 elif row[j] is not None:
                     values.append(row[j])
                     attrs_reduced.append(attrs[j])
             upsert_bulk(db, schema, table, attrs_reduced, [tuple(values)])
-        db.conn.commit()
+
 
     except Exception as ex:
         logger.error("[ROW] UPSERT failed when tailing: %s" % ex)
         logger.error("[ROW] VALUES: %s" % values)
-        raise SystemExit()
 
 
 def upsert_transfer_info(db, schema, table, attrs, row):
@@ -239,13 +245,14 @@ def upsert_transfer_info(db, schema, table, attrs, row):
         constraint, attrs_reduced, excluded)
 
     try:
-        db.cur.execute(cmd, [temp_row])
-        db.conn.commit()
+        cur = db.conn.cursor()
+        cur.execute(cmd, [temp_row])
     except Exception as ex:
         logger.error("[ROW] UPSERT TRANSFER INFO failed: %s" % ex)
         logger.error("\n[ROW] CMD:\n %s" % cmd)
         logger.error("\n[ROW] VALUES:\n %s" % row)
         raise SystemExit()
+    cur.close()
 
 
 def delete(db, schema, table_name, ids):
@@ -265,7 +272,7 @@ def delete(db, schema, table_name, ids):
 
     Example
     -------
-    delete(db, schema, 'Audience', ObjectId("5acf593eed101e0c1266e32b"))
+    delete(db, 'public', 'employee', "5acf593eed101e0c1266e32b")
 
     """
     oids = "','".join(ids)

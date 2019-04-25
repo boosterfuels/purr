@@ -12,26 +12,27 @@ def init_values(attrs):
     return attrs
 
 
-def set_values(attrs, doc, _extra_props=None):
+def set_values(attr_details, doc, _extra_props=None):
     """
     Casts values for a whole document
     """
-    for key_doc, value_doc in doc.items():
-        keys_cm = list(attrs.keys())
-        if key_doc in keys_cm:
+    for key, field_value in doc.items():
+        keys_cm = list(attr_details.keys())
+        if key in keys_cm:
+            field_type = attr_details[key]["type_cm"]
             value = unnester.cast(
-                attrs[key_doc]["type_cm"], value_doc)
+                field_value, field_type)
             if value == 'undefined' and _extra_props is not None:
-                _extra_props.update({key_doc: value_doc})
+                _extra_props.update({key: field_value})
             else:
-                attrs[key_doc]["value"] = value
+                attr_details[key]["value"] = value
         else:
             if _extra_props is not None:
-                _extra_props.update({key_doc: value_doc})
+                _extra_props.update({key: field_value})
     if _extra_props is not None:
-        return attrs, _extra_props
+        return attr_details, _extra_props
     else:
-        return attrs
+        return attr_details
 
 
 def prepare_row_for_insert(attrs, doc, include_extra_props=None):
@@ -41,7 +42,7 @@ def prepare_row_for_insert(attrs, doc, include_extra_props=None):
     (attrs, _extra_props) = set_values(attrs, doc, _extra_props)
 
     if include_extra_props is True:
-        _extra_props = unnester.cast('jsonb', _extra_props)
+        _extra_props = unnester.cast(_extra_props, 'jsonb')
         attrs["extraProps"]["value"] = _extra_props
 
     attrs_pg = [v["name_cm"]
@@ -69,8 +70,6 @@ class Relation():
     def __init__(self, pg, schema, relation, created=False):
         """Constructor for Relation"""
         self.relation_name = relation
-        self.column_names = []
-        self.column_types = []
         self.created = created
         self.db = pg
         self.schema = schema
@@ -80,7 +79,7 @@ class Relation():
         return self.created
 
     def insert_bulk(self, docs, attrs,
-                    include_extra_props=True, unset=[]):
+                    include_extra_props=True):
         """
         Transforms document and inserts it into the corresponding table.
         Parameters
@@ -88,7 +87,6 @@ class Relation():
         doc : dict
               the document we want to insert
         TODO add unset
-        CHECK if self.column_names and self.column_types are still the same
         """
         # This is needed because
         # sometimes there is no value for attributes (null)
@@ -107,7 +105,7 @@ class Relation():
                             self.relation_name, attrs_pg, result)
 
     def insert_bulk_no_extra_props(self, docs, attrs,
-                                   include_extra_props=True, unset=[]):
+                                   include_extra_props=True):
         """
         Transforms document and inserts it into the corresponding table.
         Parameters
@@ -116,8 +114,6 @@ class Relation():
               the documents we want to insert
          unset: string[]
               list of fields to unset
-        TODO
-        CHECK if self.column_names and self.column_types are still the same
         """
         # This is needed because
         # sometimes there is no value for attributes (null)
@@ -126,8 +122,7 @@ class Relation():
             docs = [docs]
         for doc in docs:
             attrs = init_values(attrs)
-
-            (attrs) = set_values(attrs, doc)
+            attrs = set_values(attrs, doc)
 
             if len(docs) > 1:
                 attrs_pg = [v["name_cm"] for k, v in attrs.items()]
@@ -137,9 +132,6 @@ class Relation():
                             for k, v in attrs.items() if k in doc.keys()]
                 values = [v["value"]
                           for k, v in attrs.items() if k in doc.keys()]
-                for u in unset:
-                    attrs_pg.append(attrs[u]["name_cm"])
-                    values.append(None)
             result.append(tuple(values))
 
         if self.created is True or len(docs) == 1:
@@ -152,47 +144,43 @@ class Relation():
     def insert_bulk_no_extra_props_tailed(self,
                                           docs,
                                           attrs,
-                                          include_extra_props=True,
-                                          unset=[]):
+                                          include_extra_props=True):
         """
         Transforms document and inserts it into the corresponding table.
         Parameters
         ----------
         docs : dict
               the documents we want to insert
-         unset: string[]
-              list of fields to unset
-        TODO
-        CHECK if self.column_names and self.column_types are still the same
+
         """
         # This is needed because
         # sometimes there is no value for attributes (null)
         result = []
         if type(docs) is not list:
             docs = [docs]
-        for doc in docs:
+        grouped_values = {}
+
+        for i in range(len(docs)):
+            attrs_pg = []
+            values = []
+            doc = docs[i]
             attrs = init_values(attrs)
             (attrs) = set_values(
                 attrs, doc)
-            if len(docs) > 1:
-                attrs_pg = [v["name_cm"] for k, v in attrs.items()]
-                values = [v["value"] for k, v in attrs.items()]
-            else:
-                attrs_pg = [v["name_cm"]
-                            for k, v in attrs.items() if k in doc.keys()]
-                values = [v["value"]
-                          for k, v in attrs.items() if k in doc.keys()]
-                for u in unset:
-                    attrs_pg.append(attrs[u]["name_cm"])
-                    values.append(None)
-            result.append(tuple(values))
 
-        if self.created is True or len(docs) == 1:
+            attrs_pg = tuple([v["name_cm"]
+                              for k, v in attrs.items() if k in doc.keys()])
+            values = [v["value"]
+                      for k, v in attrs.items() if k in doc.keys()]
+
+            if attrs_pg not in grouped_values.keys():
+                grouped_values[attrs_pg] = []
+            grouped_values[attrs_pg].append(values)
+
+        for k, v in grouped_values.items():
+            attrs_pg = list(k)
             row.upsert_bulk_tail(self.db, self.schema,
-                                 self.relation_name, attrs_pg, result)
-        else:
-            row.insert_bulk(self.db, self.schema,
-                            self.relation_name, attrs_pg, result)
+                                 self.relation_name, attrs_pg, v)
 
     def delete(self, docs):
         ids = []
@@ -355,3 +343,6 @@ class Relation():
         # we need to check if it is possible to convert the
         # old type into the new one.
         # Anything can be converted to JSONB.
+
+    def vacuum(self):
+        table.vacuum(self.db, self.schema, self.relation_name)

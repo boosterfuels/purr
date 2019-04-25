@@ -20,3 +20,7 @@ class MongoConnection():
             self.conn = self.client[db_name]
         except Exception as ex:
             logger.error("Could not create connection to MongoDB: %s" % ex)
+
+    def disconnect(self):
+        logger.info("MongoDB says goodbye.")
+        self.client.close()

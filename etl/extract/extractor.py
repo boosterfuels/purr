@@ -35,7 +35,86 @@ class Extractor():
         self.coll_map_cur = cm.get_table(self.pg)
         self.attr_details = {}
 
+    def convert_columns(self, name_table, source, fields_cur, fields_new):
+        """
+        (1) Tries to convert the column
+        (2) TODO: If (1) was not successful (PG could not
+        convert the column), just rename it and add
+        the column again so Purr can take care of it
+        """
+        for i in range(0, len(fields_new)):
+            field = fields_new[i]
+            if field[":source"] in source:
+                for column, v in field.items():
+                    if v is None:
+                        type_old = fields_cur[i][":type"]
+                        type_new = field[":type"]
+                        if tc.is_convertable(type_old, type_new):
+                            logger.info(
+                                """%s table %s, column %s:
+                                Type [%s] is convertable to [%s]""" % (
+                                    CURR_FILE,
+                                    name_table,
+                                    column,
+                                    type_old,
+                                    type_new
+                                ))
+                            table.column_change_type(
+                                self.pg,
+                                self.schema,
+                                name_table,
+                                column,
+                                type_new)
+                        else:
+                            logger.error("""
+                                %s In table %s, column %s:
+                                Type [%s] is NOT convertable to [%s]
+                                """ % (
+                                CURR_FILE,
+                                name_table,
+                                column,
+                                type_old,
+                                type_new))
+
+    def add_columns(self, source, added, name_coll, name_table, fields_new, cm):
+        """
+        Adds columns to a table and updates the coll_def.
+        After that, it restarts the collection transfer
+        so the changes would be picked up.
+        """
+        for item in added:
+            if item[":source"] not in source:
+                for attribute, v in item.items():
+                    if v is None:
+                        self.coll_def[name_coll][":columns"] = fields_new
+                        table.add_column(
+                            self.pg,
+                            self.schema,
+                            name_table,
+                            attribute,
+                            item[":type"])
+                        self.transfer_coll(cm[1])
+
+    def remove_columns(self, source, removed, name_coll, name_table, fields_new):
+        """
+        Removes columns to a table and updates the coll_def.
+        """
+        for item in removed:
+            if item[":source"] not in source:
+                for attribute, v in item.items():
+                    if v is None:
+                        # update collection settings
+                        self.coll_def[name_coll][":columns"] = fields_new
+                        table.remove_column(
+                            self.pg,
+                            self.schema,
+                            name_table,
+                            attribute)
+
     def update_table_def(self, coll_map_cur, coll_map_new):
+        """
+        Updates tables' columns and collection definition (coll_def)
+        """
         for i in range(0, len(coll_map_cur)):
             name_coll = coll_map_cur[i][1]
             name_table = coll_map_cur[i][2]
@@ -52,69 +131,19 @@ class Extractor():
                 x for x in sources_removed if x in sources_added]
 
             if len(source_persistent):
-                # (1) Try to convert the column
-                # (2) If (1) was not successful (PG could not
-                # convert the column), just rename it and add
-                # the column again so Purr can take care of it
-                for i in range(0, len(fields_new)):
-                    field = fields_new[i]
-                    if field[":source"] in source_persistent:
-                        for column, v in field.items():
-                            if v is None:
-                                type_old = fields_cur[i][":type"]
-                                type_new = field[":type"]
-                                if tc.is_convertable(type_old, type_new):
-                                    logger.info(
-                                        """%s table %s, column %s:
-                                        Type [%s] is convertable to [%s]""" % (
-                                            CURR_FILE,
-                                            name_table,
-                                            column,
-                                            type_old,
-                                            type_new
-                                        ))
-                                    table.column_change_type(
-                                        self.pg,
-                                        self.schema,
-                                        name_table,
-                                        column,
-                                        type_new)
-                                else:
+                self.convert_columns(
+                    name_table,
+                    source_persistent,
+                    fields_cur,
+                    fields_new
+                )
 
-                                    logger.error("""
-                                        %s In table %s, column %s:
-                                        Type [%s] is NOT convertable to [%s]
-                                        """ % (
-                                        CURR_FILE,
-                                        name_table,
-                                        column,
-                                        type_old,
-                                        type_new))
+            self.add_columns(source_persistent, added,
+                             name_coll, name_table, fields_new,
+                             coll_map_cur[i])
 
-            for item in added:
-                if item[":source"] not in source_persistent:
-                    for attribute, v in item.items():
-                        if v is None:
-                            self.coll_def[name_coll][":columns"] = fields_new
-                            table.add_column(
-                                self.pg,
-                                self.schema,
-                                name_table,
-                                attribute,
-                                item[":type"])
-                            self.transfer_coll(coll_map_cur[i][1])
-
-            for item in removed:
-                if item[":source"] not in source_persistent:
-                    for attribute, v in item.items():
-                        if v is None:
-                            # update collection settings
-                            self.coll_def[name_coll][":columns"] = fields_new
-                            table.remove_column(
-                                self.pg,
-                                self.schema,
-                                name_table,
-                                attribute)
+            self.remove_columns(source_persistent, removed,
+                                name_coll, name_table, fields_new)
 
     def table_track(self, coll_map_cur, coll_map_new):
         """
@@ -256,7 +285,7 @@ class Extractor():
 
         # Start transferring docs
         nr_of_docs = docs.count()
-        nr_of_transferred = 1000
+        nr_of_transferred = 500
         i = 0
         transferring = []
         for doc in docs:
@@ -294,15 +323,16 @@ class Extractor():
                 logger.error("""%s Transfer unsuccessful. %s""" % (
                     CURR_FILE,
                     ex))
-            if (i+1) % (nr_of_transferred*10) == 0:
-                logger.info("""
-                   %s Transferred %d from collection %s
-                   """ % (
+            if (i+1) % (nr_of_transferred * 10) == 0:
+                logger.info("""%s %d/%d (%s)""" % (
                     CURR_FILE,
-                    i+1, coll))
+                    i+1,
+                    nr_of_docs,
+                    coll))
             i += 1
+        r.vacuum()
 
-    def insert_multiple(self, docs, r, coll, unset=[]):
+    def insert_multiple(self, docs, r, coll):
         '''
         Transfers multiple documents with different fields
         (not whole collections).
@@ -349,10 +379,10 @@ class Extractor():
         try:
             if self.include_extra_props is True:
                 r.insert_bulk(
-                    docs, self.attr_details, self.include_extra_props, unset)
+                    docs, self.attr_details, self.include_extra_props)
             else:
                 r.insert_bulk_no_extra_props_tailed(
-                    docs, self.attr_details, self.include_extra_props, unset)
+                    docs, self.attr_details, self.include_extra_props)
         except Exception as ex:
             logger.error("""
             %s Transferring to %s was unsuccessful.
@@ -363,7 +393,7 @@ class Extractor():
                 r.relation_name, ex))
             logger.error("%s\n" % docs)
 
-    def update_multiple(self, docs, r, coll, unset=[]):
+    def update_multiple(self, docs, r, coll):
         '''
         Upserts multiple documents with different fields.
         Parameters
@@ -374,8 +404,6 @@ class Extractor():
             relation in PG
         coll : string
              : collection name
-        unset : list
-                list of fields that must be removed
         Returns
         -------
         -
@@ -385,7 +413,6 @@ class Extractor():
         Example
         -------
         '''
-
         (attrs_new, attrs_original, types, relation_name,
          type_x_props_pg) = cp.config_fields(self.coll_def, coll)
         if types == []:
@@ -404,10 +431,10 @@ class Extractor():
         try:
             if self.include_extra_props is True:
                 r.insert_bulk(
-                    docs, self.attr_details, self.include_extra_props, unset)
+                    docs, self.attr_details, self.include_extra_props)
             else:
                 r.insert_bulk_no_extra_props_tailed(
-                    docs, self.attr_details, self.include_extra_props, unset)
+                    docs, self.attr_details, self.include_extra_props)
         except Exception as ex:
             logger.error("""
             %s Transferring to %s was unsuccessful. Exception: %s
@@ -429,7 +456,11 @@ class Extractor():
         Returns
         -------
         attr_details : list
-                      : attribute details with extra property
+                      : details for mapping each field
+                      - name of the field (in mongodb)
+                      - name in the collection map (for pg)
+                      - type in the collection map (for pg)
+                      - default value
 
         Parameters
         ----------

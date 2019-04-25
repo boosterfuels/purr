@@ -2,7 +2,7 @@ import psycopg2
 from etl.monitor import logger
 
 
-def create(db, schema, name, attrs=[], types=[]):
+def create(db, schema, name, attrs, types, pks=["id"]):
     """
     Creates a table in Postgres.
     Parameters
@@ -11,17 +11,15 @@ def create(db, schema, name, attrs=[], types=[]):
     TODO
     ----
     """
-    nr_of_attrs = len(attrs)
     attrs_and_types = []
-    if nr_of_attrs:
-        for i in range(nr_of_attrs):
-            pair = '"%s" %s' % (attrs[i], types[i])
-            if attrs[i] == 'id':
-                pair = "%s PRIMARY KEY" % pair
-            attrs_and_types.append(pair)
-    else:
-        attrs_and_types = ""
 
+    for i in range(len(attrs)):
+        pair = '"%s" %s' % (attrs[i], types[i])
+        attrs_and_types.append(pair)
+
+    pks = [('"%s"' % pk) for pk in pks]
+    primary_keys = "PRIMARY KEY (%s)" % ",".join(pks)
+    attrs_and_types.append(primary_keys)
     attrs_and_types = ", ".join(attrs_and_types)
 
     name = name.lower()
@@ -282,3 +280,12 @@ def drop_trigger_type_notification(db, schema, table, name, proc):
         db.execute_cmd(cmd)
     except Exception as ex:
         logger.error("[TABLE] Dropping trigger '%s' failed: %s" % (name, ex))
+
+def vacuum(db, schema, table):
+    cmd = "VACUUM FULL ANALYZE %s.%s;" % (schema, table)
+    try:
+        logger.info("[TABLE] Vacuuming table '%s.%s'" % (schema, table))
+        db.execute_cmd(cmd)    
+    except Exception as ex:
+        logger.error("[TABLE] Vacuuming table '%s.%s' failed: %s" % (schema, table))
+

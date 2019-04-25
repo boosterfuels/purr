@@ -1,6 +1,6 @@
 from threading import Thread
 from etl.monitor import logger
-
+import time
 
 class NotificationThread(Thread):
     conn = None
@@ -38,6 +38,7 @@ class NotificationThread(Thread):
         running = True
         try:
             while running:
+                time.sleep(1)
                 if self.terminate is True:
                     break
                 db.commit()
@@ -52,4 +53,3 @@ class NotificationThread(Thread):
                     self.new = True
         except Exception as ex:
             logger.error("[NOTIFICATION] Details: %s" % ex)
-            return

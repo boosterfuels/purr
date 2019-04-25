@@ -18,7 +18,7 @@ def add_pk(db, schema, table, attr):
 
     Example
     -------
-    add_pk('Audience', 'id')
+    add_pk(pg, 'public', 'employee', 'id')
 
     """
     cmd = 'ALTER TABLE %s.%s ADD PRIMARY KEY (%s)' % (

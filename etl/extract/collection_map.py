@@ -73,6 +73,7 @@ def create_table(db, coll_map, schema='public'):
     types = ["integer", "text", "text", "jsonb[]", "timestamp", "text"]
 
     try:
+        # TODO: make this fucntion accept string and list 
         table.drop(db, schema, [table_name])
         table.create(db, schema, table_name, attrs, types)
         logger.info("[TRANSFER INFO] Created table %s.%s." %
@@ -93,7 +94,32 @@ def create_table(db, coll_map, schema='public'):
         db, 'public', 'purr_collection_map', 'notify', procedure_name)
 
 
-def determine_types(mongo, name_db):
+def get_types(docs):
+    types = {}
+    for doc in docs:
+        fields = []
+        for k, v in doc.items():
+            name_column = tc.snake_case(k)
+            if name_column in fields:
+                logger.warn(
+                    "%s Column %s cannot appear twice. Skipping..."
+                    % (CURR_FILE, k))
+                continue
+            else:
+                fields.append(name_column)
+
+            if k not in types.keys():
+                types[k] = {}
+
+            value_new, type_pg = tc.get_type_pg(v)
+            if type_pg in types[k].keys():
+                types[k][type_pg] += 1
+            else:
+                types[k][type_pg] = 1
+    return types
+
+
+def create_map(mongo, name_db):
     coll_map = {name_db: {}}
     colls = collection.get_all(mongo)
 
@@ -113,29 +139,9 @@ def determine_types(mongo, name_db):
             }
         }
         docs = collection.get_docs_for_type_check(mongo, coll)
-        types = {}
         logger.info("%s Reading samples..." % (CURR_FILE))
 
-        for doc in docs:
-            fields = []
-            for k, v in doc.items():
-                name_column = tc.snake_case(k)
-                if name_column in fields:
-                    logger.warn(
-                        "%s Column %s cannot appear twice. Skipping..."
-                        % (CURR_FILE, k))
-                    continue
-                else:
-                    fields.append(name_column)
-
-                if k not in types.keys():
-                    types[k] = {}
-
-                value_new, type_pg = tc.get_type_pg(v)
-                if type_pg in types[k].keys():
-                    types[k][type_pg] += 1
-                else:
-                    types[k][type_pg] = 1
+        types = get_types(docs)
 
         # TODO: handle None
         for field, value in types.items():

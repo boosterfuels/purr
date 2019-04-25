@@ -2,6 +2,7 @@ import psycopg2
 import psycopg2.extras
 import time
 from etl.monitor import logger
+from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
 CURR_FILE = "[INIT_PG]"
 
@@ -18,6 +19,8 @@ class PgConnection:
             self.attempt_to_reconnect = False
         try:
             self.conn = psycopg2.connect(self.conn_details)
+            self.conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+
             self.cur = self.conn.cursor()
             logger.info("%s Connected to Postgres." % (CURR_FILE))
             self.ttw = 1
@@ -36,12 +39,12 @@ class PgConnection:
             self.__init__(self.conn_details, self.ttw * 2)
 
     def execute_cmd(self, cmd, values=None):
+        cur = self.conn.cursor()
         try:
             if values is not None:
-                self.cur.execute(cmd, values)
+                cur.execute(cmd, values)
             else:
-                self.cur.execute(cmd)
-                self.conn.commit()
+                cur.execute(cmd)
 
         except (psycopg2.InterfaceError, psycopg2.OperationalError):
             self.handle_interface_and_oper_error()
@@ -51,15 +54,17 @@ class PgConnection:
                 %s Executing query without fetch failed.
                 Details: %s
                 """ % (CURR_FILE, ex))
+        cur.close()
 
     def execute_cmd_with_fetch(self, cmd, values=None):
+        cur = self.conn.cursor()
+
         try:
             if values is not None:
-                self.cur.execute(cmd, values)
+                cur.execute(cmd, values)
             else:
-                self.cur.execute(cmd)
-                self.conn.commit()
-            return self.cur.fetchall()
+                cur.execute(cmd)
+            return cur.fetchall()
 
         except (psycopg2.InterfaceError, psycopg2.OperationalError):
             self.handle_interface_and_oper_error()
@@ -69,10 +74,26 @@ class PgConnection:
                 %s Executing query with fetch failed.
                 Details: %s
                 """ % (CURR_FILE, ex))
+        cur.close()
+
+    def execute_many_cmd(self, cmd, values):
+        cur = self.conn.cursor()
+        try:
+            cur.executemany(cmd, values)
+        except (psycopg2.InterfaceError, psycopg2.OperationalError):
+            self.handle_interface_and_oper_error()
+        except Exception as ex:
+            logger.error(
+                """
+                %s Executing many failed.
+                Details: %s
+                """ % (CURR_FILE, ex))
+        cur.close()
 
     def poll(self):
-        self.cur.execute()
-        self.cur.commit()
+        cur = self.conn.cursor()
+        cur.execute()
+        cur.close()
 
     def notifies(self):
         return self.conn.notifies

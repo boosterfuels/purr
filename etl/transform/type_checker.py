@@ -1,3 +1,5 @@
+from bson.json_util import ObjectId
+import datetime
 import re
 
 
@@ -13,42 +15,36 @@ def get_type_pg(item):
     pg_type = None
     item_type = type(item)
 
-    types = {
-        "bool": 'boolean',
-        "int": 'double precision',
-        "float": 'double precision',
-        "str": 'text',
-        "datetime.datetime": 'timestamp',
-        "ObjectId": 'text',
-        "dict": 'boolean',
-        "list": 'jsonb',
-    }
+    if item_type is bool:
+        pg_type = 'boolean'
 
-    if str(item_type) in types.keys():
-        pg_type = types[str(item_type)]
-    elif item_type is type(None):
+    elif item_type is int:
+        pg_type = 'double precision'
+
+    elif item_type is float:
+        pg_type = 'double precision'
+
+    elif item_type is str:
+        pg_type = 'text'
+
+    elif item_type is datetime.datetime:
+        pg_type = 'timestamp'
+
+    elif item_type is ObjectId:
+        pg_type = 'text'
+
+    elif item_type is dict:
+        pg_type = 'jsonb'
+
+    elif item_type is list:
+        pg_type = 'jsonb'
+
+    elif isinstance(item_type, type(None)):
         item = 'null'
-
     else:
         pg_type = 'jsonb'
 
     return item, pg_type
-
-
-def rename(name_old, type_orig, type_new):
-    name_new = None
-    if type_equal(type_orig, type_new) is True:
-        return name_new
-    elif type_new == 'text':
-        if type_orig not in ['character', 'text']:
-            name_new = "%s_t" % name_old
-    elif type_new == 'float':
-        name_new = "%s_f" % name_old
-    elif type_new == 'boolean':
-        name_new = "%s_b" % name_old
-    elif type_new == 'integer':
-        name_new = "%s_i" % name_old
-    return name_new
 
 
 def type_equal(old, new):
