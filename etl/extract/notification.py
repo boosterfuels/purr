@@ -1,6 +1,6 @@
 from threading import Thread
 from etl.monitor import logger
-
+import time
 
 class NotificationThread(Thread):
     conn = None
