@@ -160,8 +160,15 @@ class Tailer(extractor.Extractor):
         ts = time.time()
         for i in range(len(ids_log)):
             id = ids_log[i]
+            doc = None
+            try:
+                doc = str(docs_useful[i])
+            except:
+                logger.error("%s Converting log entry failed. Details: %s\n Document: " %
+                             (CURR_FILE, ex))
+                logger.error(docs_useful[i])
             row = [oper, r.relation_name, id, ts,
-                   merged, json.dumps(docs_useful[i]) or None]
+                   merged, doc]
             log_row = tuple(row)
             log_entries.append(log_row)
         try:
@@ -315,7 +322,7 @@ class Tailer(extractor.Extractor):
                             self.handle_multiple(docs, updated_at)
                             docs = []
                     except Exception as ex:
-                        logger.error("%s Cursor error %s" % (CURR_FILE, ex))
+                        logger.error("%s Cursor error: %s" % (CURR_FILE, ex))
                 cursor.close()
                 continue
         except StopIteration as e:
