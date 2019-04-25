@@ -3,6 +3,18 @@ import time
 from etl.load import table, row
 from etl.monitor import logger
 
+table_desc = {
+    "purr_log": {
+        "attrs": ["id", "operation", "relation", "obj_id", "ts", "merged", "document"],
+        "types": ["SERIAL", "TEXT", "TEXT", "TEXT", "INTEGER", "BOOLEAN", "TEXT"],
+        "pks": ["id", "ts"]
+    },
+    "purr_info": {
+        "attrs": ["id", "relation", "latest_successful_ts"],
+        "types": ["INTEGER", "TEXT", "TEXT"]
+    }
+}
+
 
 def create_stat_table(db, schema='public'):
     """
@@ -21,8 +33,8 @@ def create_stat_table(db, schema='public'):
 
     """
     table_name = "purr_info"
-    attrs = ["id", "relation", "latest_successful_ts"]
-    types = ["INTEGER", "TEXT", "TEXT"]
+    attrs = table_desc[table_name]["attrs"]
+    types = table_desc[table_name]["types"]
     values = [0, None, int(time.time())]
     try:
         table.create(db, schema, table_name, attrs, types)
@@ -96,9 +108,10 @@ def create_log_table(db, schema='public'):
 
     """
     table_name = "purr_log"
-    attrs = ["id", "operation", "relation", "obj_id", "ts", "merged"]
-    pks = ["id", "ts"]
-    types = ["SERIAL", "TEXT", "TEXT", "TEXT", "INTEGER", "BOOLEAN"]
+    attrs = table_desc[table_name]["attrs"]
+    types = table_desc[table_name]["types"]
+    pks = table_desc[table_name]["pks"]
+
     values = [int(time.time())]
     try:
         table.drop(db, schema, [table_name])
@@ -127,7 +140,8 @@ def log_rows(db, schema, values):
 
     """
     table_name = "purr_log"
-    attrs = ["operation", "relation", "obj_id", "ts", "merged"]
+    # id is SERIAL type, we can skip it when inserting rows:
+    attrs = table_desc[table_name]["attrs"][1:]
     try:
         row.insert_bulk(db, schema, table_name, attrs, values)
     except Exception as ex:

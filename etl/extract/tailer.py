@@ -7,6 +7,7 @@ from bson import Timestamp
 from etl.transform import relation
 from etl.monitor import logger
 from etl.extract import extractor, transfer_info
+import json
 
 INSERT = "i"
 UPDATE = "u"
@@ -157,14 +158,16 @@ class Tailer(extractor.Extractor):
 
         log_entries = []
         ts = time.time()
-        for id in ids_log:
-            row = [oper, r.relation_name, id, ts, merged]
+        for i in range(len(ids_log)):
+            id = ids_log[i]
+            row = [oper, r.relation_name, id, ts,
+                   merged, json.dumps(docs_useful[i]) or None]
             log_row = tuple(row)
             log_entries.append(log_row)
         try:
             transfer_info.log_rows(self.pg, self.schema, log_entries)
         except Exception as ex:
-            logger.error(ex)
+            logger.error("%s Logging failed. Details: %s" % (CURR_FILE, ex))
 
     def transform_and_load_many(self, docs_details):
         """
