@@ -285,7 +285,7 @@ class Extractor():
 
         # Start transferring docs
         nr_of_docs = docs.count()
-        nr_of_transferred = 500
+        nr_of_transferred = 1000
         i = 0
         transferring = []
         for doc in docs:
