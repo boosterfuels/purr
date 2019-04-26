@@ -163,7 +163,7 @@ class Tailer(extractor.Extractor):
             doc = None
             try:
                 doc = str(docs_useful[i])
-            except:
+            except Exception as ex:
                 logger.error("%s Converting log entry failed. Details: %s\n Document: " %
                              (CURR_FILE, ex))
                 logger.error(docs_useful[i])
@@ -314,7 +314,7 @@ class Tailer(extractor.Extractor):
                                 docs.append(doc)
                         time.sleep(1)
                         seconds = datetime.utcnow().second
-                        if (seconds > SECONDS_BETWEEN_FLUSHES and len(docs) or len(docs) > 50):
+                        if (seconds > SECONDS_BETWEEN_FLUSHES and len(docs) or len(docs) > 100):
                             logger.info("""
                             %s Flushing after %s seconds.
                             Number of documents: %s
