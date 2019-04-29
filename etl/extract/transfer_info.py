@@ -63,7 +63,8 @@ def get_latest_successful_ts(db, schema='public'):
   get_latest_successful_ts(pg, 'purr')
 
   """
-    cmd = "SELECT latest_successful_ts FROM %s.purr_info;" % (schema)
+    table_name = 'purr_info'
+    cmd = "SELECT latest_successful_ts FROM %s.%s;" % (schema, table_name)
 
     try:
         res = db.execute_cmd_with_fetch(cmd)
