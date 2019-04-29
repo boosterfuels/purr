@@ -101,6 +101,7 @@ class TestTailer(unittest.TestCase):
         assert mocked == docs_useful and merged is True
 
     def test_handle_multiple(self):
+        transfer_info.create_log_table(pg, 'public')
         reset_dataset()
         oplog_entries = mock.oplog_entries_update
         create_and_populate_company_pg()
@@ -177,7 +178,7 @@ class TestTailer(unittest.TestCase):
                                merged)
         cursor.execute(
             """SELECT operation,
-            relation, obj_id, merged, document FROM purr_log;""")
+            relation, obj_id, merged, document FROM purr_oplog;""")
         res = cursor.fetchone()
         cursor.close()
         mock = tuple(
@@ -210,7 +211,7 @@ class TestTailer(unittest.TestCase):
                                merged)
         cursor.execute(
             """SELECT operation,
-            relation, obj_id, merged, document FROM purr_log order by id;""")
+            relation, obj_id, merged, document FROM purr_oplog order by id;""")
         res = cursor.fetchall()
         mock = [
             tuple(
