@@ -65,6 +65,32 @@ def prepare_docs_for_update(docs):
     return docs_useful, merge_similar
 
 
+def log_tailed_docs(pg, schema, docs_useful, ids_log, table_name, oper, merged):
+    log_entries = []
+    ts = time.time()
+    logger.info("IDs: %s\n" % ids_log)
+    for i in range(len(ids_log)):
+        id = ids_log[i]
+        doc = "no entry"
+        try:
+            if docs_useful[i] is not None:
+                doc = str(docs_useful[i])
+            else:
+                doc = "Doc is NULL"
+        except Exception as ex:
+            logger.error("%s Converting log entry failed. Details: %s\n Document: " %
+                         (CURR_FILE, ex))
+            logger.error(docs_useful[i])
+        row = [oper, table_name, id, ts,
+               merged, doc]
+        log_row = tuple(row)
+        log_entries.append(log_row)
+    try:
+        transfer_info.log_rows(pg, schema, log_entries)
+    except Exception as ex:
+        logger.error("%s Logging failed. Details: %s" % (CURR_FILE, ex))
+
+
 class Tailer(extractor.Extractor):
     """
     Class for extracting data from the oplog.
@@ -103,31 +129,6 @@ class Tailer(extractor.Extractor):
         except Exception as ex:
             logger.error("%s Deatils %s" % (CURR_FILE, ex))
             return False
-
-    def log_tailed_docs(self, docs_useful, ids_log, r, oper, merged):
-        log_entries = []
-        ts = time.time()
-        logger.info("IDs: %s\n" % ids_log)
-        for i in range(len(ids_log)):
-            id = ids_log[i]
-            doc = "no entry"
-            try:
-                if docs_useful[i] is not None:
-                    doc = str(docs_useful[i])
-                else:
-                    doc = "Doc is NULL"
-            except Exception as ex:
-                logger.error("%s Converting log entry failed. Details: %s\n Document: " %
-                             (CURR_FILE, ex))
-                logger.error(docs_useful[i])
-            row = [oper, r.relation_name, id, ts,
-                   merged, doc]
-            log_row = tuple(row)
-            log_entries.append(log_row)
-        try:
-            transfer_info.log_rows(self.pg, self.schema, log_entries)
-        except Exception as ex:
-            logger.error("%s Logging failed. Details: %s" % (CURR_FILE, ex))
 
     def flush(self, docs, oper, r):
         """
@@ -181,7 +182,11 @@ class Tailer(extractor.Extractor):
                     """%s Deleting multiple documents failed: %s.
                     Details: %s""" % (CURR_FILE, docs, ex))
 
-        self.log_tailed_docs(docs_useful, ids_log, r, oper, merged)
+        log_tailed_docs(
+            self.pg, self.schema,
+            docs_useful, ids_log,
+            r.relation_name, oper, merged
+        )
 
     def transform_and_load_many(self, docs_details):
         """
