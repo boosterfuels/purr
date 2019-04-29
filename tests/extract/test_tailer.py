@@ -176,9 +176,10 @@ class TestTailer(unittest.TestCase):
                                ids_log, table_name, oper,
                                merged)
         cursor.execute(
-            """SELECT operation, 
+            """SELECT operation,
             relation, obj_id, merged, document FROM purr_log;""")
         res = cursor.fetchone()
+        cursor.close()
         mock = tuple(
             ['u',
              'some_relation',
@@ -186,4 +187,45 @@ class TestTailer(unittest.TestCase):
              True,
              "{'_id': '58a32cfda51183070034909b', 'updatedAt': datetime.datetime(2019, 4, 29, 11, 26, 50, 703000)}"
              ])
+        assert mock == res
+
+    def test_log_tailed_docs_multiple(self):
+        transfer_info.create_log_table(pg)
+
+        ids_log = ['58a32cfda51183070034909b', '58a32cfda51183070034909c']
+        docs = [{
+            '_id': '58a32cfda51183070034909b',
+            'updatedAt': datetime.datetime(2019, 4, 29, 11, 26, 50, 703000)
+        }, {
+            '_id': '58a32cfda51183070034909c',
+            'updatedAt': datetime.datetime(2019, 5, 21, 2, 24, 24, 5)
+        }]
+        table_name = 'some_relation'
+        oper = 'u'
+        merged = False
+        cursor = pg.conn.cursor()
+        schema = 'public'
+        tailer.log_tailed_docs(pg, schema, docs,
+                               ids_log, table_name, oper,
+                               merged)
+        cursor.execute(
+            """SELECT operation,
+            relation, obj_id, merged, document FROM purr_log order by id;""")
+        res = cursor.fetchall()
+        mock = [
+            tuple(
+                ['u',
+                 'some_relation',
+                 '58a32cfda51183070034909b',
+                 False,
+                 "{'_id': '58a32cfda51183070034909b', 'updatedAt': datetime.datetime(2019, 4, 29, 11, 26, 50, 703000)}"
+                 ]),
+            tuple(
+                ['u',
+                 'some_relation',
+                 '58a32cfda51183070034909c',
+                 False,
+                 "{'_id': '58a32cfda51183070034909c', 'updatedAt': datetime.datetime(2019, 5, 21, 2, 24, 24, 5)}"
+                 ])]
+        cursor.close()
         assert mock == res

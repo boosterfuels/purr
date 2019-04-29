@@ -69,7 +69,8 @@ def log_tailed_docs(pg, schema, docs_useful, ids_log, table_name, oper, merged):
     log_entries = []
     ts = time.time()
     logger.info("IDs: %s\n" % ids_log)
-    for i in range(len(ids_log)):
+    logger.info("n(ids)=%s; n(docs_useful)=%s\n" % (len(ids_log), len(docs_useful)))
+    for i in range(len(docs_useful)):
         id = ids_log[i]
         doc = "no entry"
         try:
