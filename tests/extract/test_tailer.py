@@ -1,6 +1,7 @@
 from etl.extract import collection
 from etl.extract import tailer
 from etl.extract import extractor
+from etl.extract import transfer_info
 import unittest
 from tests.meta import mock
 from bson import ObjectId
@@ -154,8 +155,35 @@ class TestTailer(unittest.TestCase):
         if res != mocked_arja:
             for i in range(len(mocked_arja)):
                 if mocked_arja[i] != res[i]:
-                    print(res)
-                    print(mocked_arja)
                     assert False
 
         assert True
+
+    def test_log_tailed_docs_one(self):
+        transfer_info.create_log_table(pg)
+
+        ids_log = ['58a32cfda51183070034909b']
+        docs = [{
+            '_id': '58a32cfda51183070034909b',
+            'updatedAt': datetime.datetime(2019, 4, 29, 11, 26, 50, 703000)
+        }]
+        table_name = 'some_relation'
+        oper = 'u'
+        merged = True
+        cursor = pg.conn.cursor()
+        schema = 'public'
+        tailer.log_tailed_docs(pg, schema, docs,
+                               ids_log, table_name, oper,
+                               merged)
+        cursor.execute(
+            """SELECT operation, 
+            relation, obj_id, merged, document FROM purr_log;""")
+        res = cursor.fetchone()
+        mock = tuple(
+            ['u',
+             'some_relation',
+             '58a32cfda51183070034909b',
+             True,
+             "{'_id': '58a32cfda51183070034909b', 'updatedAt': datetime.datetime(2019, 4, 29, 11, 26, 50, 703000)}"
+             ])
+        assert mock == res
