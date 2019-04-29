@@ -68,8 +68,9 @@ def prepare_docs_for_update(docs):
 def log_tailed_docs(pg, schema, docs_useful, ids_log, table_name, oper, merged):
     log_entries = []
     ts = time.time()
-    logger.info("IDs: %s\n" % ids_log)
-    logger.info("n(ids)=%s; n(docs_useful)=%s\n" % (len(ids_log), len(docs_useful)))
+    logger.info("IDs: %s" % ids_log)
+    if len(ids_log) != len(docs_useful):
+        logger.error("n(ids)=%s; n(docs_useful)=%s" % (len(ids_log), len(docs_useful)))
     for i in range(len(docs_useful)):
         id = ids_log[i]
         doc = "no entry"
