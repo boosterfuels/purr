@@ -12,7 +12,7 @@ def test_update_latest_successful_ts():
     pass
 
 
-def test_create_log_table():
+def test_create_oplog_table():
     pass
 
 

@@ -101,7 +101,7 @@ class TestTailer(unittest.TestCase):
         assert mocked == docs_useful and merged is True
 
     def test_handle_multiple(self):
-        transfer_info.create_log_table(pg, 'public')
+        transfer_info.create_oplog_table(pg, 'public')
         reset_dataset()
         oplog_entries = mock.oplog_entries_update
         create_and_populate_company_pg()
@@ -161,7 +161,7 @@ class TestTailer(unittest.TestCase):
         assert True
 
     def test_log_tailed_docs_one(self):
-        transfer_info.create_log_table(pg)
+        transfer_info.create_oplog_table(pg)
 
         ids_log = ['58a32cfda51183070034909b']
         docs = [{
@@ -191,7 +191,7 @@ class TestTailer(unittest.TestCase):
         assert mock == res
 
     def test_log_tailed_docs_multiple(self):
-        transfer_info.create_log_table(pg)
+        transfer_info.create_oplog_table(pg)
 
         ids_log = ['58a32cfda51183070034909b', '58a32cfda51183070034909c']
         docs = [{

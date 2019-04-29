@@ -90,7 +90,7 @@ def update_latest_successful_ts(db, schema, dt):
         )
 
 
-def create_log_table(db, schema='public'):
+def create_oplog_table(db, schema='public'):
     """
     Logs the operation, relation name, object id and
     timestamp for each entry of the oplog.
@@ -105,7 +105,7 @@ def create_log_table(db, schema='public'):
 
     Example
     -------
-    create_log_table(pg, 'purr')
+    create_oplog_table(pg, 'purr')
 
     """
     table_name = "purr_oplog"
@@ -137,7 +137,7 @@ def log_rows(db, schema, values):
 
     Example
     -------
-    create_log_table(pg, 'purr')
+    create_oplog_table(pg, 'purr')
 
     """
     table_name = "purr_oplog"
