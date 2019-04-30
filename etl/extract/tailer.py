@@ -70,12 +70,13 @@ def log_tailed_docs(pg, schema, docs_useful, ids_log, table_name, oper, merged):
     ts = time.time()
     logger.info("IDs: %s" % ids_log)
     if len(ids_log) != len(docs_useful):
-        logger.error("n(ids)=%s; n(docs_useful)=%s" % (len(ids_log), len(docs_useful)))
+        logger.error("n(ids)=%s; n(docs_useful)=%s" %
+                     (len(ids_log), len(docs_useful)))
     for i in range(len(docs_useful)):
         id = ids_log[i]
         doc = "no entry"
         try:
-            if docs_useful[i] is not None:
+            if docs_useful[i] is not None and oper != 'd':
                 doc = str(docs_useful[i])
             else:
                 doc = "Doc is NULL"
@@ -142,7 +143,8 @@ class Tailer(extractor.Extractor):
         merged = False
 
         if oper == INSERT:
-            logger.info("%s Inserting %s documents" % (CURR_FILE, len(docs)))
+            logger.info("%s Inserting %s documents into '%s'" %
+                        (CURR_FILE, len(docs), r.relation_name))
 
             # TODO: check extra props
             for doc in docs:
@@ -158,7 +160,8 @@ class Tailer(extractor.Extractor):
                     """ % (CURR_FILE, docs, ex))
 
         elif oper == UPDATE:
-            logger.info("%s Updating %s documents" % (CURR_FILE, len(docs)))
+            logger.info("%s Updating %s documents in '%s'" %
+                        (CURR_FILE, len(docs), r.relation_name))
             r.created = True
 
             (docs_useful, merged) = prepare_docs_for_update(docs)
@@ -172,7 +175,7 @@ class Tailer(extractor.Extractor):
                     Details: %s""" % (CURR_FILE, docs, ex))
 
         elif oper == DELETE:
-            logger.info("%s Deleting %s documents" % (CURR_FILE, len(docs)))
+            logger.info("%s Deleting %s documents from '%s'" % (CURR_FILE, len(docs), r.relation_name))
             ids = []
             for doc in docs:
                 ids.append(doc["o"])
@@ -211,9 +214,6 @@ class Tailer(extractor.Extractor):
         r = relation.Relation(self.pg, self.schema, table_name_pg, True)
 
         oper = docs_details[0]["op"]
-        logger.info("%s [%s] [%s]" % (
-            CURR_FILE, table_name_mdb, oper
-        ))
 
         docs_with_equal_oper = []
         for doc_details in docs_details:
