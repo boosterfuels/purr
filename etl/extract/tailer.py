@@ -328,7 +328,7 @@ class Tailer(extractor.Extractor):
                                 docs.append(doc)
                         time.sleep(1)
                         seconds = datetime.utcnow().second
-                        if (seconds > SECONDS_BETWEEN_FLUSHES and len(docs) or len(docs) > 100):
+                        if ((seconds > SECONDS_BETWEEN_FLUSHES and len(docs)) or (len(docs) > 100)):
                             logger.info("""
                             %s Flushing after %s seconds.
                             Number of documents: %s
