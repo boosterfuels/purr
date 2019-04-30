@@ -4,7 +4,7 @@ from etl.load import table, row
 from etl.monitor import logger
 
 table_desc = {
-    "purr_log": {
+    "purr_oplog": {
         "attrs": ["id", "operation", "relation", "obj_id", "ts", "merged", "document"],
         "types": ["SERIAL", "TEXT", "TEXT", "TEXT", "INTEGER", "BOOLEAN", "TEXT"],
         "pks": ["id", "ts"]
@@ -63,7 +63,8 @@ def get_latest_successful_ts(db, schema='public'):
   get_latest_successful_ts(pg, 'purr')
 
   """
-    cmd = "SELECT latest_successful_ts FROM %s.purr_info;" % (schema)
+    table_name = 'purr_info'
+    cmd = "SELECT latest_successful_ts FROM %s.%s;" % (schema, table_name)
 
     try:
         res = db.execute_cmd_with_fetch(cmd)
@@ -89,7 +90,7 @@ def update_latest_successful_ts(db, schema, dt):
         )
 
 
-def create_log_table(db, schema='public'):
+def create_oplog_table(db, schema='public'):
     """
     Logs the operation, relation name, object id and
     timestamp for each entry of the oplog.
@@ -104,10 +105,10 @@ def create_log_table(db, schema='public'):
 
     Example
     -------
-    create_log_table(pg, 'purr')
+    create_oplog_table(pg, 'purr')
 
     """
-    table_name = "purr_log"
+    table_name = "purr_oplog"
     attrs = table_desc[table_name]["attrs"]
     types = table_desc[table_name]["types"]
     pks = table_desc[table_name]["pks"]
@@ -136,10 +137,10 @@ def log_rows(db, schema, values):
 
     Example
     -------
-    create_log_table(pg, 'purr')
+    create_oplog_table(pg, 'purr')
 
     """
-    table_name = "purr_log"
+    table_name = "purr_oplog"
     # id is SERIAL type, we can skip it when inserting rows:
     attrs = table_desc[table_name]["attrs"][1:]
     try:

@@ -65,6 +65,35 @@ def prepare_docs_for_update(docs):
     return docs_useful, merge_similar
 
 
+def log_tailed_docs(pg, schema, docs_useful, ids_log, table_name, oper, merged):
+    log_entries = []
+    ts = time.time()
+    logger.info("IDs: %s" % ids_log)
+    if len(ids_log) != len(docs_useful):
+        logger.error("n(ids)=%s; n(docs_useful)=%s" %
+                     (len(ids_log), len(docs_useful)))
+    for i in range(len(docs_useful)):
+        id = ids_log[i]
+        doc = "no entry"
+        try:
+            if docs_useful[i] is not None and oper != 'd':
+                doc = str(docs_useful[i])
+            else:
+                doc = "Doc is NULL"
+        except Exception as ex:
+            logger.error("%s Converting log entry failed. Details: %s\n Document: " %
+                         (CURR_FILE, ex))
+            logger.error(docs_useful[i])
+        row = [oper, table_name, id, ts,
+               merged, doc]
+        log_row = tuple(row)
+        log_entries.append(log_row)
+    try:
+        transfer_info.log_rows(pg, schema, log_entries)
+    except Exception as ex:
+        logger.error("%s Logging failed. Details: %s" % (CURR_FILE, ex))
+
+
 class Tailer(extractor.Extractor):
     """
     Class for extracting data from the oplog.
@@ -114,7 +143,8 @@ class Tailer(extractor.Extractor):
         merged = False
 
         if oper == INSERT:
-            logger.info("%s Inserting %s documents" % (CURR_FILE, len(docs)))
+            logger.info("%s Inserting %s documents into '%s'" %
+                        (CURR_FILE, len(docs), r.relation_name))
 
             # TODO: check extra props
             for doc in docs:
@@ -130,7 +160,8 @@ class Tailer(extractor.Extractor):
                     """ % (CURR_FILE, docs, ex))
 
         elif oper == UPDATE:
-            logger.info("%s Updating %s documents" % (CURR_FILE, len(docs)))
+            logger.info("%s Updating %s documents in '%s'" %
+                        (CURR_FILE, len(docs), r.relation_name))
             r.created = True
 
             (docs_useful, merged) = prepare_docs_for_update(docs)
@@ -144,7 +175,7 @@ class Tailer(extractor.Extractor):
                     Details: %s""" % (CURR_FILE, docs, ex))
 
         elif oper == DELETE:
-            logger.info("%s Deleting %s documents" % (CURR_FILE, len(docs)))
+            logger.info("%s Deleting %s documents from '%s'" % (CURR_FILE, len(docs), r.relation_name))
             ids = []
             for doc in docs:
                 ids.append(doc["o"])
@@ -156,25 +187,11 @@ class Tailer(extractor.Extractor):
                     """%s Deleting multiple documents failed: %s.
                     Details: %s""" % (CURR_FILE, docs, ex))
 
-        log_entries = []
-        ts = time.time()
-        for i in range(len(ids_log)):
-            id = ids_log[i]
-            doc = None
-            try:
-                doc = str(docs_useful[i])
-            except Exception as ex:
-                logger.error("%s Converting log entry failed. Details: %s\n Document: " %
-                             (CURR_FILE, ex))
-                logger.error(docs_useful[i])
-            row = [oper, r.relation_name, id, ts,
-                   merged, doc]
-            log_row = tuple(row)
-            log_entries.append(log_row)
-        try:
-            transfer_info.log_rows(self.pg, self.schema, log_entries)
-        except Exception as ex:
-            logger.error("%s Logging failed. Details: %s" % (CURR_FILE, ex))
+        log_tailed_docs(
+            self.pg, self.schema,
+            docs_useful, ids_log,
+            r.relation_name, oper, merged
+        )
 
     def transform_and_load_many(self, docs_details):
         """
@@ -197,9 +214,6 @@ class Tailer(extractor.Extractor):
         r = relation.Relation(self.pg, self.schema, table_name_pg, True)
 
         oper = docs_details[0]["op"]
-        logger.info("%s [%s] [%s]" % (
-            CURR_FILE, table_name_mdb, oper
-        ))
 
         docs_with_equal_oper = []
         for doc_details in docs_details:
@@ -314,7 +328,7 @@ class Tailer(extractor.Extractor):
                                 docs.append(doc)
                         time.sleep(1)
                         seconds = datetime.utcnow().second
-                        if (seconds > SECONDS_BETWEEN_FLUSHES and len(docs) or len(docs) > 100):
+                        if ((seconds > SECONDS_BETWEEN_FLUSHES and len(docs)) or (len(docs) > 100)):
                             logger.info("""
                             %s Flushing after %s seconds.
                             Number of documents: %s
