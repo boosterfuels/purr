@@ -16,7 +16,7 @@ DELETE = "d"
 CURR_FILE = "[TAILER]"
 
 
-def prepare_docs_for_update(docs):
+def prepare_docs_for_update(coll_settings, docs):
     docs_useful = []
     docs_id = []
     for doc in docs:
@@ -47,7 +47,16 @@ def prepare_docs_for_update(docs):
         if "$set" not in temp.keys() and "$unset" not in temp.keys():
             # case when the document was not updated
             # using a query, but the IDE e.g. Studio3T:
+            logger.info("Direct update:")
             doc_useful.update(temp)
+            fields = [x[":source"]
+                      for x in coll_settings[":columns"]]
+            for k in fields:
+                if k == '_id':
+                    temp[k] = str(temp[k])
+                    doc_useful.update(temp)
+                if k not in temp.keys():
+                    unset[k] = '$unset'
             for k, v in temp.items():
                 if v is None:
                     unset[k] = '$unset'
@@ -164,7 +173,12 @@ class Tailer(extractor.Extractor):
                         (CURR_FILE, len(docs), r.relation_name))
             r.created = True
 
-            (docs_useful, merged) = prepare_docs_for_update(docs)
+            coll_name = docs[0]["coll_name"]
+            coll_settings = self.coll_settings[coll_name]
+            (docs_useful, merged) = prepare_docs_for_update(
+                coll_settings,
+                docs
+            )
             for doc in docs_useful:
                 ids_log.append(str(doc["_id"]))
             try:
@@ -175,7 +189,8 @@ class Tailer(extractor.Extractor):
                     Details: %s""" % (CURR_FILE, docs, ex))
 
         elif oper == DELETE:
-            logger.info("%s Deleting %s documents from '%s'" % (CURR_FILE, len(docs), r.relation_name))
+            logger.info("%s Deleting %s documents from '%s'" %
+                        (CURR_FILE, len(docs), r.relation_name))
             ids = []
             for doc in docs:
                 ids.append(doc["o"])
