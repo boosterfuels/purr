@@ -14,6 +14,17 @@ query = mock.query
 ex = extractor.Extractor(pg, mongo, mock.setup_pg,
                          mock.settings, mock.coll_config_company_employee)
 
+settings_company = {
+    ':columns':
+    [
+        {':source': '_id', ':type': 'TEXT', 'id': None},
+        {':source': 'active', ':type': 'BOOLEAN', 'active': None},
+        {':source': 'domains', ':type': 'JSONB', 'domains': None},
+        {':source': 'signupCode', ':type': 'TEXT', 'signup_code': None}
+    ],
+    ':meta': {':extra_props': 'JSONB', ':table': 'company'}
+}
+
 
 def create_and_populate_company_pg():
     cursor = pg.conn.cursor()
@@ -81,31 +92,99 @@ class TestTailer(unittest.TestCase):
         mocked = [{'_id': '5caf5998a54d758375bd9928',
                    'active': True, 'name': True}]
 
-        collection_settings = mock.coll_config
-        collection_name = "Company"
         (docs_useful, merged) = tailer.prepare_docs_for_update(
-            collection_settings, docs, collection_name)
+            settings_company, docs)
+        assert mocked == docs_useful and merged is False
+
+    def test_prepare_docs_for_update_one_no_set_no_unset(self):
+        docs = [{'coll_name': 'Company',
+                 'db_name': 'test_purrito',
+                 'o': {
+                     '_id': ObjectId('5caf5998a54d758375bd9928'),
+                     'active': True,
+                     'name': True
+                 },
+                 'o2': {'_id': ObjectId('5caf5998a54d758375bd9928')},
+                 'op': 'u'}]
+        mocked = [{'_id': '5caf5998a54d758375bd9928',
+                   'active': True, 'name': True, 'domains': '$unset', 'signupCode': '$unset'}]
+
+        (docs_useful, merged) = tailer.prepare_docs_for_update(
+            settings_company, docs)
+
+        assert mocked == docs_useful and merged is False
+
+    def test_prepare_docs_for_update_one_no_set_no_unset_all_nulls(self):
+        docs = [{'coll_name': "Company",
+                 'db_name': 'test_purrito',
+                 'o': {
+                     '_id': ObjectId('5caf5998a54d758375bd9928'),
+                     'active': None
+                 },
+                 'o2': {'_id': ObjectId('5caf5998a54d758375bd9928')},
+                 'op': 'u'}]
+        mocked = [{
+            '_id': '5caf5998a54d758375bd9928',
+            'active': '$unset',
+            'domains': '$unset',
+            'signupCode': '$unset'
+        }]
+        (docs_useful, merged) = tailer.prepare_docs_for_update(
+            settings_company, docs)
+        assert mocked == docs_useful and merged is False
+
+    def test_prepare_docs_for_update_multiple_merged_mixed(self):
+        """
+        This test covers the case when one document of a collection
+        is updated directly through the IDE (e.g. Studio3T) and
+        another is updated using an update query:
+        coll.update({}, {"$set"}, {"$unset"})
+        """
+        docs = [{'coll_name': 'Company',
+                 'db_name': 'test_purrito',
+                 'o': {
+                     '_id': ObjectId('5caf5998a54d758375bd9928'),
+                     'active': True,
+                     'name': True
+                 },
+                 'o2': {'_id': ObjectId('5caf5998a54d758375bd9928')},
+                 'op': 'u'},
+
+                {'coll_name': 'Company',
+                 'db_name': 'test_purrito',
+                 'o': {'$set': {'name': 'stuffy'}, '$unset': {'active': True}},
+                 'o2': {'_id': ObjectId('5caf5998a54d758375bd9929')},
+                 'op': 'u'}]
+
+        mocked = [{'_id': '5caf5998a54d758375bd9928',
+                   'active': True, 'name': True, 'domains': '$unset', 'signupCode': '$unset'},
+                  {'_id': '5caf5998a54d758375bd9929',
+                   'active': '$unset', 'name': 'stuffy'}]
+
+        (docs_useful, merged) = tailer.prepare_docs_for_update(
+            settings_company, docs)
+
         assert mocked == docs_useful and merged is False
 
     def test_prepare_docs_for_update_multiple_merged(self):
         docs = [{'coll_name': 'Company',
                  'db_name': 'test_purrito',
                  'o': {'$set': {'active': True, 'name': True}},
-                 'o2': {'_id': ObjectId('5caf5998a54d758375bd9928')},
+                 'o2': {'_id': ObjectId('5caf5998a54d758375bd9929')},
                  'op': 'u'},
                 {'coll_name': 'Company',
                  'db_name': 'test_purrito',
                  'o': {'$set': {'name': 'stuffy'}, '$unset': {'active': True}},
-                 'o2': {'_id': ObjectId('5caf5998a54d758375bd9928')},
+                 'o2': {'_id': ObjectId('5caf5998a54d758375bd9929')},
                  'op': 'u'}]
-        mocked = [{'_id': '5caf5998a54d758375bd9928',
+        mocked = [{'_id': '5caf5998a54d758375bd9929',
                    'active': '$unset', 'name': 'stuffy'}]
 
         collection_settings = mock.coll_config
         collection_name = "Company"
 
         (docs_useful, merged) = tailer.prepare_docs_for_update(
-            collection_settings, docs, collection_name)
+            collection_settings[collection_name], docs)
 
         assert mocked == docs_useful and merged is True
 

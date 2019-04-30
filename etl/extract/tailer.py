@@ -16,7 +16,7 @@ DELETE = "d"
 CURR_FILE = "[TAILER]"
 
 
-def prepare_docs_for_update(coll_settings, docs, coll_name):
+def prepare_docs_for_update(coll_settings, docs):
     docs_useful = []
     docs_id = []
     for doc in docs:
@@ -50,8 +50,11 @@ def prepare_docs_for_update(coll_settings, docs, coll_name):
             logger.info("Direct update:")
             doc_useful.update(temp)
             fields = [x[":source"]
-                      for x in coll_settings[coll_name][":columns"]]
+                      for x in coll_settings[":columns"]]
             for k in fields:
+                if k == '_id':
+                    temp[k] = str(temp[k])
+                    doc_useful.update(temp)
                 if k not in temp.keys():
                     unset[k] = '$unset'
             for k, v in temp.items():
@@ -170,10 +173,11 @@ class Tailer(extractor.Extractor):
                         (CURR_FILE, len(docs), r.relation_name))
             r.created = True
 
+            coll_name = docs[0]["coll_name"]
+            coll_settings = self.coll_settings[coll_name]
             (docs_useful, merged) = prepare_docs_for_update(
-                self.coll_settings,
-                docs,
-                docs[0]["coll_name"]
+                coll_settings,
+                docs
             )
             for doc in docs_useful:
                 ids_log.append(str(doc["_id"]))
