@@ -290,13 +290,9 @@ class Extractor():
         nr_of_transferred = 1000
         i = 0
         transferring = []
-        # log_entries = []
         actions = []
-        if self.drop is True or self.truncate is True:
-            actions.append(['INSERT', int(time.time()), None])
-        else:
-            actions.append(['UPSERT', int(time.time()), None])
 
+        transfer_start = time.time()
         # transfer_info.log_stats(self.pg, self.schema, log_entry)
         for doc in docs:
             transferring.append(doc)
@@ -340,9 +336,17 @@ class Extractor():
                     nr_of_docs,
                     coll))
             i += 1
-        actions.append(['FULL VACUUM', int(time.time()), None])
+
+        transfer_end = time.time()
+        action = 'UPSERT'
+        if self.drop is True or self.truncate is True:
+            action = 'INSERT'
+        actions.append([action, transfer_start, transfer_end])
+
+        vacuum_start = time.time()
         r.vacuum()
-        actions.append(['FULL VACUUM', None, int(time.time())])
+        vacuum_end = time.time()
+        actions.append(['FULL VACUUM', vacuum_start, vacuum_end])
 
         log_entries = []
 
