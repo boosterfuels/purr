@@ -16,9 +16,18 @@ table_desc = {
     "purr_transfer_stats": {
         "attrs": ["id", "action", "relation", "number_of_rows", "ts_start", "ts_end"],
         "types": ["SERIAL", "TEXT", "TEXT", "INTEGER", "INTEGER", "INTEGER"]
+    },
+    "purr_error": {
+        "attrs": ["id", "location", "message", "ts"],
+        "types": ["SERIAL", "TEXT", "TEXT", "INTEGER"]
     }
 }
 
+def save_logs_to_db(db, schema='public'):
+    create_stat_table(db, schema)
+    create_oplog_table(db, schema)
+    create_transfer_stats_table(db, schema)
+    create_log_error_table(db, schema)
 
 def create_stat_table(db, schema='public'):
     """
@@ -212,3 +221,61 @@ def log_stats(db, schema, values):
         logger.error(
             "[TRANSFER_INFO] Failed to insert logs into table %s: %s"
             % (table_name, ex))
+
+
+def create_log_error_table(db, schema='public'):
+    """
+    Logs the error's location, message and timestamp 
+    when an it occurs.
+
+    Parameters
+    ----------
+    db: connection obj
+    schema: name of the schema in Postgres
+    Returns
+    -------
+    -
+
+    Example
+    -------
+    create_log_error_table(pg, 'purr')
+
+    """
+    table_name = "purr_error"
+    attrs = table_desc[table_name]["attrs"]
+    types = table_desc[table_name]["types"]
+
+    values = [int(time.time())]
+    try:
+        table.create(db, schema, table_name, attrs, types)
+        logger.info("[TRANSFER INFO] Created table %s." % (table_name))
+    except Exception as ex:
+        logger.error(
+            "[TRANSFER_INFO] Failed to create table %s: %s" % (table_name, ex))
+
+
+def log_error(db, values, schema='public'):
+    """
+    Insert the number, relation name, timestamp 
+    for each collection transfer.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+    -
+
+    Example
+    -------
+    log_stats(pg, 'purr', [])
+    """
+    
+    table_name = "purr_error"
+    # id is SERIAL type, we can skip it when inserting rows:
+    attrs = table_desc[table_name]["attrs"][1:]
+    try:
+        row.insert(db, schema, table_name, attrs, values)
+    except Exception as ex:
+        logger.error("""[TRANSFER_INFO] Failed to insert logs into table %s: %s"""
+                     % (table_name, ex))
