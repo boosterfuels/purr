@@ -1,3 +1,4 @@
+from datetime import datetime
 import time
 import os
 from etl.extract import extractor, transfer
@@ -6,6 +7,9 @@ from etl.extract import collection_map as cm
 from etl.load import init_pg as postgres
 from etl.monitor import logger
 import pkg_resources
+
+global THREADS
+THREADS = []
 
 
 def start(settings, coll_map):
@@ -52,20 +56,49 @@ def start(settings, coll_map):
     ex = extractor.Extractor(
         pg, mongo.conn, setup_pg, settings, coll_map)
 
+    start_date_time = datetime.utcnow()
+
     if mode_tailing:
-        handle_coll_map_changes(settings, coll_map, pg, mongo, ex)
+        try:
+            # first just transfer the data
+            tailing_start = False
+            thr_transfer = transfer.TransferThread(
+                settings,
+                coll_map,
+                pg,
+                mongo,
+                ex,
+                tailing_start
+            )
+            thr_transfer.start()
+            # wait until thread is finished
+            thr_transfer.join()
+            handle_coll_map_changes(settings, coll_map, pg,
+                                    mongo, ex, start_date_time)
+        except (KeyboardInterrupt, SystemExit):
+            logger.error('[CORE] Stopping transfer.')
+            for t in THREADS:
+                t.stop()
+            raise SystemExit()
+
+        except Exception as ex:
+            logger.error(
+                "[CORE] Unablex to start transfer thread. Details: %s" % ex)
+            raise SystemExit()
+
     else:
         transfer.start(ex, coll_map)
 
 
-def handle_coll_map_changes(settings, coll_map, pg, mongo, ex):
-    THREADS = []
+def handle_coll_map_changes(settings, coll_map, pg, mongo, ex, dt):
+    tailing_start = True
     try:
         thr_notification = notification.NotificationThread(pg)
         THREADS.append(thr_notification)
         thr_notification.start()
+
         thr_transfer = transfer.TransferThread(
-            settings, coll_map, pg, mongo, ex)
+            settings, coll_map, pg, mongo, ex, tailing_start, dt)
         THREADS.append(thr_transfer)
         thr_transfer.start()
         while True:
@@ -77,7 +110,7 @@ def handle_coll_map_changes(settings, coll_map, pg, mongo, ex):
                 thr_transfer.join(3)
 
                 thr_transfer = transfer.TransferThread(
-                    settings, coll_map, pg, mongo, ex)
+                    settings, coll_map, pg, mongo, ex, tailing_start, dt)
                 THREADS.append(thr_transfer)
                 thr_transfer.settings["tailing"] = False
                 thr_transfer.settings["tailing_from_db"] = True
@@ -89,6 +122,7 @@ def handle_coll_map_changes(settings, coll_map, pg, mongo, ex):
         logger.error('[CORE] Stopping all threads.')
         for t in THREADS:
             t.stop()
+        raise SystemExit()
     except Exception as ex:
         logger.error(
             "[CORE] Unable to start listener thread. Details: %s" % ex)

@@ -21,7 +21,7 @@ def start(extractor, coll_config):
 class TransferThread(Thread):
     new = False
 
-    def __init__(self, settings, coll_config, pg, mongo, ex):
+    def __init__(self, settings, coll_config, pg, mongo, ex, tail, dt=None):
         Thread.__init__(self)
         self.settings = settings
         self.coll_config = coll_config
@@ -34,30 +34,30 @@ class TransferThread(Thread):
         # initialize extractor
         self.extractor = ex
         self.terminate = False
+        self.dt = dt
+        self.start_tailing = tail
 
     def run(self):
         # collections which will be transferred
-        setup_pg = self.settings["postgres"]
+        if self.start_tailing is False:
+            setup_pg = self.settings["postgres"]
 
-        start_date_time = datetime.utcnow()
+            tailing_cmd = self.settings["tailing_from"]
+            tailing_db = self.settings["tailing_from_db"]
+            if tailing_db is False and tailing_cmd is None:
 
-        tailing_cmd = self.settings["tailing_from"]
-        tailing_db = self.settings["tailing_from_db"]
-        if tailing_db is False and tailing_cmd is None:
+                schema.create(self.pg, setup_pg["schema_name"])
 
-            schema.create(self.pg, setup_pg["schema_name"])
+                # after extracting all collections tailing
+                # will start from this timestamp
+                if setup_pg["schema_reset"] is True:
+                    schema.reset(self.pg, setup_pg["schema_name"])
 
-            # after extracting all collections tailing
-            # will start from this timestamp
-            if setup_pg["schema_reset"] is True:
-                schema.reset(self.pg, setup_pg["schema_name"])
+                transfer_info.save_logs_to_db(self.pg, setup_pg["schema_name"])
 
-            transfer_info.create_stat_table(self.pg, setup_pg["schema_name"])
-            transfer_info.create_oplog_table(self.pg, setup_pg["schema_name"])
-            transfer_info.create_transfer_stats_table(self.pg, setup_pg["schema_name"])
-            
-            start(self.extractor, self.coll_config)
-        self.tail(start_date_time)
+                start(self.extractor, self.coll_config)
+        else:
+            self.tail(self.dt)
 
     def stop(self):
         self.terminate = True
