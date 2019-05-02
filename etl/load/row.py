@@ -48,10 +48,7 @@ def insert(db, schema, table, attrs, values):
     # MoSQL ignores the document and logs a warning
     # if a document could not be inserted.
     # We will decide later what to do with DataErrors.
-    try:
-        db.execute_cmd(cmd, values)
-    except Exception as ex:
-        logger.error("[ROW] Insert failed: %s", ex)
+    db.execute_cmd(cmd, values)
 
 
 def insert_bulk(db, schema, table, attrs, values):
@@ -145,17 +142,7 @@ def upsert_bulk(db, schema, table, attrs, rows):
     """ % (
         schema, table.lower(), attrs, temp,
         constraint, attrs_reduced, excluded)
-    try:
-        db.execute_many_cmd(cmd, rows)
-    except Exception as ex:
-        logger.error("[ROW] Relation: %s.%s; UPSERT failed: %s" %
-                     (schema, table, ex))
-        ids = [x[0] for x in rows]
-        logger.error("[ROW] IDs: %s" % ", ".join(ids))
-
-        if len(rows) <= NR_OF_ROWS_TO_DISPLAY:
-            logger.error("[ROW] CMD:\n %s" % cmd)
-            logger.error("[ROW] VALUES:\n %s" % rows)
+    db.execute_many_cmd(cmd, rows)
 
 
 def upsert_bulk_tail(db, schema, table, attrs, rows):
@@ -180,24 +167,20 @@ def upsert_bulk_tail(db, schema, table, attrs, rows):
     -------
     upsert_bulk_tail(pg, 'public', 'employee', [attributes], [values])
     """
-    try:
-        for i in range(0, len(rows)):
-            row = rows[i]
-            values = []
-            attrs_reduced = []
-            for j in range(0, len(attrs)):
-                if row[j] == '$unset':
-                    values.append(None)
-                    attrs_reduced.append(attrs[j])
-                elif row[j] is not None:
-                    values.append(row[j])
-                    attrs_reduced.append(attrs[j])
-            upsert_bulk(db, schema, table, attrs_reduced, [tuple(values)])
+    for i in range(0, len(rows)):
+        row = rows[i]
+        values = []
+        attrs_reduced = []
+        for j in range(0, len(attrs)):
+            if row[j] == '$unset':
+                values.append(None)
+                attrs_reduced.append(attrs[j])
+            elif row[j] is not None:
+                values.append(row[j])
+                attrs_reduced.append(attrs[j])
+        upsert_bulk(db, schema, table, attrs_reduced, [tuple(values)])
 
 
-    except Exception as ex:
-        logger.error("[ROW] UPSERT failed when tailing: %s" % ex)
-        logger.error("[ROW] VALUES: %s" % values)
 
 
 def upsert_transfer_info(db, schema, table, attrs, row):
@@ -279,7 +262,4 @@ def delete(db, schema, table_name, ids):
     cmd = "DELETE FROM %s.%s WHERE id IN ('%s');" % (
         schema, table_name.lower(), oids)
     logger.info("[ROW] %s" % cmd)
-    try:
-        db.execute_cmd(cmd)
-    except Exception as ex:
-        logger.error("[ROW] Delete failed: %s" % ex)
+    db.execute_cmd(cmd)
