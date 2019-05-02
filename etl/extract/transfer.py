@@ -54,6 +54,7 @@ class TransferThread(Thread):
 
             transfer_info.create_stat_table(self.pg, setup_pg["schema_name"])
             transfer_info.create_oplog_table(self.pg, setup_pg["schema_name"])
+            transfer_info.create_transfer_stats_table(self.pg, setup_pg["schema_name"])
             
             start(self.extractor, self.coll_config)
         self.tail(start_date_time)

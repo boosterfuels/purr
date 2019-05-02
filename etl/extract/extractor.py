@@ -2,7 +2,8 @@ from etl.extract import collection
 from etl.extract import collection_map as cm
 from etl.load import table, schema
 from etl.monitor import logger
-
+from etl.extract import transfer_info
+import time
 from etl.transform import relation, type_checker as tc, config_parser as cp
 
 name_extra_props_pg = "_extra_props"
@@ -272,6 +273,7 @@ class Extractor():
         coll : string
              : name of collection which is going to be transferred
         '''
+
         r = self.adjust_columns(coll)
 
         if self.tailing_from is not None or self.tailing_from_db is True:
@@ -288,6 +290,14 @@ class Extractor():
         nr_of_transferred = 1000
         i = 0
         transferring = []
+        # log_entries = []
+        actions = []
+        if self.drop is True or self.truncate is True:
+            actions.append(['INSERT', int(time.time()), None])
+        else:
+            actions.append(['UPSERT', int(time.time()), None])
+
+        # transfer_info.log_stats(self.pg, self.schema, log_entry)
         for doc in docs:
             transferring.append(doc)
             try:
@@ -330,7 +340,16 @@ class Extractor():
                     nr_of_docs,
                     coll))
             i += 1
+        actions.append(['FULL VACUUM', int(time.time()), None])
         r.vacuum()
+        actions.append(['FULL VACUUM', None, int(time.time())])
+
+        log_entries = []
+
+        for action in actions:
+            log_entries.append(tuple([action[0], r.relation_name,
+                                      nr_of_docs, action[1], action[2]]))
+        transfer_info.log_stats(self.pg, self.schema, log_entries)
 
     def insert_multiple(self, docs, r, coll):
         '''
