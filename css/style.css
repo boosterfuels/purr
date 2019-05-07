@@ -16,7 +16,6 @@ body {
   .nav li > a {
     position: relative;
     display: block;
-    padding: 10px 15px;
     color: whitesmoke; }
   .nav li > a:hover {
     color: #db13dc;
@@ -24,15 +23,14 @@ body {
   .nav li > a:active {
     color: #db13dc;
     background: purple; }
-  .nav .navbar-brand {
+  .nav .navbar-header .navbar-brand {
     color: white;
     font-weight: bolder;
-    font-size: 16px; }
+    margin: 5px 0 0 -20px; }
   .nav .navbar-header .logo {
     float: left;
-    width: 40px;
-    height: 40px;
-    margin: 5px -20px 5px 0; }
+    width: 60px;
+    margin: 5px 0; }
 
 ul li a {
   color: dimgrey;
