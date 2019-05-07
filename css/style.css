@@ -29,8 +29,7 @@ body {
     margin: 5px 0 0 -20px; }
   .nav .navbar-header .logo {
     float: left;
-    width: 60px;
-    margin: 5px 0; }
+    width: 60px; }
 
 ul li a {
   color: dimgrey;
@@ -60,8 +59,6 @@ ul li a {
     padding: 2% 0; }
     .content .row .no-padding {
       padding: 0 !important; }
-      .content .row .no-padding div[class^='col-'] {
-        padding: 0; }
     .content .row .vertical-align {
       display: flex;
       align-items: center; }
@@ -126,28 +123,31 @@ ul li a {
     display: flex;
     align-items: center;
     height: 100vh; }
-    .content .home .text-intro {
-      margin-bottom: 30px; }
-      .content .home .text-intro span {
-        color: #ffa500c7; }
-      .content .home .text-intro h3 {
-        color: #facfff;
-        font-weight: normal; }
+    .content .home .intro {
+      padding-left: 10vw !important; }
+      .content .home .intro .text-intro {
+        margin-bottom: 30px; }
+        .content .home .intro .text-intro span {
+          color: #ffa500c7; }
+        .content .home .intro .text-intro h3 {
+          color: #facfff;
+          font-weight: normal; }
     .content .home .side-by-side {
-      float: left; }
+      max-width: 400px; }
     .content .home .link {
       padding: 10px 10px;
-      width: 200px;
-      border: 1px solid;
-      margin: 0 20px 0 0; }
+      min-width: 46%;
+      border: 1px solid; }
     .content .home .try {
       background-color: orange !important;
       color: #8c1c96;
-      border-color: orange; }
+      border-color: orange;
+      margin-right: 3%; }
     .content .home .docs {
       background-color: transparent;
       color: #facfff;
-      border-color: #facfff; }
+      border-color: #facfff;
+      margin-left: 3%; }
     .content .home .docs {
       background-color: transparent;
       color: #facfff;
