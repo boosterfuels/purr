@@ -5,7 +5,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <title>Purrito</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel=icon href=/images/cat_sitting.png> <link rel="stylesheet"
+  <link rel=icon href=/images/logo.png> <link rel="stylesheet"
     href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
     integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous" />
 
@@ -37,7 +37,7 @@
   <nav class="nav nav-pills">
     <div class="container-fluid">
       <div class="navbar-header">
-        <img class="logo" src="images/logo_purr.png" alt="" />
+        <img class="logo" src="images/logo.png" alt="" />
         <a class="navbar-brand" href="#">Purrito</a>
         <button class="navbar-toggle collapsed" data-toggle="collapse" data-target="#mobile">
           <span class="icon-bar"></span>
@@ -77,7 +77,7 @@
         <h1>
           Documentation
         </h1>
-        <h3>Purrito v1.0</h3>
+        <h3>Purrito v1</h3>
       </div>
       <div class="col-md-1"></div>
     </div>
@@ -190,7 +190,7 @@
             Purrito is an easy to use, open-source ETL tool which transfers data
             from MongoDB to PostgreSQL.
           </p>
-          <p>Purrito is the right choice if you want to</p>
+          <p>You can download it from PyPI if you want to</p>
           <ul>
             <li>migrate from MongoDB to PostgreSQL</li>
             <li>
@@ -198,7 +198,6 @@
               the same time
             </li>
           </ul>
-          <!-- Purrito is written using the Python programming language.  -->
           <p>
             Purrito is released under the terms of the
             <a href="https://github.com/boosterfuels/purr/blob/master/LICENCE">MIT License</a>.
@@ -206,6 +205,8 @@
           </p>
           <h4 id="features">1.1 Features</h4>
           <ul>
+            <li>
+              transfer collections from MongoDB to Postgres tables </li>
             <li>
               continue syncing with MongoDB after data transfer is finished
             </li>
@@ -230,6 +231,7 @@
                 </li>
               </ul>
             </li>
+            <li>view collection transfer statistics</li>
           </ul>
           <div class="row vertical-center">
             <div class="col-md">
@@ -241,7 +243,7 @@
           <h2 id="download">
             2. Download & Install
           </h2>
-          <p>The current stable release is 1.0.0</p>
+          <p>The current stable release is v1.0</p>
 
           <h4 id="install_pip">Install using pip</h4>
           <p>
@@ -318,9 +320,20 @@
                 You can start Purrito using command line options or you can create
                 another YAML file to organize your settings. The collection map
                 and the setup file should not be mixed. -->
-            If you have Docker installed, check out our
-            <a href="https://github.com/boosterfuels/purr-examples">example</a>.
-            <!-- `docker compose up` `docker compose down` -->
+            We created an <a href="https://github.com/boosterfuels/purr-examples">example</a> for those who have Docker
+            installed:
+
+            <p>
+              <code>
+                docker compose up
+              </code>
+
+            </p>
+            <p><code>
+                docker compose down
+              </code>
+            </p>
+
             <h4>Without Docker</h4>
 
             <ol>

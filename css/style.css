@@ -29,7 +29,9 @@ body {
     margin: 5px 0 0 -20px; }
   .nav .navbar-header .logo {
     float: left;
-    width: 60px; }
+    padding: 5px;
+    width: 60px;
+    margin-right: 10px; }
 
 ul li a {
   color: dimgrey;
@@ -123,8 +125,11 @@ ul li a {
     display: flex;
     align-items: center;
     height: 100vh; }
+    .content .home .block .cat-purrito img {
+      width: 80%;
+      margin-left: 0; }
     .content .home .intro {
-      padding-left: 10vw !important; }
+      padding-left: 10vw; }
       .content .home .intro .text-intro {
         margin-bottom: 30px; }
         .content .home .intro .text-intro span {
@@ -152,8 +157,6 @@ ul li a {
       background-color: transparent;
       color: #facfff;
       border-color: #facfff; }
-    .content .home .cat-mobile {
-      display: none; }
   .content .about .booster-truck {
     height: 100% !important; }
   .content .contribute h2 {
@@ -322,10 +325,19 @@ code {
     margin-bottom: 30px; } }
 
 @media (max-width: 768px) {
-  .side-by-side {
-    width: 100%;
-    display: flex;
-    justify-content: space-evenly; }
+  .intro {
+    padding: 5vh 10vw; }
+    .intro .text-intro {
+      margin: 5vh auto !important; }
+      .intro .text-intro h1 {
+        margin: 3vh auto !important; }
+      .intro .text-intro .desc {
+        margin: 6vh 11vw !important; }
+    .intro .side-by-side {
+      width: 100%;
+      display: flex;
+      justify-content: space-evenly;
+      margin: 0 auto; }
   .contributors .card-deck .card {
     margin-bottom: 30px; }
   .contributors div {
@@ -353,16 +365,22 @@ code {
     padding: 0 2%; }
   .image-center {
     padding: 0 20px; }
-  .home h1 {
-    text-align: center; }
-  .home .cat-mobile {
-    display: block; }
-    .home .cat-mobile img {
-      width: 50%; }
-  .home .cat-desktop {
-    display: none; }
-  .home h3 {
-    text-align: center; } }
+  .home {
+    display: block !important; }
+    .home h1 {
+      text-align: center; }
+    .home .intro {
+      display: block;
+      margin-left: auto !important;
+      padding-left: auto !important; }
+      .home .intro .text-intro {
+        text-align: center; }
+    .home .block .cat-purrito img {
+      width: 50% !important;
+      text-align: center;
+      margin-left: auto !important; }
+    .home h3 {
+      text-align: center; } }
 
 #btn-sticky {
   display: none;
