@@ -3,7 +3,7 @@
 
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-  <title>Purr</title>
+  <title>Purrito</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel=icon href=/images/cat_sitting.png> <link rel="stylesheet"
     href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
@@ -38,7 +38,7 @@
     <div class="container-fluid">
       <div class="navbar-header">
         <img class="logo" src="images/logo_purr.png" alt="" />
-        <a class="navbar-brand" href="#">Purr</a>
+        <a class="navbar-brand" href="#">Purrito</a>
         <button class="navbar-toggle collapsed" data-toggle="collapse" data-target="#mobile">
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
@@ -77,7 +77,7 @@
         <h1>
           Documentation
         </h1>
-        <h3>purr v1.0</h3>
+        <h3>Purrito v1.0</h3>
       </div>
       <div class="col-md-1"></div>
     </div>
@@ -187,10 +187,10 @@
             1. Introduction
           </h2>
           <p>
-            Purr is an easy to use, open-source ETL tool which transfers data
+            Purrito is an easy to use, open-source ETL tool which transfers data
             from MongoDB to PostgreSQL.
           </p>
-          <p>Purr is the right choice if you want to</p>
+          <p>Purrito is the right choice if you want to</p>
           <ul>
             <li>migrate from MongoDB to PostgreSQL</li>
             <li>
@@ -198,9 +198,9 @@
               the same time
             </li>
           </ul>
-          <!-- Purr is written using the Python programming language.  -->
+          <!-- Purrito is written using the Python programming language.  -->
           <p>
-            Purr is released under the terms of the
+            Purrito is released under the terms of the
             <a href="https://github.com/boosterfuels/purr/blob/master/LICENCE">MIT License</a>.
             <!-- use from both free and proprietary software. -->
           </p>
@@ -213,7 +213,7 @@
               generate the schema based on existing MongoDB collections
             </li>
             <li>
-              update the schema while Purr is syncing PostgreSQL with MongoDB
+              update the schema while Purrito is syncing PostgreSQL with MongoDB
             </li>
             <li>
               transfer data to a custom schema in Postgres
@@ -245,14 +245,14 @@
 
           <h4 id="install_pip">Install using pip</h4>
           <p>
-            Purr is available on
-            <a href="https://test.pypi.org/project/purr/" target="_blank">PyPI</a>. Make sure to have an up-to-date pip:
+            Purrito is available on
+            <a href="https://pypi.org/project/purrito/" target="_blank">PyPI</a>. Make sure to have an up-to-date pip:
           </p>
           <code>
               pip install -U pip
             </code>
           <p>
-            Install Purr:
+            Install Purrito:
           </p>
           <code>
               pip install purrito
@@ -260,7 +260,7 @@
           <h4 id="install_github">Installing from source</h4>
 
           <p>
-            You can also download Purr from Github and install from source:
+            You can also download Purrito from Github and install from source:
           </p>
           <ul>
             <li>
@@ -277,11 +277,11 @@
                 <p>
                   generate the collection map
                 </p>
-                <code>purr -m -mdb mongodb://localhost:27017 -n booster</code>
+                <code>purrito -m -mdb mongodb://localhost:27017 -n booster</code>
               </li>
               <li>
                 <code>
-                  purr -cf ./collections.yml -pg
+                  purrito -cf ./collections.yml -pg
                   postgres://127.0.0.1:5432/postgres -mdb mongodb
                   ://localhost:27017 -n booster -t -td</code
                 >
@@ -315,7 +315,7 @@
           <div>
             <!-- Once you created your collection map, you should have a running
                 MongoDB instance as a source and Postgres as a target database.
-                You can start Purr using command line options or you can create
+                You can start Purrito using command line options or you can create
                 another YAML file to organize your settings. The collection map
                 and the setup file should not be mixed. -->
             If you have Docker installed, check out our
@@ -325,7 +325,7 @@
 
             <ol>
               <li>
-                <p>Install Purr using <b>pip</b>:</p>
+                <p>Install Purrito using <b>pip</b>:</p>
                 <code>
                     pip install purrito
                   </code>
@@ -339,7 +339,7 @@
                   Generate the collection map that will describe the database
                   schema:
                 </p>
-                <code>purr -m -mdb mongodb://localhost:27017 -n db_name</code>
+                <code>purrito -m -mdb mongodb://localhost:27017 -n db_name</code>
               </li>
               <li>Start PostgreSQL</li>
               <li id="purr_start">
@@ -347,14 +347,14 @@
                   To start the data transfer, type:
                 </p>
                 <code>
-                    purr -cf collections.yml -pg
+                    purrito -cf collections.yml -pg
                     postgres://localhost:5432/postgres -mdb
                     mongodb://localhost:27017 -n db_name -t
                   </code>
               </li>
             </ol>
             <p>
-              Purr transfers all collections to the <code>public</code> schema
+              Purrito transfers all collections to the <code>public</code> schema
               and starts tailing the oplog.
             </p>
             <p>
@@ -436,7 +436,7 @@
                     :extra_props: JSONB
             </pre>
           <p>
-            Explanation: When connecting to the MongoDB instance, Purr looks
+            Explanation: When connecting to the MongoDB instance, Purrito looks
             for the database name in the collection map
             (<i>my_mongo_database</i>). Collection <i>Cat</i> will be
             transferred to table <i>cat</i> (described under :meta -> :table).
@@ -454,7 +454,7 @@
             Data Types
           </h4>
           <p>
-            Purr uses 5 different data types when creating rows for a table:
+            Purrito uses 5 different data types when creating rows for a table:
           </p>
           <ul>
             <li>boolean</li>
@@ -467,14 +467,14 @@
             Type Conversion
           </h5>
           <p>
-            When starting Purr, the collection map is inserted into a table
+            When starting Purrito, the collection map is inserted into a table
             called <code>purr_transfer_info</code>. After changing any column
-            type in the map, Purr tries to apply the changes to the tables in
+            type in the map, Purrito tries to apply the changes to the tables in
             Postgres.
             <!-- The old
               collection map is located in the table
               <code>purr_transfer_info</code> which is compared to the new one. -->
-            <!-- In case of updated column types Purr tries to update the column
+            <!-- In case of updated column types Purrito tries to update the column
               definition.  -->
             This is sometimes rejected by Postgres and in that case, an error
             will be logged.
@@ -545,26 +545,26 @@
             Conversions that have ✔, can be easily handled by Postgres.
             <!-- When
               you assign a new type and your data is not castable to your new
-              type, Purr will have to handle that situation on its own. Purr
+              type, Purrito will have to handle that situation on its own. Purrito
               will rename your inconsistent column to column_name_old and create
               a new one with the new data type under column_name. This way we
               can make sure that you will not lose any data and you can continue
               working on your new column. -->
-            <!-- Purr will restart collection transfer for that specific collection
+            <!-- Purrito will restart collection transfer for that specific collection
               and will try to cast your values so they fit into your new column.
               If casting cannot be done, you will have NULLs instead of a value. -->
           </p>
 
           <!-- Keeping the old version of a column gives more control over the
               data: you decide what to do with the values which could not be
-              casted and inserted into the new column. When restarting Purr
+              casted and inserted into the new column. When restarting Purrito
               again, the old column will not be deleted but they will not be
               updated anymore so you can decide later what to do with it. since
               it's not part of the collection map. Feel free to drop the old
               column at any moment (if you are sure that you don't need it). -->
           <!-- <p>
-              When Purr is tailing and a type change happens, Purr will try to
-              cast the data to the new type. If that is not successful, Purr
+              When Purrito is tailing and a type change happens, Purrito will try to
+              cast the data to the new type. If that is not successful, Purrito
               will log a warning and continue with the tailing.
             </p> -->
 
@@ -586,15 +586,15 @@
               are merged together to form a new attribute called -->
             <!-- <code>extra_properties</code> with the <code>JSONB</code> data
                 type.  -->
-            Purr does not transfer extra properties by default because it
+            Purrito does not transfer extra properties by default because it
             slows down the data transfer.
           </p>
           <p>
-            To include extra properties, start Purr with option
+            To include extra properties, start Purrito with option
             <code>-ex</code>.
           </p>
           <!-- <p>
-              If you already have an extra_props column but you restarted Purr
+              If you already have an extra_props column but you restarted Purrito
               without this option, all columns named extra_props one by one.
             </p> -->
           <!-- <ul>
@@ -608,25 +608,25 @@
             </ul> -->
 
           <!-- <p>
-              Example: start Purr using a setup file and collections described
+              Example: start Purrito using a setup file and collections described
               in collections.yml
             </p>
             <code>
-              purr -sf setup.yml -cf collections.yml
+              purrito-sf setup.yml -cf collections.yml
             </code>
             <p>
-              Example: start Purr without setup file (tailing mode)
+              Example: start Purrito without setup file (tailing mode)
             </p>
 
             <code>
-              purr -cf collections.yml -pg postgres://127.0.0.1:5432/postgres
+              Purrito -cf collections.yml -pg postgres://127.0.0.1:5432/postgres
               -mdb mongodb://localhost:27017 -n db_name -t
             </code>
             <p>
-              If -t is set, Purr starts tailing the oplog after transferring all
+              If -t is set, Purrito starts tailing the oplog after transferring all
               the collections described in the collection map. The oplog is a
               capped collection that records all write operations that happened
-              in your Mongo instance. Tailing is started from the timestamp Purr
+              in your Mongo instance. Tailing is started from the timestamp Purrito
               saved in the beginning (before it created purr_info). Tailing has
               to happen after all the tables were created since there may be
               write operations on a collection that was not yet transferred and
@@ -645,20 +645,20 @@
           </p>
 
           <p>
-            When starting Purr, by adding the flag
+            When starting Purrito, by adding the flag
             <code>-m</code> (<code>--map</code>) and the Mongo connection
             information:
           </p>
-          <code>purr -m -mdb mongodb://localhost:27017 -n db_name</code>
+          <code>purrito -m -mdb mongodb://localhost:27017 -n db_name</code>
           <p>
-            Purr generates the YAML file with the collection definitions. In
+            Purrito generates the YAML file with the collection definitions. In
             case the data file can be changed before starting the data
             transfer Here are some things to keep in mind for generating a
             collection map:
           </p>
           <ul>
             <li>
-              Purr expects collection and field names in camelCase and outputs
+              Purrito expects collection and field names in camelCase and outputs
               them in snake_case. This may cause some issues when a document
               has <code>_id</code> and <code>id</code> fields, both will be
               converted to <code>id</code>. Having two columns with the same
@@ -697,11 +697,11 @@
             </li>
             <li>collections with no documents are skipped</li>
             <li>
-              Purr takes a collection sample which consists of the last 100
+              Purrito takes a collection sample which consists of the last 100
               documents of each collection and checks each key and value it
               finds. After that, it determines the type for each value in a
               document and records it. If inconsistent data was found and
-              values with different types belong to the same key, Purr will
+              values with different types belong to the same key, Purrito will
               choose the type which occured the most frequently.
             </li>
           </ul>
@@ -714,12 +714,12 @@
 
           <p>
             Sooner or later you will need to change your collection map. If
-            you restart Purr and keep your existing schema, your tables'
+            you restart Purrito and keep your existing schema, your tables'
             fields in PG will be compared to the ones in your collection map.
           </p>
           <ul>
             <li>
-              Adding a new attribute will make Purr update your entire
+              Adding a new attribute will make Purrito update your entire
               collection.
             </li>
             <li>Removing an attribute drops the column.</li>
@@ -729,13 +729,13 @@
             </li>
             <li>
               Changing a column type will result with an attempt to ALTER the
-              column. If the attempt was unsuccessful, Purr will try to
+              column. If the attempt was unsuccessful, Purrito will try to
               convert your data to JSONB.
             </li>
           </ul>
           <p>
             What about the tables in my Postgres database that were in the
-            schema before using Purr?
+            schema before using Purrito?
           </p>
           <p>
             If you have any existing tables in your schema that you want to be
@@ -767,12 +767,12 @@
 
           <h2>5. Setup</h2>
           <p>
-            <!-- There are many options for Purr -->
-            <!-- Without the collection map Purr cannot be started. -->
+            <!-- There are many options for Purrito -->
+            <!-- Without the collection map Purrito cannot be started. -->
             <!-- Once the collection map is created, the data transfer can start. -->
             <!-- This requires a source (MongoDB) and a target (PostgreSQL)
               database. 
-              Purr can be started by using command line options.
+              Purrito can be started by using command line options.
                or you can  -->
             There are multiple options which can be set on the command line
             but things can easily get messy. In some situations, it is better
@@ -841,7 +841,7 @@
             </li>
           </ul>
           <p></p>
-          <code> purr -sf path/to/setup.yml -cf path/to/collections.yml</code>
+          <code> purrito -sf path/to/setup.yml -cf path/to/collections.yml</code>
           <h3>Command line options</h3>
           <p>
             You can set all the variables from the previous section using the
@@ -905,8 +905,8 @@
             </li>
           </ul>
 
-          <p>Starting Purr without using a setup file:</p>
-          <code>purr -cf path/to/collections.yml -pg
+          <p>Starting Purrito without using a setup file:</p>
+          <code>purrito -cf path/to/collections.yml -pg
               postgres://127.0.0.1:5432/postgres -mdb mongodb://localhost:27017
               -n mongo_db_name -t</code>
 
@@ -952,14 +952,14 @@
           <p>
             Tailing without collection transfer must have a starting point
             defined by the user. This starting point can be a timestamp which
-            can be passed using <code>-ts</code> datetime. Purr creates a
+            can be passed using <code>-ts</code> datetime. Purrito creates a
             table called purr_info where it saves the current Unix epoch time.
             This timestamp is updated every couple of minutes. The update
             happens only if the current document is successfully transfered.
-            When an error occurs, you can be sure that Purr saved the latest
+            When an error occurs, you can be sure that Purrito saved the latest
             successful timestamp to purr_info and can continue tailing the
             oplog from -tsdb. purr_info is always created when you first start
-            Purr. If you do not add any timestamps to -s:
+            Purrito. If you do not add any timestamps to -s:
           </p>
 
           <ul>
@@ -971,10 +971,10 @@
               new entries
             </li>
             <li>
-              if the timestamp is "too old", Purr updates all collections
+              if the timestamp is "too old", Purrito updates all collections
             </li>
           </ul>
-          <p>if the timestamp is "too old", Purr updates all collections</p>
+          <p>if the timestamp is "too old", Purrito updates all collections</p>
           <ul>
             <li>the latest timestamp will be inserted into purr_info</li>
           </ul>
@@ -988,19 +988,19 @@
           </div>
           <h2 id="output">7. Output</h2>
           <p>
-            Purr will log a warning if it could not transfer a document.
+            Purrito will log a warning if it could not transfer a document.
           </p>
 
           <h4>
             Connectivity issues
           </h4>
           <p>
-            When starting for the first time, Purr creates a table called
+            When starting for the first time, Purrito creates a table called
             <i>purr_info</i>. This table contains a timestamp which is
             refreshed every couple of minutes in case of a successful
-            transfer. If Purr is disconnected from the database, it waits a
+            transfer. If Purrito is disconnected from the database, it waits a
             couple of seconds before attempting to reconnect. If succeeded,
-            Purr first checks purr_info for the latest timestamp it managed to
+            Purrito first checks purr_info for the latest timestamp it managed to
             save and continues tailing from there.
           </p>
           <div class="row vertical-center">
@@ -1013,7 +1013,7 @@
           <h2 id="contribute">
             8. Contribute
           </h2>
-          Purr is an open-source project that was built using Python. If you
+          Purrito is an open-source project that was built using Python. If you
           would like to contribute, check out our guidelines
           <h3>Our most valuable contributors</h3>
           <div id="contributors" class="row contributors vertical-center">
@@ -1023,7 +1023,7 @@
                     Our most valuable contributors
                   </h5> -->
                 <!-- <p class="desc">
-                    Meet the people developing on Purr
+                    Meet the people developing on Purrito
                   </p> -->
               </div>
               <div class="card-deck">
@@ -1076,7 +1076,7 @@
 
           <h3 id="guidelines">Guidelines</h3>
           <p>
-            Contributing to Purr is a great way to learn more about MongoDB,
+            Contributing to Purrito is a great way to learn more about MongoDB,
             Python and PostgreSQL
           </p>
           <h4 id="pep_conventions">PEP 8 Conventions</h4>
@@ -1125,7 +1125,7 @@
           </p>
           <h3 id="plans">Plans</h3>
           <p>
-            In the future, we would like to add some new features to Purr.
+            In the future, we would like to add some new features to Purrito.
           </p>
           <ul>
             <li>slack integration</li>
