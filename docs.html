@@ -321,17 +321,16 @@
                 another YAML file to organize your settings. The collection map
                 and the setup file should not be mixed. -->
             We created an <a href="https://github.com/boosterfuels/purr-examples">example</a> for those who have Docker
-            installed:
+            installed. Download the example and in <code>purrito-examples/example1/</code> type
 
             <p>
               <code>
-                docker compose up
-              </code>
-
+                    docker compose up
+                  </code> to start the entire app
             </p>
             <p><code>
                 docker compose down
-              </code>
+              </code> to stop the app
             </p>
 
             <h4>Without Docker</h4>
@@ -346,6 +345,9 @@
               <li>
                 Start MongoDB as a
                 <a href="https://docs.mongodb.com/manual/replication">replica set</a>
+                <p class="note">Note: this step is necessary if we want Purrito to sync the two databases.
+                  Otherwise Purrito will stop after transfering all the collections from the collection map.
+                </p>
               </li>
               <li>
                 <p>
