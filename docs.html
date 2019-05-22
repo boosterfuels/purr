@@ -289,6 +289,11 @@
                 >
               </li> -->
           </ul>
+
+          <div>
+            <p>After the installation is done, check if you have the latest version of Purrito:</p>
+            <code>purrito -v</code>
+          </div>
           <div class="row vertical-center">
             <div class="col-md">
               <div class="cat-mobile">
@@ -1003,9 +1008,25 @@
           </div>
           <h2 id="output">7. Output</h2>
           <p>
-            Purrito will log a warning if it could not transfer a document.
+            Purrito logs have the following form:
+            <b>
+              [type] + [component] + message
+            </b>
+            Type can be info, warning, error, etc. Component is a part of the application that the log "belongs to"
+            Purrito logs a warning if it cannot transfer a document.
           </p>
 
+          <h3>Stat tables and recovery tables</h3>
+          <h4>purr_info</h4>
+          <h4>purr_oplog</h4>
+          <h4>purr_error</h4>
+          <h4>purr_transfer_stats</h4>
+          <p>Purrito creates several tables where it saves timestamps of the latest successful data transfer and
+            statistics.
+            These tables helped us see how our data grows and
+            <h4>Purr info</h4>
+
+          </p>
           <h4>
             Connectivity issues
           </h4>
