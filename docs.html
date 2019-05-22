@@ -1007,26 +1007,86 @@
             </div>
           </div>
           <h2 id="output">7. Output</h2>
+          <h3>Logs</h3>
           <p>
             Purrito logs have the following form:
             <b>
               [type] + [component] + message
-            </b>
-            Type can be info, warning, error, etc. Component is a part of the application that the log "belongs to"
-            Purrito logs a warning if it cannot transfer a document.
+            </b>.
+            Type can be info, warning, error, etc. Component is the part of the application that the log "belongs to".
           </p>
 
           <h3>Stat tables and recovery tables</h3>
-          <h4>purr_info</h4>
-          <h4>purr_oplog</h4>
-          <h4>purr_error</h4>
-          <h4>purr_transfer_stats</h4>
-          <p>Purrito creates several tables where it saves timestamps of the latest successful data transfer and
-            statistics.
-            These tables helped us see how our data grows and
-            <h4>Purr info</h4>
-
+          <p>Purrito creates several tables. These tables contain valuable information about the data transfer and in
+            some cases help Purrito recover itself in case of a crash.
           </p>
+          <h4>purr_info</h4>
+          <p>
+            Holds the timestamp of the latest successfully synced document and lets Purrito recover in case of a crash.
+          </p>
+          <h4>purr_oplog</h4>
+          <p>
+            This table records the documents that were tailed.
+            Contains the operation, timestamp, and the document(s) which were synced after the collection
+            transfer.
+          </p>
+          <h4>purr_error</h4>
+          <p>
+            <li>
+              purr_error contains detailed information about errors
+            </li>
+            <li>
+              which component of Purrito detected the error
+            </li>
+            <li>
+              message
+            </li>
+            <li>
+              timestamp
+            </li>
+          </p>
+          <p>
+            This table contains errors that happened during data transfer.
+          </p>
+          <h4>purr_transfer_stats</h4>
+          <p>
+            This table helps us see how our data grows over time, it contains information about the collection trasfer:
+            <ul>
+              <li>name of the relation,</li>
+              <li>action (INSERT, UPSERT or FULL VACUUM),</li>
+              <li>number of rows affected,</li>
+              <li>start and end of the transfer</li>
+            </ul>
+          </p>
+          <h4>purr_collection_map</h4>
+          <p>Contains information about each relation:
+            <ul>
+              <li>
+                name of the collection in MongoDB
+              </li>
+              <li>
+                name of the relation in PostgreSQL
+              </li>
+              <li>
+                column names and corresponding types
+              </li>
+              <li>
+                timestamp of the insert/update of the current row
+              </li>
+              <li>
+                the query that can be used to update the table definition
+              </li>
+            </ul>
+          </p>
+          <h6>Query Example</h6>
+          <pre>
+            SELECT 
+              relation, 
+              action, 
+              TO_TIMESTAMP(ts_end) - TO_TIMESTAMP(ts_start) duration
+            FROM purr_transfer_stats 
+            ORDER BY ts_start DESC;
+          </pre>
           <h4>
             Connectivity issues
           </h4>
