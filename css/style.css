@@ -1,18 +1,5 @@
-body {
-  background: white;
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  font-size: 16px;
-  font-weight: lighter;
-  line-height: 1.8; }
-
-.navbar-toggle {
-  background-color: purple;
-  border: 1px solid #facfff; }
-  .navbar-toggle span {
-    background-color: #facfff; }
-
 .nav {
-  background: #920d92; }
+  background: #8c1c96; }
   .nav li > a {
     position: relative;
     display: block;
@@ -32,6 +19,44 @@ body {
     padding: 5px;
     width: 60px;
     margin-right: 10px; }
+
+.navbar-toggle {
+  background-color: purple;
+  border: 1px solid #facfff; }
+  .navbar-toggle span {
+    background-color: #facfff; }
+
+.card-deck {
+  display: block;
+  width: 70%;
+  margin: 30px auto; }
+  .card-deck .card {
+    width: 100%;
+    background: white;
+    border-radius: 5px;
+    color: grey;
+    padding: 10px;
+    flex: 1;
+    margin: 10px auto; }
+
+pre {
+  border: none;
+  background: #f8f6fc;
+  color: #600260;
+  padding: 2px 4px;
+  padding-top: 20px;
+  font-size: 90%;
+  border-radius: 5px; }
+
+code {
+  background: #f8f6fc;
+  color: #600260; }
+
+body {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  font-weight: lighter;
+  line-height: 1.8; }
 
 ul li a {
   color: dimgrey;
@@ -287,34 +312,8 @@ ul li a {
   font-size: smaller;
   margin: 20px 0; }
 
-pre {
-  border: none;
-  background: #f8f6fc;
-  color: #600260;
-  padding: 2px 4px;
-  padding-top: 20px;
-  font-size: 90%;
-  border-radius: 5px; }
-
-code {
-  background: #f8f6fc;
-  color: #600260; }
-
 .font-middle {
   font-size: 50%; }
-
-.card-deck {
-  display: block;
-  width: 70%;
-  margin: 30px auto; }
-  .card-deck .card {
-    width: 100%;
-    background: white;
-    border-radius: 5px;
-    color: grey;
-    padding: 10px;
-    flex: 1;
-    margin: 10px auto; }
 
 @media (min-width: 768px) {
   .contributors .card-deck {
