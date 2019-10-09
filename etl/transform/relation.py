@@ -191,7 +191,7 @@ class Relation():
 
         row.delete(self.db, self.schema, self.relation_name, ids)
 
-    def create_with_columns(self, attrs, types):
+    def create(self, attrs, types):
         table.create(self.db, self.schema, self.relation_name, attrs, types)
 
     def add_pk(self, attr):
@@ -330,7 +330,7 @@ class Relation():
             attrs_cm = [v["name_cm"] for k, v in attrs_types_cm.items()]
             types_cm = [v["type_cm"] for k, v in attrs_types_cm.items()]
             if self.exists() is False:
-                self.create_with_columns(attrs_cm, types_cm)
+                self.create(attrs_cm, types_cm)
             return
         # TODO if table was dropped or schema was reset
         # then there is no need to have fun
