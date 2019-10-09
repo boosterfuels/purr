@@ -287,7 +287,7 @@ class Extractor():
 
         # Start transferring docs
         nr_of_docs = docs.count()
-        nr_of_transferred = 1000
+        MAX_NR_OF_TRANSFERRED = 1000
         i = 0
         transferring = []
         actions = []
@@ -296,40 +296,24 @@ class Extractor():
         # transfer_info.log_stats(self.pg, self.schema, log_entry)
         for doc in docs:
             transferring.append(doc)
+            is_last_doc = (i + 1 == nr_of_docs)
             try:
-                if (i+1) % nr_of_transferred == 0 and i+1 >= nr_of_transferred:
-                    if self.include_extra_props is True:
-                        r.insert_bulk(
-                            transferring,
-                            self.attr_details,
-                            self.include_extra_props)
-                    else:
-                        r.insert_bulk_no_extra_props(
+                if (i+1) % MAX_NR_OF_TRANSFERRED == 0 or is_last_doc:
+                    r.insert(
                             transferring,
                             self.attr_details,
                             self.include_extra_props)
                     transferring = []
-                if i + 1 == nr_of_docs and (i + 1) % nr_of_transferred != 0:
-                    if self.include_extra_props is True:
-                        r.insert_bulk(
-                            transferring,
-                            self.attr_details,
-                            self.include_extra_props)
-                    else:
-                        r.insert_bulk_no_extra_props(
-                            transferring,
-                            self.attr_details,
-                            self.include_extra_props)
-                        logger.info(
-                            "%s Finished collection %s: %d docs"
-                            % (CURR_FILE,
-                               coll, i + 1))
-                        transferring = []
+                if is_last_doc is True:
+                    logger.info(
+                        "%s Finished collection %s: %d docs"
+                        % (CURR_FILE,
+                            coll, i + 1))
             except Exception as ex:
                 logger.error("""%s Transfer unsuccessful. %s""" % (
                     CURR_FILE,
                     ex))
-            if (i+1) % (nr_of_transferred * 10) == 0:
+            if (i+1) % (MAX_NR_OF_TRANSFERRED * 10) == 0:
                 logger.info("""%s %d/%d (%s)""" % (
                     CURR_FILE,
                     i+1,
@@ -400,12 +384,8 @@ class Extractor():
             att_new, att_orig, types, type_x_props_pg)
         # TODO remove this stuff with the extra props
         try:
-            if self.include_extra_props is True:
-                r.insert_bulk(
-                    docs, self.attr_details, self.include_extra_props)
-            else:
-                r.insert_bulk_no_extra_props_tailed(
-                    docs, self.attr_details, self.include_extra_props)
+            tailing = True
+            r.insert(docs, self.attr_details, self.include_extra_props, tailing)
         except Exception as ex:
             logger.error("""
             %s Transferring to %s was unsuccessful.
@@ -452,12 +432,8 @@ class Extractor():
             attrs_new, attrs_original, types, type_x_props_pg)
         # TODO remove this stuff with the extra props.
         try:
-            if self.include_extra_props is True:
-                r.insert_bulk(
-                    docs, self.attr_details, self.include_extra_props)
-            else:
-                r.insert_bulk_no_extra_props_tailed(
-                    docs, self.attr_details, self.include_extra_props)
+            tailing = True
+            r.insert(docs, self.attr_details, self.include_extra_props, tailing)
         except Exception as ex:
             logger.error("""
             %s Transferring to %s was unsuccessful. Exception: %s

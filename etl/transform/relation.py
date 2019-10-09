@@ -78,6 +78,25 @@ class Relation():
         self.created = table.exists(self.db, self.schema, self.relation_name)
         return self.created
 
+    def insert(self, docs, attr_details, include_extra_props=True, tailing=False):
+        if include_extra_props is True:
+            self.insert_bulk(
+                docs,
+                attr_details,
+                include_extra_props)
+        else:
+            if tailing is True:
+                self.insert_bulk_no_extra_props_tailed(
+                docs,
+                attr_details,
+                include_extra_props)
+            else:
+                self.insert_bulk_no_extra_props(
+                docs,
+                attr_details,
+                include_extra_props)
+
+
     def insert_bulk(self, docs, attrs,
                     include_extra_props=True):
         """
