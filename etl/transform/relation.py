@@ -78,6 +78,25 @@ class Relation():
         self.created = table.exists(self.db, self.schema, self.relation_name)
         return self.created
 
+    def insert(self, docs, attr_details, include_extra_props=True, tailing=False):
+        if include_extra_props is True:
+            self.insert_bulk(
+                docs,
+                attr_details,
+                include_extra_props)
+        else:
+            if tailing is True:
+                self.insert_bulk_no_extra_props_tailed(
+                docs,
+                attr_details,
+                include_extra_props)
+            else:
+                self.insert_bulk_no_extra_props(
+                docs,
+                attr_details,
+                include_extra_props)
+
+
     def insert_bulk(self, docs, attrs,
                     include_extra_props=True):
         """
@@ -191,7 +210,7 @@ class Relation():
 
         row.delete(self.db, self.schema, self.relation_name, ids)
 
-    def create_with_columns(self, attrs, types):
+    def create(self, attrs, types):
         table.create(self.db, self.schema, self.relation_name, attrs, types)
 
     def add_pk(self, attr):
@@ -330,7 +349,7 @@ class Relation():
             attrs_cm = [v["name_cm"] for k, v in attrs_types_cm.items()]
             types_cm = [v["type_cm"] for k, v in attrs_types_cm.items()]
             if self.exists() is False:
-                self.create_with_columns(attrs_cm, types_cm)
+                self.create(attrs_cm, types_cm)
             return
         # TODO if table was dropped or schema was reset
         # then there is no need to have fun

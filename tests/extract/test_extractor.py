@@ -408,7 +408,7 @@ class TestExtractor(unittest.TestCase):
         )
         attrs = mock.attrs_company
         types = mock.types_company
-        r.create_with_columns(attrs, types)
+        r.create(attrs, types)
 
         ex.insert_multiple(docs, r, coll)
 
@@ -470,7 +470,7 @@ class TestExtractor(unittest.TestCase):
         )
         attrs = mock.attrs_company
         types = mock.types_company
-        r.create_with_columns(attrs, types)
+        r.create(attrs, types)
 
         ex.update_multiple(docs, r, coll)
 
