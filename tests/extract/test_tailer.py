@@ -83,7 +83,7 @@ def reset_dataset():
 
 
 class TestTailer(unittest.TestCase):
-    def test_prepare_docs_for_update_one(self):
+    def test_modify_docs_before_update_one(self):
         docs = [{'coll_name': 'Company',
                  'db_name': 'test_purrito',
                  'o': {'$set': {'active': True, 'name': True}},
@@ -92,11 +92,11 @@ class TestTailer(unittest.TestCase):
         mocked = [{'_id': '5caf5998a54d758375bd9928',
                    'active': True, 'name': True}]
 
-        (docs_useful, merged) = tailer.prepare_docs_for_update(
+        (docs_useful, merged) = tailer.modify_docs_before_update(
             settings_company, docs)
         assert mocked == docs_useful and merged is False
 
-    def test_prepare_docs_for_update_one_no_set_no_unset(self):
+    def test_modify_docs_before_update_one_no_set_no_unset(self):
         docs = [{'coll_name': 'Company',
                  'db_name': 'test_purrito',
                  'o': {
@@ -109,12 +109,12 @@ class TestTailer(unittest.TestCase):
         mocked = [{'_id': '5caf5998a54d758375bd9928',
                    'active': True, 'name': True, 'domains': '$unset', 'signupCode': '$unset'}]
 
-        (docs_useful, merged) = tailer.prepare_docs_for_update(
+        (docs_useful, merged) = tailer.modify_docs_before_update(
             settings_company, docs)
 
         assert mocked == docs_useful and merged is False
 
-    def test_prepare_docs_for_update_one_no_set_no_unset_all_nulls(self):
+    def test_modify_docs_before_update_one_no_set_no_unset_all_nulls(self):
         docs = [{'coll_name': "Company",
                  'db_name': 'test_purrito',
                  'o': {
@@ -129,11 +129,11 @@ class TestTailer(unittest.TestCase):
             'domains': '$unset',
             'signupCode': '$unset'
         }]
-        (docs_useful, merged) = tailer.prepare_docs_for_update(
+        (docs_useful, merged) = tailer.modify_docs_before_update(
             settings_company, docs)
         assert mocked == docs_useful and merged is False
 
-    def test_prepare_docs_for_update_multiple_merged_mixed(self):
+    def test_modify_docs_before_update_multiple_merged_mixed(self):
         """
         This test covers the case when one document of a collection
         is updated directly through the IDE (e.g. Studio3T) and
@@ -161,12 +161,12 @@ class TestTailer(unittest.TestCase):
                   {'_id': '5caf5998a54d758375bd9929',
                    'active': '$unset', 'name': 'stuffy'}]
 
-        (docs_useful, merged) = tailer.prepare_docs_for_update(
+        (docs_useful, merged) = tailer.modify_docs_before_update(
             settings_company, docs)
 
         assert mocked == docs_useful and merged is False
 
-    def test_prepare_docs_for_update_multiple_merged(self):
+    def test_modify_docs_before_update_multiple_merged(self):
         docs = [{'coll_name': 'Company',
                  'db_name': 'test_purrito',
                  'o': {'$set': {'active': True, 'name': True}},
@@ -183,7 +183,7 @@ class TestTailer(unittest.TestCase):
         collection_settings = mock.coll_config
         collection_name = "Company"
 
-        (docs_useful, merged) = tailer.prepare_docs_for_update(
+        (docs_useful, merged) = tailer.modify_docs_before_update(
             collection_settings[collection_name], docs)
 
         assert mocked == docs_useful and merged is True
