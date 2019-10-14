@@ -179,32 +179,28 @@ def upsert_bulk_tail(db, schema, table, attrs, rows):
                 attrs_reduced.append(attrs[j])
         upsert_bulk(db, schema, table, attrs_reduced, [tuple(values)])
 
-
-def upsert_transfer_info(db, schema, table, attrs, row):
-    """
-    Updates the collection map.
-    """
-    temp = []
-    temp_row = []
-    for r in row:
-        if type(r) is list and type(r[0]) is dict:
-            temp.append('%s::jsonb[]')
-        else:
-            temp.append('%s')
-
+def generate_new_row_with_placeholder(row):
     placeholder = []
+    row_modified = []
 
     for r in row:
         if type(r) is list and type(r[0]) is dict:
             for item in r:
-                temp_row.append(json.dumps(item))
+                row_modified.append(json.dumps(item))
             placeholder.append("%s::jsonb[]")
         else:
             placeholder.append("'%s'" % r)
 
     placeholder = ','.join(placeholder)
 
-    temp = ', '.join(temp)
+    return (placeholder, row_modified)
+
+def upsert_transfer_info(db, schema, table, attrs, row):
+    """
+    Updates transfer information which contains
+    statistics about transferred collections
+    """
+    placeholder, row_modified = generate_new_row_with_placeholder(row)
 
     attrs_reduced = [('"%s"' % a) for a in attrs]
     attrs_reduced = ', '.join(attrs_reduced)
@@ -226,7 +222,7 @@ def upsert_transfer_info(db, schema, table, attrs, row):
 
     try:
         cur = db.conn.cursor()
-        cur.execute(cmd, [temp_row])
+        cur.execute(cmd, [row_modified])
     except Exception as ex:
         logger.error("[ROW] UPSERT TRANSFER INFO failed: %s" % ex)
         logger.error("\n[ROW] CMD:\n %s" % cmd)
