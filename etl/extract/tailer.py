@@ -15,62 +15,121 @@ DELETE = "d"
 CURR_FILE = "[TAILER]"
 
 
-def prepare_docs_for_update(coll_settings, docs):
-    docs_useful = []
+def fuse(docs_useful, doc_useful, merge_similar):
+    """ 
+    Merging values with the same ID because there cannot be
+    multiple updates of the same row in one statement"""
+
+    if merge_similar is True:
+        for i in range(0, len(docs_useful)):
+            if docs_useful[i]["_id"] == doc_useful["_id"]:
+                docs_useful[i] = dict(docs_useful[i], **doc_useful)
+                break
+    # otherwise just append the document
+    else:
+        docs_useful.append(doc_useful)
+
+    return docs_useful
+
+
+def unset_values(doc, unset, action):
+    """
+    Unset values of a document.
+    doc: the document
+    unset: a dictionary that contains which 
+    keys of the document need to be to unset 
+    action: the action that affects the values
+    """
+    if action == '$set':
+        if "$set" in doc.keys():
+            for k, v in doc["$set"].items():
+                if v is None:
+                    unset[k] = "$unset"
+    elif action == '$unset':
+        if "$unset" in doc.keys():
+            for k, v in doc["$unset"].items():
+                unset[k] = '$unset'
+    elif action == 'direct_update':
+        for k, v in doc.items():
+            if v is None:
+                unset[k] = '$unset'
+    return unset
+
+
+def handleQueryUpdate(doc, doc_useful, temp, unset, docs_id, merge_similar):
+    # This function handles oplog entries when updating a document
+    # happened using a query.
+    if "o2" in doc.keys():
+        # check if the same document is updated multiple times
+        if "_id" in doc["o2"].keys():
+            doc_useful["_id"] = str(doc["o2"]["_id"])
+            if (doc_useful["_id"] in docs_id):
+                merge_similar = True
+            else:
+                docs_id.append(str(doc_useful["_id"]))
+
+        # updated element by setting variables
+        if "$set" in temp.keys():
+            doc_useful.update(temp["$set"])
+
+        # look for values to unset
+        unset = unset_values(temp, unset, '$set')
+        unset = unset_values(temp, unset, '$unset')
+
+    return (doc_useful, unset, merge_similar)
+
+
+def handleDirectUpdate(doc, doc_useful, temp, unset, coll_settings):
+    # This function handles oplog entries when updating a document
+    # happened using an IDE e.g. Studio3T:
+    if "$set" not in temp.keys() and "$unset" not in temp.keys():
+        logger.info("Direct update:")
+        doc_useful.update(temp)
+        fields = [x[":source"]
+                  for x in coll_settings[":columns"]]
+        for k in fields:
+            if k == '_id':
+                temp[k] = str(temp[k])
+                doc_useful.update(temp)
+            if k not in temp.keys():
+                unset[k] = '$unset'
+        unset = unset_values(temp, unset, 'direct_update')
+    return (doc_useful, unset)
+
+
+def modify_docs_before_update(coll_settings, docs):
+    """
+    Modifies documents based on the keys found in the oplog entry.
+    An entry may (not necessarily) contain keys like $o2, $set and $unset.
+    There are multiple situations when we need to unset a value:
+    - if it has no value: null (None)
+    - if the key appeared in $unset
+    - if the key was left out and there was no $set/$unset
+    """
+    result = []
     docs_id = []
     for doc in docs:
         # It is possible that multiple versions of one document
         # exist among these documents. they must be merged so they
         # can be sent Postgres together as one entry.
-        merge_similar = False
+        ids_equal = False
         unset = {}
-        doc_useful = {}
+        doc_to_append = {}
         temp = doc["o"]
 
-        if "o2" in doc.keys():
-            if "_id" in doc["o2"].keys():
-                doc_useful["_id"] = str(doc["o2"]["_id"])
-                if (doc_useful["_id"] in docs_id):
-                    merge_similar = True
-                else:
-                    docs_id.append(str(doc_useful["_id"]))
+        # updated using a query
+        doc_to_append, unset, ids_equal = handleQueryUpdate(
+            doc, doc_to_append, temp, unset, docs_id, ids_equal)
 
-        if "$set" in temp.keys():
-            doc_useful.update(temp["$set"])
-            for k, v in temp["$set"].items():
-                if v is None:
-                    unset[k] = "$unset"
-        if "$unset" in temp.keys():
-            for k, v in temp["$unset"].items():
-                unset[k] = '$unset'
-        if "$set" not in temp.keys() and "$unset" not in temp.keys():
-            # case when the document was not updated
-            # using a query, but the IDE e.g. Studio3T:
-            logger.info("Direct update:")
-            doc_useful.update(temp)
-            fields = [x[":source"]
-                      for x in coll_settings[":columns"]]
-            for k in fields:
-                if k == '_id':
-                    temp[k] = str(temp[k])
-                    doc_useful.update(temp)
-                if k not in temp.keys():
-                    unset[k] = '$unset'
-            for k, v in temp.items():
-                if v is None:
-                    unset[k] = '$unset'
-        doc_useful.update(unset)
+        # updated without a query (possibly using a client app like Studio3T)
+        handleDirectUpdate(doc, doc_to_append, temp, unset, coll_settings)
 
-        # merging values with the same ID because there cannot be
-        # multiple updates of the same row in one statement
-        if merge_similar is True:
-            for i in range(0, len(docs_useful)):
-                if docs_useful[i]["_id"] == doc_useful["_id"]:
-                    docs_useful[i] = dict(docs_useful[i], **doc_useful)
-                    break
-        else:
-            docs_useful.append(doc_useful)
-    return docs_useful, merge_similar
+        doc_to_append.update(unset)
+
+        # whatever needs to be appended to result, just append it
+        result = fuse(result, doc_to_append, ids_equal)
+
+    return result, ids_equal
 
 
 def log_tailed_docs(pg, schema, docs_useful, ids_log, table_name, oper, merged):
@@ -176,7 +235,7 @@ class Tailer(extractor.Extractor):
 
             coll_name = docs[0]["coll_name"]
             coll_settings = self.coll_settings[coll_name]
-            (docs_useful, merged) = prepare_docs_for_update(
+            (docs_useful, merged) = modify_docs_before_update(
                 coll_settings,
                 docs
             )
