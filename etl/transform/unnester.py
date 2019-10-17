@@ -42,7 +42,7 @@ def cast(value, column_type):
             new_value = 'undefined'
 
     elif column_type == 'jsonb':
-        new_value = json.dumps(value, default=str)
+        new_value = json.dumps(value, default=str).replace('NaN', 'null')
 
     elif column_type == 'boolean':
         new_value = bool(value)
