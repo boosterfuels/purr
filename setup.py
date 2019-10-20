@@ -8,7 +8,7 @@ with open('README.md', encoding='utf-8') as f:
 with open('requirements.txt') as f:
     requirements = f.read().splitlines()
 
-version = '1.0.5'
+version = '1.0.6'
 
 setup(name='purrito',
       version=version,
