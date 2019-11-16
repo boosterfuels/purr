@@ -3,6 +3,7 @@ from etl.extract import collection_map as cm
 from etl.load import table, schema
 from etl.monitor import logger
 from etl.extract import transfer_info
+from etl.extract import extractor_helper as helper
 import time
 from etl.transform import relation, type_checker as tc, config_parser as cp
 
@@ -30,6 +31,8 @@ class Extractor():
         self.schema = settings_pg["schema_name"]
         self.truncate = settings_pg['table_truncate']
         self.drop = settings_pg['table_drop']
+        self.tables_empty = self.truncate or self.drop
+        self.settings_pg = settings_pg
         self.coll_def = coll_def
         self.tailing_from = settings_general['tailing_from']
         self.tailing_from_db = settings_general['tailing_from_db']
@@ -274,8 +277,6 @@ class Extractor():
              : name of collection which is going to be transferred
         '''
 
-        r = self.adjust_columns(coll)
-
         if self.tailing_from is not None or self.tailing_from_db is True:
             return
 
@@ -285,35 +286,69 @@ class Extractor():
             attr_source = [k for k, v in self.attr_details.items()]
             docs = collection.get_by_name_reduced(self.mdb, coll, attr_source)
 
-        # Start transferring docs
         nr_of_docs = docs.count()
-        MAX_NR_OF_TRANSFERRED = 1000
-        i = 0
-        transferring = []
-        actions = []
 
+        MAX_N_ROWS = self.settings_pg["n_rows"]
+
+        (n_process, size_chunk) = helper.get_n_process(
+            nr_of_docs, MAX_N_ROWS)
+
+        pg_conns = helper.init_connections(
+            n_process,
+            self.settings_pg["connection"]
+        )
+
+        # the documents will be divided into n chunks
+        # one chunk will be transferred by one process
+        chunks = helper.init_chunks(n_process)
+
+        # init relations object for each connection
+        relations = []
+        for conn in pg_conns:
+            r = self.adjust_columns(coll, conn)
+            relations.append(r)
+
+        # Start transferring docs
+        i = 0
+        j = 0
         transfer_start = time.time()
-        # transfer_info.log_stats(self.pg, self.schema, log_entry)
         for doc in docs:
-            transferring.append(doc)
             is_last_doc = (i + 1 == nr_of_docs)
+            chunks[j].append(doc)
+
+            # if the current chunk is full, move to the next one
+            if len(chunks[j]) == size_chunk:
+                j = j+1
+
             try:
-                if (i+1) % MAX_NR_OF_TRANSFERRED == 0 or is_last_doc:
-                    r.insert(
-                            transferring,
-                            self.attr_details,
-                            self.include_extra_props)
-                    transferring = []
+                # we reached the maximum number of docs we can transfer at once OR
+                # we reached the last document therefore we start pumping
+                if (i+1) % MAX_N_ROWS == 0 or is_last_doc:
+                    processes = helper.init_processes(
+                        pg_conns,
+                        chunks,
+                        self.attr_details,
+                        self.include_extra_props,
+                        relations
+                    )
+
+                    helper.start_processes(processes)
+                    helper.finish_processes(processes)
+                    j = 0
+                    chunks = helper.init_chunks(n_process)
+
                 if is_last_doc is True:
                     logger.info(
                         "%s Finished collection %s: %d docs"
                         % (CURR_FILE,
                             coll, i + 1))
+
             except Exception as ex:
                 logger.error("""%s Transfer unsuccessful. %s""" % (
                     CURR_FILE,
                     ex))
-            if (i+1) % (MAX_NR_OF_TRANSFERRED * 10) == 0:
+
+            if (i+1) % (MAX_N_ROWS) == 0:
                 logger.info("""%s %d/%d (%s)""" % (
                     CURR_FILE,
                     i+1,
@@ -321,23 +356,23 @@ class Extractor():
                     coll))
             i += 1
 
-        transfer_end = time.time()
-        action = 'UPSERT'
-        if self.drop is True or self.truncate is True:
-            action = 'INSERT'
-        actions.append([action, transfer_start, transfer_end])
+        # log and full vacuum
+        transfer_details = helper.get_transfer_details(
+            self.tables_empty,
+            transfer_start,
+            time.time()
+        )
+        vacuum_details = helper.get_vacuum_details(relations[0])
 
-        vacuum_start = time.time()
-        r.vacuum()
-        vacuum_end = time.time()
-        actions.append(['FULL VACUUM', vacuum_start, vacuum_end])
+        helper.log(relations[0],
+                   nr_of_docs,
+                   [transfer_details, vacuum_details]
+                   )
+        helper.close_connections(pg_conns)
 
-        log_entries = []
-
-        for action in actions:
-            log_entries.append(tuple([action[0], r.relation_name,
-                                      nr_of_docs, action[1], action[2]]))
-        transfer_info.log_stats(self.pg, self.schema, log_entries)
+        # remove unused objects
+        for r in relations:
+            del r
 
     def insert_multiple(self, docs, r, coll):
         '''
@@ -385,7 +420,8 @@ class Extractor():
         # TODO remove this stuff with the extra props
         try:
             tailing = True
-            r.insert(docs, self.attr_details, self.include_extra_props, tailing)
+            r.insert(docs, self.attr_details,
+                     self.include_extra_props, tailing)
         except Exception as ex:
             logger.error("""
             %s Transferring to %s was unsuccessful.
@@ -433,7 +469,8 @@ class Extractor():
         # TODO remove this stuff with the extra props.
         try:
             tailing = True
-            r.insert(docs, self.attr_details, self.include_extra_props, tailing)
+            r.insert(docs, self.attr_details,
+                     self.include_extra_props, tailing)
         except Exception as ex:
             logger.error("""
             %s Transferring to %s was unsuccessful. Exception: %s
@@ -496,7 +533,7 @@ class Extractor():
             self.attr_details[attrs_mdb[i]] = details
         return self.attr_details
 
-    def adjust_columns(self, coll):
+    def adjust_columns(self, coll, pg):
         """
         Adds or removes extra properties if necessary and updates column types
         for a collection.
@@ -526,7 +563,7 @@ class Extractor():
         if types == []:
             return
 
-        r = relation.Relation(self.pg, self.schema, relation_name)
+        r = relation.Relation(pg, self.schema, relation_name)
 
         self.add_extra_props(attrs_original, attrs_new, types)
         # Check if changing type was unsuccessful.
