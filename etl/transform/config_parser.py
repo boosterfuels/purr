@@ -146,7 +146,6 @@ def config_fields(colls, name):
             collections.yml. Skipping collection.
             """ % name)
         return ([], [], [], [], [])
-    relation_name = collection[":meta"][":table"]
     extra_props_type = collection[":meta"][":extra_props"]
     for field in collection[":columns"]:
         for key, value in field.items():
@@ -157,4 +156,20 @@ def config_fields(colls, name):
                     attrs_original.append(value)
                 elif key == ":type":
                     types.append(value)
-    return attrs_new, attrs_original, types, relation_name, extra_props_type
+    return attrs_new, attrs_original, types, extra_props_type
+
+
+def get_relation_name(collection_def, coll_name):
+    """
+    returns name of the relation from config (collection map)
+    """
+    relation_name = None
+    if coll_name in collection_def.keys():
+        relation_name = collection_def[coll_name][":meta"][":table"]
+    else:
+        monitor.logging.warn(
+            """
+            [CONFIG PARSER] Failed to find relation name of %s in
+            collections.yml.
+            """ % coll_name)
+    return relation_name
