@@ -299,6 +299,7 @@ class Tailer(extractor.Extractor):
                 oper = doc_details["op"]
                 docs_with_equal_oper = [doc_details]
         self.send_group(docs_with_equal_oper, oper, r)
+        del r
 
     def handle_multiple(self, docs, updated_at):
         # group by name

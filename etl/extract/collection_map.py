@@ -39,7 +39,7 @@ def populate_table(db, coll_map, table, attrs, schema='public'):
         row.upsert_transfer_info(db, schema, table, attrs, values)
 
 
-def get_table(db, schema='public'):
+def get_coll_map_from_db(db, schema='public'):
     cmd = """SELECT id, collection_name, relation_name,
     types FROM %s.purr_collection_map ORDER BY id""" % (
         schema)

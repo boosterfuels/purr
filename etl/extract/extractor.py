@@ -33,7 +33,7 @@ class Extractor():
         self.coll_def = coll_def
         self.tailing_from = settings_general['tailing_from']
         self.tailing_from_db = settings_general['tailing_from_db']
-        self.coll_map_cur = cm.get_table(self.pg)
+        self.coll_map_cur = cm.get_coll_map_from_db(self.pg)
 
     def column_convert(self, name_table, source, fields_cur, fields_new):
         """
@@ -203,7 +203,7 @@ class Extractor():
                     CURR_FILE)
 
         coll_map_cur = self.coll_map_cur
-        coll_map_new = cm.get_table(self.pg)
+        coll_map_new = cm.get_coll_map_from_db(self.pg)
 
         if coll_map_cur == coll_map_new:
             logger.info("%s Database schema is not changed" %
@@ -227,9 +227,9 @@ class Extractor():
         # restart transfer
         # update schema
 
-    def transfer(self, coll_names_in_config):
+    def start(self, coll_names_in_config):
         """
-        Transfers documents or whole collections if the number of fields
+        Starts with transferring whole collections if the number of fields
         is less than 30 000 (batch_size).
         Types of attributes are determined using the collections.yml file.
         Returns

@@ -297,7 +297,7 @@ class TestExtractor(unittest.TestCase):
         del ex
         assert res
 
-    def test_transfer(self):
+    def test_start(self):
         # drop/truncate table
         # create schema
         # transfers collections
@@ -321,7 +321,7 @@ class TestExtractor(unittest.TestCase):
             mock.settings,
             coll_config
         )
-        ex.transfer(collection_names)
+        ex.start(collection_names)
         for i in range(len(mock.rel_names)):
             relation = mock.rel_names[i]
             cursor.execute("SELECT count(*) FROM %s" % (relation))
