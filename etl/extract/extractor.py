@@ -141,11 +141,11 @@ class Extractor():
                 )
 
             self.column_add(source_persistent, added,
-                             name_coll, name_table, fields_new,
-                             coll_map_cur[i])
+                            name_coll, name_table, fields_new,
+                            coll_map_cur[i])
 
             self.column_remove(source_persistent, removed,
-                                name_coll, name_table, fields_new)
+                               name_coll, name_table, fields_new)
 
     def table_track(self, coll_map_cur, coll_map_new):
         """
@@ -227,7 +227,7 @@ class Extractor():
         # restart transfer
         # update schema
 
-    def start(self, coll_names_in_config):
+    def start(self, collections):
         """
         Starts with transferring whole collections if the number of fields
         is less than 30 000 (batch_size).
@@ -240,12 +240,10 @@ class Extractor():
         coll_names : list
                    : list of collection names
         """
-
-        coll_names = collection.check(self.mdb, coll_names_in_config)
+        # check if collections exist
+        coll_names = collection.check(self.mdb, collections)
         if len(coll_names) == 0:
-            logger.info('%s No collections to transfer.' %
-                        CURR_FILE
-                        )
+            logger.info('%s No collections to transfer.' % CURR_FILE)
             return
 
         relation_names = []
@@ -255,7 +253,7 @@ class Extractor():
         if self.drop:
             table.drop(self.pg, self.schema, relation_names)
         elif self.truncate:
-            table.truncate(self.pg, self.schema, coll_names)
+            table.truncate(self.pg, self.schema, relation_names)
 
         schema.create(self.pg, self.schema)
 
