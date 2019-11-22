@@ -227,11 +227,11 @@ class Extractor():
         # restart transfer
         # update schema
 
-    def cleanup(self):
+    def cleanup(self, relations):
         if self.drop:
-            table.drop(self.pg, self.schema, relation_names)
+            table.drop(self.pg, self.schema, relations)
         elif self.truncate:
-            table.truncate(self.pg, self.schema, relation_names)
+            table.truncate(self.pg, self.schema, relations)
 
     def start(self, collections):
         """
@@ -256,7 +256,7 @@ class Extractor():
         for coll in coll_names:
             relation_names.append(tc.snake_case(coll))
 
-        self.cleanup()
+        self.cleanup(relation_names)
         schema.create(self.pg, self.schema)
 
         for coll in coll_names:
