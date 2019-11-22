@@ -337,7 +337,7 @@ class TestExtractor(unittest.TestCase):
 
         assert True
 
-    def test_transfer_coll(self):
+    def test_transfer_collections(self):
         # TODO: check
 
         cursor = pg.conn.cursor()
@@ -361,7 +361,7 @@ class TestExtractor(unittest.TestCase):
             mock.settings,
             coll_config
         )
-        ex.transfer_coll(collection)
+        ex.transfer_collections(collection)
         cursor.execute("SELECT count(*) FROM %s" % (relation))
         cnt_pg = cursor.fetchone()
         cnt_mongo = mongo[collection].count()

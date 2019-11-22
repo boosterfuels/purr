@@ -95,7 +95,7 @@ class Extractor():
                             name_table,
                             attribute,
                             item[":type"])
-                        self.transfer_coll(cm[1], new_columns)
+                        self.transfer_collections(cm[1], new_columns)
 
     def column_remove(self, source, removed, name_coll, name_table, fields_new):
         """
@@ -179,7 +179,7 @@ class Extractor():
                 ':columns': columns,
                 ':meta': meta,
             }
-            self.transfer_coll(name_coll)
+            self.transfer_collections(name_coll)
 
     def table_untrack(self, coll_map_cur, coll_map_new):
         tables_cur = [x[2] for x in coll_map_cur]
@@ -227,6 +227,12 @@ class Extractor():
         # restart transfer
         # update schema
 
+    def cleanup(self):
+        if self.drop:
+            table.drop(self.pg, self.schema, relation_names)
+        elif self.truncate:
+            table.truncate(self.pg, self.schema, relation_names)
+
     def start(self, collections):
         """
         Starts with transferring whole collections if the number of fields
@@ -250,17 +256,13 @@ class Extractor():
         for coll in coll_names:
             relation_names.append(tc.snake_case(coll))
 
-        if self.drop:
-            table.drop(self.pg, self.schema, relation_names)
-        elif self.truncate:
-            table.truncate(self.pg, self.schema, relation_names)
-
+        self.cleanup()
         schema.create(self.pg, self.schema)
 
         for coll in coll_names:
-            self.transfer_coll(coll)
+            self.transfer_collections(coll)
 
-    def transfer_coll(self, coll, new_columns=[]):
+    def transfer_collections(self, coll, new_columns=[]):
         '''
         Transfers documents or whole collections if the number of fields
         is less than 30 000 (batch_size).
