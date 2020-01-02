@@ -10,11 +10,3 @@ def test_get_latest_successful_ts():
 
 def test_update_latest_successful_ts():
     pass
-
-
-def test_create_oplog_table():
-    pass
-
-
-def test_log_rows():
-    pass

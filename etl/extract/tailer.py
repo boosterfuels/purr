@@ -132,37 +132,6 @@ def modify_docs_before_update(coll_settings, docs):
     return result, ids_equal
 
 
-def log_tailed_docs(pg, schema, docs_useful, ids_log, table_name, oper, merged):
-    log_entries = []
-    ts = time.time()
-    logger.info("IDs: %s" % ids_log)
-    if len(ids_log) != len(docs_useful) and oper != 'd':
-        logger.error("n(ids)=%s; n(docs_useful)=%s" %
-                     (len(ids_log), len(docs_useful)))
-    for i in range(len(docs_useful)):
-        id = ids_log[i]
-        doc = "no entry"
-        try:
-            if docs_useful[i] is not None and oper != 'd':
-                doc = str(docs_useful[i])
-            else:
-                doc = "Doc is NULL"
-        except Exception as ex:
-            logger.error(
-                """Converting log entry failed. Details: %s
-                Document: """ %
-                ex, CURR_FILE)
-            logger.error(docs_useful[i])
-        row = [oper, table_name, id, ts,
-               merged, doc]
-        log_row = tuple(row)
-        log_entries.append(log_row)
-    try:
-        transfer_info.log_rows(pg, schema, log_entries)
-    except Exception as ex:
-        logger.error("Logging failed. Details: %s" % ex, CURR_FILE)
-
-
 class Tailer(extractor.Extractor):
     """
     Class for extracting data from the oplog.
@@ -261,12 +230,6 @@ class Tailer(extractor.Extractor):
                 logger.info(
                     """Deleting multiple documents failed: %s.
                     Details: %s""" % (docs, ex), CURR_FILE)
-
-        log_tailed_docs(
-            self.pg, self.schema,
-            docs_useful, ids_log,
-            r.relation_name, oper, merged
-        )
 
     def transform_and_load_many(self, docs_details):
         """
