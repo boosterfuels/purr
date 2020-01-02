@@ -4,13 +4,6 @@ from etl.load import table, row
 from etl.monitor import logger
 
 table_desc = {
-    "purr_oplog": {
-        "attrs": ["id", "operation", "relation", "obj_id",
-                  "ts", "merged", "document"],
-        "types": ["SERIAL", "TEXT", "TEXT", "TEXT",
-                  "INTEGER", "BOOLEAN", "TEXT"],
-        "pks": ["id", "ts"]
-    },
     "purr_info": {
         "attrs": ["id", "relation", "latest_successful_ts"],
         "types": ["INTEGER", "TEXT", "TEXT"]
@@ -30,7 +23,6 @@ table_desc = {
 
 def save_logs_to_db(db, schema='public'):
     create_stat_table(db, schema)
-    create_oplog_table(db, schema)
     create_transfer_stats_table(db, schema)
     create_log_error_table(db, schema)
 
@@ -107,66 +99,6 @@ def update_latest_successful_ts(db, schema, dt):
             of the latest successful transfer: %s"""
             % (ex)
         )
-
-
-def create_oplog_table(db, schema='public'):
-    """
-    Logs the operation, relation name, object id and
-    timestamp for each entry of the oplog.
-
-    Parameters
-    ----------
-    db: connection obj
-    schema: name of the schema in Postgres
-    Returns
-    -------
-    -
-
-    Example
-    -------
-    create_oplog_table(pg, 'purr')
-
-    """
-    table_name = "purr_oplog"
-    attrs = table_desc[table_name]["attrs"]
-    types = table_desc[table_name]["types"]
-    pks = table_desc[table_name]["pks"]
-
-    try:
-        table.drop(db, schema, [table_name])
-        table.create(db, schema, table_name, attrs, types, pks)
-        logger.info("[TRANSFER INFO] Created table %s." % (table_name))
-    except Exception as ex:
-        logger.error(
-            "[TRANSFER_INFO] Failed to create table %s: %s" % (table_name, ex))
-
-
-def log_rows(db, schema, values):
-    """
-    Holds the operation, relation name, object id and
-    timestamp for each entry of the oplog.
-
-    Parameters
-    ----------
-
-    Returns
-    -------
-    -
-
-    Example
-    -------
-    create_oplog_table(pg, 'purr')
-
-    """
-    table_name = "purr_oplog"
-    # id is SERIAL type, we can skip it when inserting rows:
-    attrs = table_desc[table_name]["attrs"][1:]
-    try:
-        row.insert_bulk(db, schema, table_name, attrs, values)
-    except Exception as ex:
-        logger.error(
-            "[TRANSFER_INFO] Failed to insert logs into table %s: %s"
-            % (table_name, ex))
 
 
 def create_transfer_stats_table(db, schema='public'):
