@@ -40,7 +40,7 @@ workflows:
                 - test
       - publish-github-release:
           requires:
-            - build
+            - build-and-test
           filters:
             branches:
               only: master 
