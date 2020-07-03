@@ -25,7 +25,10 @@ jobs:
             docker push boosterfuels/purr:production
       - run:
           name: Test
-          #command: ./tests/
+          command: |
+            ./tests/python -m unittest discover extract
+            ./tests/python -m unittest discover load
+            ./tests/python -m unittest discover transform
   deploy:
     <<: *setup_environment
     steps:
@@ -39,9 +42,9 @@ jobs:
             docker login -u $DOCKER_USER -p $DOCKER_PASS
             docker build -t boosterfuels/purr:production .
             docker push boosterfuels/purr:production
-      - run:
-          name: Deploy production docker image
-          # command: |
+      # - deploy:
+      #    name: Deploy production docker image
+      #    command: |
 
   publish-github-release:
     docker:
@@ -49,8 +52,8 @@ jobs:
     steps:
       - attach_workspace:
           at: ./artifacts
-      - run:
-          name: "Publish Release on GitHub"
+      # - run:
+      #     name: "Publish Release on GitHub"
 
 workflows:
   version: 2
