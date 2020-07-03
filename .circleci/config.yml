@@ -15,9 +15,9 @@ jobs:
       - run:
           name: Test
           command: |
-            ./tests/python -m unittest discover extract
-            ./tests/python -m unittest discover load
-            ./tests/python -m unittest discover transform
+            python -m unittest discover ./tests/extract
+            python -m unittest discover ./tests/load
+            python -m unittest discover ./tests/transform
 
   publish-github-release:
     docker:
