@@ -1,6 +1,6 @@
 setup_environment: &setup_environment
   docker:
-    - image: boosterfuels/circle-build:v1.0
+    - image: boosterfuels/circle-build:v1.0-python
       auth:
         username: $DOCKER_USER
         password: $DOCKER_PASS
@@ -14,8 +14,15 @@ jobs:
     <<: *setup_environment
     steps:
       - checkout
+      - setup_remote_docker
       - attach_workspace:
           at: ~/project
+      - run:
+          name: Build and push production docker image
+          command: |
+            docker login -u $DOCKER_USER -p $DOCKER_PASS
+            docker build -t boosterfuels/purr:production .
+            docker push boosterfuels/purr:production
       - run:
           name: Test
           command: |
