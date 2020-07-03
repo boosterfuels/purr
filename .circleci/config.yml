@@ -1,6 +1,6 @@
 setup_environment: &setup_environment
   docker:
-    - image: boosterfuels/circle-build:v1.0-python
+    - image: boosterfuels/circle-build:v1.0
       auth:
         username: $DOCKER_USER
         password: $DOCKER_PASS
@@ -10,26 +10,41 @@ working_directory: ~/project
 
 version: 2
 jobs:
-  deploy:
+  build:
     <<: *setup_environment
     steps:
       - checkout
-      - setup_remote_docker
       - attach_workspace:
           at: ~/project
       - run:
-          name: Build and push production docker image
+          name: Test
           command: |
-            docker login -u $DOCKER_USER -p $DOCKER_PASS
-            docker build -t boosterfuels/purr:production .
-            docker push boosterfuels/purr:production
+            ./tests/python -m unittest discover extract
+            ./tests/python -m unittest discover load
+            ./tests/python -m unittest discover transform
+
+  publish-github-release:
+    docker:
+      - image: cibuilds/github:0.10
+    steps:
+      - attach_workspace:
+          at: ./artifacts
+      # - run:
+      #     name: "Publish Release on GitHub"
+
 workflows:
   version: 2
   install_test_deploy:
     jobs:
-      - deploy:
+      - build:
           filters:
             branches:
               only: 
-                - master 
-                - test 
+                - master
+                - test
+      - publish-github-release:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master 
