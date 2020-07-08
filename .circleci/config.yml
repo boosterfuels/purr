@@ -19,6 +19,11 @@ jobs:
             sudo mkdir -p mongodb
             sudo tar -zxvf mongodb-linux-x86_64-ubuntu1204-3.4.2.tgz -C mongodb --strip-components=1
             sudo mkdir -p ./data/db
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - data
+            - mongodb
       - run:
           name: Setup test database
           command: |
