@@ -6,13 +6,24 @@ working_directory: ~/project
 
 jobs:
   setup:
-    executor: python/default
     steps:
       - checkout
-      - python/load-cache
-      - python/install-deps
-      - python/save-cache
-
+      - restore_cache:
+          key: dependency-cache-{{ checksum "package.json" }}
+      - run:
+          name: Install dependencies
+          command: npm i
+      - save_cache:
+          key: dependency-cache-{{ checksum "package.json" }}
+          paths:
+            - node_modules
+      - run:
+          name: Run lint
+          command: npm run lint
+      - run:
+          name: Generate test file
+          command: |
+            (find . -regex "./test/.*.tests/[^_|.]*/index.js"; find . -maxdepth 3 -regex "./test/.*.tests/.*.test.js$") > test-file-paths.txt
       - run:
           name: Setup mongodb
           command: |
@@ -20,24 +31,28 @@ jobs:
             sudo mkdir -p mongodb
             sudo tar -zxvf mongodb-linux-x86_64-ubuntu1204-3.4.2.tgz -C mongodb --strip-components=1
             sudo mkdir -p ./data/db
-      - persist_to_workspace:
-          root: ~/project
-          paths:
-            - data
-            - mongodb
       - run:
           command: |
             pip install -r requirements.txt
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - node_modules
+            - data
+            - mongodb
+            - test-file-paths.txt
   test:
     executor: python/default
     steps:
       - checkout
+      - python/load-cache
+      - python/install-deps
+      - python/save-cache
       - attach_workspace:
           at: ~/project
       - run:
           name: Setup test database
           command: |
-            sudo apt-get update
             sudo ./mongodb/bin/mongod --dbpath ./data/db --logpath ./mongod.log --fork || cat ./mongod.log
       - run:
           name: Test
