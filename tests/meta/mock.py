@@ -436,7 +436,7 @@ def setup_pg_tables():
         )
         TABLESPACE pg_default;
 
-        DROP FUNCTION IF EXISTS public.notify_type CASCADE;
+        DROP FUNCTION IF EXISTS public.notify_type;
 
         CREATE FUNCTION public.notify_type()
             RETURNS trigger
