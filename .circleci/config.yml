@@ -13,6 +13,17 @@ jobs:
       - python/save-cache
 
       - run:
+          name: Setup mongodb
+          command: |
+            sudo curl -Ol https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-ubuntu1204-3.4.2.tgz
+            sudo mkdir -p mongodb
+            sudo tar -zxvf mongodb-linux-x86_64-ubuntu1204-3.4.2.tgz -C mongodb --strip-components=1
+            sudo mkdir -p ./data/purr_test
+      - run:
+          name: Setup test database
+          command: |
+            sudo ./mongodb/bin/mongod --dbpath ./data/purr_test --logpath ./mongod.log --fork || cat ./mongod.log
+      - run:
           name: Test
           command: |
             python -m unittest discover ./tests/extract
