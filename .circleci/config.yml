@@ -1,7 +1,7 @@
 setup_environment: &setup_environment
   docker:
-    - image: messa/circleci-python-with-mongodb:3.6      
-    - image: postgres:9.6-jessie
+    - image: messa/circleci-python-with-mongodb:3.6
+    - image: circleci/postgres:9.6.5-alpine-ram
   environment:
     TZ: "/usr/share/zoneinfo/America/Los_Angeles"
 working_directory: ~/project
