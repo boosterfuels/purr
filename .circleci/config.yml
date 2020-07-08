@@ -37,6 +37,7 @@ jobs:
       - run:
           name: Setup test database
           command: |
+            sudo apt-get update
             sudo ./mongodb/bin/mongod --dbpath ./data/db --logpath ./mongod.log --fork || cat ./mongod.log
       - run:
           name: Test
