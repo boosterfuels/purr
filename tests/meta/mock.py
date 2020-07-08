@@ -420,7 +420,8 @@ oplog_entries_update = [
 def setup_pg_tables():
     cursor = pg.conn.cursor()
 
-    cursor.execute("""CREATE TABLE IF NOT EXISTS public.purr_collection_map
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS public.purr_collection_map
         (
             id integer NOT NULL,
             collection_name text COLLATE pg_catalog."default",
@@ -449,12 +450,11 @@ def setup_pg_tables():
             END;
             $BODY$;
 
-        DROP TRIGGER IF EXISTS notify on public.purr_collection_map;
-
         CREATE TRIGGER notify
             AFTER INSERT OR DELETE OR UPDATE 
             ON public.purr_collection_map
             FOR EACH ROW
-            EXECUTE PROCEDURE public.notify_type();""")
+            EXECUTE PROCEDURE public.notify_type();
+        """)
 
 setup_pg_tables()
