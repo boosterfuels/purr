@@ -436,7 +436,7 @@ def setup_pg_tables():
         )
         TABLESPACE pg_default;
 
-        DROP FUNCTION IF EXISTS public.notify_type();
+        DROP FUNCTION IF EXISTS public.notify_type() CASCADE;
 
         CREATE FUNCTION public.notify_type()
             RETURNS trigger
@@ -456,7 +456,7 @@ def setup_pg_tables():
             FOR EACH ROW
             EXECUTE PROCEDURE public.notify_type();
 
-        CREATE SEQUENCE public.purr_error_id_seq
+        CREATE SEQUENCE IF NOT EXISTS public.purr_error_id_seq
             INCREMENT 1
             START 74984
             MINVALUE 1
@@ -478,7 +478,7 @@ def setup_pg_tables():
         )
         TABLESPACE pg_default;
 
-        CREATE SEQUENCE public.purr_oplog_id_seq
+        CREATE SEQUENCE IF NOT EXISTS public.purr_oplog_id_seq
             INCREMENT 1
             START 1
             MINVALUE 1
@@ -498,13 +498,13 @@ def setup_pg_tables():
         )
         TABLESPACE pg_default;
 
-        CREATE SEQUENCE public.purr_transfer_stats_id_seq
+        CREATE SEQUENCE IF NOT EXISTS public.purr_transfer_stats_id_seq
             INCREMENT 1
             START 438
             MINVALUE 1
             MAXVALUE 2147483647
             CACHE 1;
-            
+
         CREATE TABLE IF NOT EXISTS public.purr_transfer_stats
         (
             id integer NOT NULL DEFAULT nextval('purr_transfer_stats_id_seq'::regclass),
