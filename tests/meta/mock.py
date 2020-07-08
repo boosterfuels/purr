@@ -435,6 +435,20 @@ def setup_pg_tables():
         )
         TABLESPACE pg_default;
 
+        DROP FUNCTION IF EXISTS public.notify_type CASCADE;
+
+        CREATE FUNCTION public.notify_type()
+            RETURNS trigger
+            LANGUAGE 'plpgsql'
+            COST 100
+            VOLATILE NOT LEAKPROOF
+        AS $BODY$
+            BEGIN
+                PERFORM pg_notify('purr', 'type_change');
+                RETURN NULL;
+            END;
+            $BODY$;
+
         DROP TRIGGER IF EXISTS notify on public.purr_collection_map;
 
         CREATE TRIGGER notify
