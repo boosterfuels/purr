@@ -37,7 +37,7 @@ jobs:
       - run:
           name: Test
           command: |
-            pip install -r requirements.txt
+            sudo pip install -r requirements.txt
             python -m unittest discover ./tests/extract
             python -m unittest discover ./tests/load
             python -m unittest discover ./tests/transform
