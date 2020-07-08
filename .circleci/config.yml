@@ -45,7 +45,7 @@ jobs:
             python -m unittest discover ./tests/transform
 
   publish-github-release:
-    executor: python/default
+    <<: *setup_environment
     steps:
       - attach_workspace:
           at: ./artifacts
