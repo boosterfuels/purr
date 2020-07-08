@@ -49,7 +49,7 @@ jobs:
             - test-file-paths.txt
   test:
     #<<: *setup_environment
-    executor: python/default
+    #executor: python/default
     steps:
       - checkout
       - python/load-cache
