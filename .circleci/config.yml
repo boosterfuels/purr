@@ -1,9 +1,6 @@
 setup_environment: &setup_environment
   docker:
     - image: messa/circleci-python-with-mongodb:3.6
-      auth:
-        username: $DOCKER_USER
-        password: $DOCKER_PASS
   environment:
     TZ: "/usr/share/zoneinfo/America/Los_Angeles"
 working_directory: ~/project
