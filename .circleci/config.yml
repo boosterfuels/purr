@@ -1,6 +1,6 @@
 setup_environment: &setup_environment
   docker:
-    - image: boosterfuels/circle-build:v1.0-python
+    - image: messa/circleci-python-with-mongodb:3.6
       auth:
         username: $DOCKER_USER
         password: $DOCKER_PASS
