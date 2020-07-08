@@ -80,7 +80,7 @@ workflows:
                 - test
       - publish-github-release:
           requires:
-            - build-and-test
+            - test
           filters:
             branches:
               only: master 
