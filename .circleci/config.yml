@@ -1,7 +1,7 @@
 setup_environment: &setup_environment
   docker:
     - image: messa/circleci-python-with-mongodb:3.6
-    - image: circleci/postgres:9.6.5-alpine-ram
+    - image: circleci/postgres:9.6.9-alpine
       environment:
         POSTGRES_USER: circleci
         POSTGRES_DB: purr_test
