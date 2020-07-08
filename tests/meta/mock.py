@@ -456,6 +456,13 @@ def setup_pg_tables():
             FOR EACH ROW
             EXECUTE PROCEDURE public.notify_type();
 
+        CREATE SEQUENCE public.purr_error_id_seq
+            INCREMENT 1
+            START 74984
+            MINVALUE 1
+            MAXVALUE 2147483647
+            CACHE 1;
+
         CREATE TABLE IF NOT EXISTS public.purr_error
         (
             id integer NOT NULL DEFAULT nextval('purr_error_id_seq'::regclass),
@@ -471,6 +478,13 @@ def setup_pg_tables():
         )
         TABLESPACE pg_default;
 
+        CREATE SEQUENCE public.purr_oplog_id_seq
+            INCREMENT 1
+            START 1
+            MINVALUE 1
+            MAXVALUE 2147483647
+            CACHE 1;
+
         CREATE TABLE IF NOT EXISTS public.purr_oplog
         (
             id integer NOT NULL DEFAULT nextval('purr_oplog_id_seq'::regclass),
@@ -484,6 +498,13 @@ def setup_pg_tables():
         )
         TABLESPACE pg_default;
 
+        CREATE SEQUENCE public.purr_transfer_stats_id_seq
+            INCREMENT 1
+            START 438
+            MINVALUE 1
+            MAXVALUE 2147483647
+            CACHE 1;
+            
         CREATE TABLE IF NOT EXISTS public.purr_transfer_stats
         (
             id integer NOT NULL DEFAULT nextval('purr_transfer_stats_id_seq'::regclass),
