@@ -11,13 +11,33 @@ working_directory: ~/project
 
 version: 2
 jobs:
-  test:
+  setup:
     <<: *setup_environment
     steps:
       - checkout
       - setup_remote_docker
+      - run:
+          name: Setup mongodb
+          command: |
+            sudo curl -Ol https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-ubuntu1204-3.4.2.tgz
+            sudo mkdir -p mongodb
+            sudo tar -zxvf mongodb-linux-x86_64-ubuntu1204-3.4.2.tgz -C mongodb --strip-components=1
+            sudo mkdir -p ./data/db
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - data
+            - mongodb
+  test:
+    <<: *setup_environment
+    steps:
+      - checkout
       - attach_workspace:
           at: ~/project
+      - run:
+          name: Setup test database
+          command: |
+            sudo ./mongodb/bin/mongod --dbpath ./data/db --logpath ./mongod.log --fork || cat ./mongod.log
       - run:
           name: Test
           command: |
@@ -48,7 +68,10 @@ workflows:
   version: 2
   install_test_deploy:
     jobs:
+      - setup
       - test:
+          requires:
+            - setup
           filters:
             branches:
               only: 
@@ -59,4 +82,6 @@ workflows:
             - test
           filters:
             branches:
-              only: master 
+              only: 
+                - master
+                - test
