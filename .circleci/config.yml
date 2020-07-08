@@ -1,6 +1,7 @@
 setup_environment: &setup_environment
   docker:
-    - image: messa/circleci-python-with-mongodb:3.6
+    - image: messa/circleci-python-with-mongodb:3.6      
+    - image: postgres:9.6-jessie
   environment:
     TZ: "/usr/share/zoneinfo/America/Los_Angeles"
 working_directory: ~/project
@@ -41,14 +42,13 @@ jobs:
             python -m unittest discover ./tests/extract
             python -m unittest discover ./tests/load
             python -m unittest discover ./tests/transform
-
   publish-github-release:
     <<: *setup_environment
     steps:
       - attach_workspace:
-          at: ./artifacts
+          at: ./project
       - run:
-          name: Test
+          name: Build
           command: |
             printf "Triggering builds"
             BUILD_INFO=$(curl -X POST -H -d \

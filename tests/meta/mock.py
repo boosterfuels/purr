@@ -6,12 +6,10 @@ import os
 
 
 # ------ CONNECTION STRINGS ------
-conn_str_pg = os.environ['PURR_TEST_POSTGRES_CONNECTION'] if 'PURR_TEST_POSTGRES_CONNECTION' in os.environ else 'postgres://postgres:postgres@localhost:5432/'
+conn_str_pg = 'postgres://localhost:5432/'
 conn_str_mongo = 'mongodb://localhost:27017'
-
 NAME_DB = 'purr_test'
 db_name_mongo = db_name_pg = NAME_DB
-
 conn_str_pg = conn_str_pg + db_name_pg
 
 # ------ CONNECTION ------
