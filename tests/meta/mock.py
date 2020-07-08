@@ -455,6 +455,46 @@ def setup_pg_tables():
             ON public.purr_collection_map
             FOR EACH ROW
             EXECUTE PROCEDURE public.notify_type();
+
+        CREATE TABLE IF NOT EXISTS public.purr_error
+        (
+            id integer NOT NULL DEFAULT nextval('purr_error_id_seq'::regclass),
+            location text COLLATE pg_catalog."default",
+            message text COLLATE pg_catalog."default",
+            ts integer
+        )
+        TABLESPACE pg_default;
+
+        CREATE TABLE IF NOT EXISTS public.purr_info
+        (
+            latest_successful_ts text COLLATE pg_catalog."default"
+        )
+        TABLESPACE pg_default;
+
+        CREATE TABLE IF NOT EXISTS public.purr_oplog
+        (
+            id integer NOT NULL DEFAULT nextval('purr_oplog_id_seq'::regclass),
+            operation text COLLATE pg_catalog."default",
+            relation text COLLATE pg_catalog."default",
+            obj_id text COLLATE pg_catalog."default",
+            ts integer NOT NULL,
+            merged boolean,
+            document text COLLATE pg_catalog."default",
+            CONSTRAINT purr_oplog_pkey PRIMARY KEY (id, ts)
+        )
+        TABLESPACE pg_default;
+
+        CREATE TABLE IF NOT EXISTS public.purr_transfer_stats
+        (
+            id integer NOT NULL DEFAULT nextval('purr_transfer_stats_id_seq'::regclass),
+            action text COLLATE pg_catalog."default",
+            relation text COLLATE pg_catalog."default",
+            number_of_rows integer,
+            ts_start integer,
+            ts_end integer
+        )
+        TABLESPACE pg_default;
+
         """)
 
 setup_pg_tables()
