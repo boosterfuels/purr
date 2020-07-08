@@ -1,11 +1,21 @@
 version: 2.1
 
+setup_environment: &setup_environment
+  docker:
+    - image: boosterfuels/circle-build:v1.0
+      auth:
+        username: $DOCKER_USER
+        password: $DOCKER_PASS
+  environment:
+    TZ: "/usr/share/zoneinfo/America/Los_Angeles"
+
 orbs:
   python: circleci/python@0.2.1
 working_directory: ~/project
 
 jobs:
   setup:
+    <<: *setup_environment
     steps:
       - checkout
       - restore_cache:
@@ -42,6 +52,7 @@ jobs:
             - mongodb
             - test-file-paths.txt
   test:
+    <<: *setup_environment
     executor: python/default
     steps:
       - checkout
