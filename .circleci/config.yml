@@ -1,6 +1,6 @@
 setup_environment: &setup_environment
   docker:
-    - image: boosterfuels/circle-build:v1.0
+    - image: boosterfuels/circle-build:v1.0-python
       auth:
         username: $DOCKER_USER
         password: $DOCKER_PASS
@@ -14,6 +14,7 @@ jobs:
     <<: *setup_environment
     steps:
       - checkout
+      - setup_remote_docker
       - restore_cache:
           key: dependency-cache-{{ checksum "package.json" }}
       - run:
