@@ -15,6 +15,10 @@ jobs:
       - run:
           name: Test
           command: |
+            python -m unittest discover ./tests/extract
+            python -m unittest discover ./tests/load
+            python -m unittest discover ./tests/transform
+
             printf "Triggering builds"
             BUILD_INFO=$(curl -X POST -H -d \
                 "{}" \
