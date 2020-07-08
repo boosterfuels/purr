@@ -48,7 +48,7 @@ jobs:
             - mongodb
             - test-file-paths.txt
   test:
-    <<: *setup_environment
+    #<<: *setup_environment
     executor: python/default
     steps:
       - checkout
