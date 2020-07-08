@@ -15,22 +15,6 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker
-      - restore_cache:
-          key: dependency-cache-{{ checksum "package.json" }}
-      - run:
-          name: Install dependencies
-          command: npm i
-      - save_cache:
-          key: dependency-cache-{{ checksum "package.json" }}
-          paths:
-            - node_modules
-      - run:
-          name: Run lint
-          command: npm run lint
-      - run:
-          name: Generate test file
-          command: |
-            (find . -regex "./test/.*.tests/[^_|.]*/index.js"; find . -maxdepth 3 -regex "./test/.*.tests/.*.test.js$") > test-file-paths.txt
       - run:
           name: Setup mongodb
           command: |
@@ -41,10 +25,8 @@ jobs:
       - persist_to_workspace:
           root: ~/project
           paths:
-            - node_modules
             - data
             - mongodb
-            - test-file-paths.txt
   test:
     <<: *setup_environment
     #executor: python/default
