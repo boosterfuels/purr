@@ -82,7 +82,7 @@ def config_collections(path):
     """
     try:
         with open(path, 'r') as stream:
-            conf_file = yaml.load(stream)
+            conf_file = yaml.safe_load(stream)
             db_names = list(conf_file.keys())
             colls = conf_file[db_names[0]]
             return colls
