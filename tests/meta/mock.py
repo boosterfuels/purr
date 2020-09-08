@@ -5,12 +5,11 @@ from bson import Timestamp
 
 
 # ------ CONNECTION STRINGS ------
-
-NAME_DB = 'test_purrito'
-db_name_mongo = db_name_pg = NAME_DB
-
+conn_str_pg = 'postgres://postgres:postgres@localhost:5432/'
 conn_str_mongo = 'mongodb://localhost:27017'
-conn_str_pg = 'postgres://127.0.0.1:5432/%s' % NAME_DB
+NAME_DB = 'purr_test'
+db_name_mongo = db_name_pg = NAME_DB
+conn_str_pg = conn_str_pg + db_name_pg
 
 # ------ CONNECTION ------
 
@@ -370,8 +369,12 @@ oplog_entries_update = [
         'h': -4473962510602026742,
         'v': 2,
         'op': 'u',
-        'ns': 'test_purrito.Employee',
+        'operationType': 'update',
+        'ns': {'db': 'test_purrito', 'coll': 'Employee'},
         'o2': {'_id': '1'},
+        'updateDescription' : {'updatedFields': {'firstName': 'Janos',
+                'lastName': None, 'hair': None}},
+        'documentKey': {'_id': '1'},
         'o': {
             '$set': {
                 'firstName': 'Janos',
@@ -388,10 +391,13 @@ oplog_entries_update = [
         'h': -6116078169406119246,
         'v': 2,
         'op': 'u',
-        'ns': 'test_purrito.Company',
+        'operationType': 'update',
+        'ns': {'db': 'test_purrito', 'coll': 'Company'},
+        'documentKey': {'_id': '2'},
         'o2': {
-            '_id': 2
+            '_id': '2'
         },
+        'updateDescription' : {'updatedFields': {'domains': ['dragonglass.org']}},
         'o': {
             '$set': {
                 'domains': ['dragonglass.org']
@@ -404,8 +410,13 @@ oplog_entries_update = [
         'h': -4473962510602026742,
         'v': 2,
         'op': 'u',
-        'ns': 'test_purrito.Employee',
+        'operationType': 'update',
+        'ns': {'db': 'test_purrito', 'coll': 'Employee'},
+        'documentKey': {'_id': '2'},
         'o2': {'_id': '2'},
+        'updateDescription' : {'updatedFields': {'firstName': 'Arja',
+                "lastName": "Stark",
+                'hair': 'blonde'}},
         'o': {
             '$set': {
                 'firstName': 'Arja',
@@ -415,3 +426,107 @@ oplog_entries_update = [
         }
     },
 ]
+
+
+def setup_pg_tables():
+    cursor = pg.conn.cursor()
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS public.purr_collection_map
+        (
+            id integer NOT NULL,
+            collection_name text COLLATE pg_catalog."default",
+            relation_name text COLLATE pg_catalog."default",
+            types jsonb[],
+            updated_at timestamp without time zone,
+            query_update text COLLATE pg_catalog."default",
+            CONSTRAINT purr_collection_map_pkey PRIMARY KEY (id)
+        )
+        WITH (
+            OIDS = FALSE
+        )
+        TABLESPACE pg_default;
+
+        DROP FUNCTION IF EXISTS public.notify_type() CASCADE;
+
+        CREATE FUNCTION public.notify_type()
+            RETURNS trigger
+            LANGUAGE 'plpgsql'
+            COST 100
+            VOLATILE NOT LEAKPROOF
+        AS $BODY$
+            BEGIN
+                PERFORM pg_notify('purr', 'type_change');
+                RETURN NULL;
+            END;
+            $BODY$;
+
+        CREATE TRIGGER notify
+            AFTER INSERT OR DELETE OR UPDATE 
+            ON public.purr_collection_map
+            FOR EACH ROW
+            EXECUTE PROCEDURE public.notify_type();
+
+        CREATE SEQUENCE IF NOT EXISTS public.purr_error_id_seq
+            INCREMENT 1
+            START 74984
+            MINVALUE 1
+            MAXVALUE 2147483647
+            CACHE 1;
+
+        CREATE TABLE IF NOT EXISTS public.purr_error
+        (
+            id integer NOT NULL DEFAULT nextval('purr_error_id_seq'::regclass),
+            location text COLLATE pg_catalog."default",
+            message text COLLATE pg_catalog."default",
+            ts integer
+        )
+        TABLESPACE pg_default;
+
+        CREATE TABLE IF NOT EXISTS public.purr_info
+        (
+            latest_successful_ts text COLLATE pg_catalog."default"
+        )
+        TABLESPACE pg_default;
+
+        CREATE SEQUENCE IF NOT EXISTS public.purr_oplog_id_seq
+            INCREMENT 1
+            START 1
+            MINVALUE 1
+            MAXVALUE 2147483647
+            CACHE 1;
+
+        CREATE TABLE IF NOT EXISTS public.purr_oplog
+        (
+            id integer NOT NULL DEFAULT nextval('purr_oplog_id_seq'::regclass),
+            operation text COLLATE pg_catalog."default",
+            relation text COLLATE pg_catalog."default",
+            obj_id text COLLATE pg_catalog."default",
+            ts integer NOT NULL,
+            merged boolean,
+            document text COLLATE pg_catalog."default",
+            CONSTRAINT purr_oplog_pkey PRIMARY KEY (id, ts)
+        )
+        TABLESPACE pg_default;
+
+        CREATE SEQUENCE IF NOT EXISTS public.purr_transfer_stats_id_seq
+            INCREMENT 1
+            START 438
+            MINVALUE 1
+            MAXVALUE 2147483647
+            CACHE 1;
+
+        CREATE TABLE IF NOT EXISTS public.purr_transfer_stats
+        (
+            id integer NOT NULL DEFAULT nextval('purr_transfer_stats_id_seq'::regclass),
+            action text COLLATE pg_catalog."default",
+            relation text COLLATE pg_catalog."default",
+            number_of_rows integer,
+            ts_start integer,
+            ts_end integer
+        )
+        TABLESPACE pg_default;
+
+        """)
+
+setup_pg_tables()
