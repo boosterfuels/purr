@@ -44,7 +44,6 @@ workflows:
             branches:
               only: 
                 - master
-                - test
       - publish-github-release:
           requires:
             - build-and-test
