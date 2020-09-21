@@ -260,6 +260,7 @@ class Tailer(extractor.Extractor):
                 self.flush(docs_with_equal_oper, oper, r)
                 oper = doc_details["op"]
                 docs_with_equal_oper = [doc_details]
+                
         self.flush(docs_with_equal_oper, oper, r)
 
     def handle_multiple(self, docs, updated_at):

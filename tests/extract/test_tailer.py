@@ -195,7 +195,7 @@ class TestTailer(unittest.TestCase):
 
         colls = ["Company", "Employee"]
 
-        ex.transfer(colls)
+        ex.start(colls)
 
         cursor = pg.conn.cursor()
         cursor.execute("SELECT * FROM public.employee where id = '1';")

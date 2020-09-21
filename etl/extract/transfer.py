@@ -14,7 +14,7 @@ def start(extractor, coll_config):
                 Check your collection names in the setup file.
                 """)
         return
-    extractor.transfer(collections)
+    extractor.start(collections)
 
 
 class TransferThread(Thread):

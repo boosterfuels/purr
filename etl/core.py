@@ -51,19 +51,14 @@ def start(settings, coll_map):
     setup_pg = settings["postgres"]
     setup_mdb = settings["mongo"]
 
-    pg = postgres.PgConnection(setup_pg["connection"])
-    mongo = mongodb.MongoConnection(setup_mdb)
-
-    cm.create_table(
-        pg, coll_map, setup_pg["schema_name"])
-    transfer_info.save_logs_to_db(pg, setup_pg["schema_name"])
-
-    ex = extractor.Extractor(
-        pg, mongo.conn, setup_pg, settings, coll_map)
+    ex = extract.extractor.Extractor(
+        None, None, setup_pg, settings, coll_map)
 
     start_date_time = datetime.utcnow()
 
     if mode_tailing:
+        tailing_start = False
+        """
         try:
             # first just transfer the data
             tailing_start = False
@@ -90,7 +85,7 @@ def start(settings, coll_map):
             logger.error(
                 "Unable to start transfer thread. Details: %s" % ex, CURR_FILE)
             raise SystemExit()
-
+        """
     else:
         transfer.start(ex, coll_map)
 

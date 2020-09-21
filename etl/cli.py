@@ -50,6 +50,11 @@ def main():
                         dest='schema_reset', default=False, help='')
     parser.add_argument('-sn', '--schema-name', type=str,
                         dest='schema_name', default='public', help='')
+    parser.add_argument('-nr', '--n-rows', type=int,
+                        dest='n_rows', default=10000, help="""
+                        Number of rows to insert/upsert at once when transferring entire
+                        collections. 
+                        """)
     parser.add_argument('-pg', '--pg-connection', type=str,
                         dest='pg_connection', help='')
     parser.add_argument('-mdb', '--mongo-connection', type=str,
@@ -108,7 +113,8 @@ def main():
                     'schema_name': args.schema_name,
                     'schema_reset': args.schema_reset,
                     'table_truncate': args.table_truncate,
-                    'table_drop': args.table_drop
+                    'table_drop': args.table_drop,
+                    'n_rows': args.n_rows
                 },
                 'mongo':
                 {

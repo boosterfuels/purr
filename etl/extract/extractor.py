@@ -3,13 +3,13 @@ from etl.extract import collection_map as cm
 from etl.load import table, schema
 from etl.monitor import logger
 from etl.extract import transfer_info
+from etl.extract import extractor_helper as eh
 import time
 from etl.transform import relation, type_checker as tc, config_parser as cp
 
-name_extra_props_pg = "_extra_props"
-name_extra_props_mdb = "extraProps"
-
 CURR_FILE = "[EXTRACTOR]"
+
+from multiprocessing import Process, Pool
 
 
 class Extractor():
@@ -20,23 +20,24 @@ class Extractor():
     def __init__(self, pg, mdb, settings_pg, settings_general, coll_def):
         """Constructor for Extractor"""
 
-        self.pg = pg
-        self.mdb = mdb
-        self.include_extra_props = settings_general['include_extra_props']
+        self.pg = settings_pg["connection"]
+        self.mdb = settings_general["mongo"]
+        self.has_extra_props = settings_general['include_extra_props']
         try:
-            self.include_extra_props = settings_general['include_extra_props']
+            self.has_extra_props = settings_general['include_extra_props']
         except KeyError:
-            self.include_extra_props = False
+            self.has_extra_props = False
         self.schema = settings_pg["schema_name"]
         self.truncate = settings_pg['table_truncate']
         self.drop = settings_pg['table_drop']
+        self.tables_empty = self.truncate or self.drop
+        self.settings_pg = settings_pg
         self.coll_def = coll_def
         self.tailing_from = settings_general['tailing_from']
         self.tailing_from_db = settings_general['tailing_from_db']
-        self.coll_map_cur = cm.get_table(self.pg)
-        self.attr_details = {}
+        self.coll_map_cur = cm.get_coll_map_from_db(self.pg)
 
-    def convert_columns(self, name_table, source, fields_cur, fields_new):
+    def column_convert(self, name_table, source, fields_cur, fields_new):
         """
         (1) Tries to convert the column
         (2) TODO: If (1) was not successful (PG could not
@@ -61,7 +62,7 @@ class Extractor():
                                     type_new
                                 ))
                             table.column_change_type(
-                                self.pg,
+                                pg,
                                 self.schema,
                                 name_table,
                                 column,
@@ -77,12 +78,14 @@ class Extractor():
                                 type_old,
                                 type_new))
 
-    def add_columns(self, source, added, name_coll, name_table, fields_new, cm):
+    def column_add(self, source, added, name_coll, name_table, fields_new, cm):
         """
         Adds columns to a table and updates the coll_def.
         After that, it restarts the collection transfer
         so the changes would be picked up.
         """
+        new_columns = []
+        # TODO: add new columns
         for item in added:
             if item[":source"] not in source:
                 for attribute, v in item.items():
@@ -94,9 +97,9 @@ class Extractor():
                             name_table,
                             attribute,
                             item[":type"])
-                        self.transfer_coll(cm[1])
+                        self.transfer_collections(cm[1], new_columns)
 
-    def remove_columns(self, source, removed, name_coll, name_table, fields_new):
+    def column_remove(self, source, removed, name_coll, name_table, fields_new):
         """
         Removes columns to a table and updates the coll_def.
         """
@@ -107,7 +110,7 @@ class Extractor():
                         # update collection settings
                         self.coll_def[name_coll][":columns"] = fields_new
                         table.remove_column(
-                            self.pg,
+                            pg,
                             self.schema,
                             name_table,
                             attribute)
@@ -132,19 +135,19 @@ class Extractor():
                 x for x in sources_removed if x in sources_added]
 
             if len(source_persistent):
-                self.convert_columns(
+                self.column_convert(
                     name_table,
                     source_persistent,
                     fields_cur,
                     fields_new
                 )
 
-            self.add_columns(source_persistent, added,
-                             name_coll, name_table, fields_new,
-                             coll_map_cur[i])
+            self.column_add(source_persistent, added,
+                            name_coll, name_table, fields_new,
+                            coll_map_cur[i])
 
-            self.remove_columns(source_persistent, removed,
-                                name_coll, name_table, fields_new)
+            self.column_remove(source_persistent, removed,
+                               name_coll, name_table, fields_new)
 
     def table_track(self, coll_map_cur, coll_map_new):
         """
@@ -178,7 +181,7 @@ class Extractor():
                 ':columns': columns,
                 ':meta': meta,
             }
-            self.transfer_coll(name_coll)
+            self.transfer_collections(name_coll)
 
     def table_untrack(self, coll_map_cur, coll_map_new):
         tables_cur = [x[2] for x in coll_map_cur]
@@ -202,7 +205,7 @@ class Extractor():
                     CURR_FILE)
 
         coll_map_cur = self.coll_map_cur
-        coll_map_new = cm.get_table(self.pg)
+        coll_map_new = cm.get_coll_map_from_db(self.pg)
 
         if coll_map_cur == coll_map_new:
             logger.info("%s Database schema is not changed" %
@@ -226,9 +229,15 @@ class Extractor():
         # restart transfer
         # update schema
 
-    def transfer(self, coll_names_in_config):
+    def cleanup(self, relations):
+        if self.drop:
+            table.drop(self.pg, self.schema, relations)
+        elif self.truncate:
+            table.truncate(self.pg, self.schema, relations)
+
+    def start(self, collections):
         """
-        Transfers documents or whole collections if the number of fields
+        Starts with transferring whole collections if the number of fields
         is less than 30 000 (batch_size).
         Types of attributes are determined using the collections.yml file.
         Returns
@@ -239,29 +248,21 @@ class Extractor():
         coll_names : list
                    : list of collection names
         """
-
-        coll_names = collection.check(self.mdb, coll_names_in_config)
+        # check if collections exist
+        mongo = mongodb.MongoConnection(self.mdb).conn
+        coll_names = extract.collection.check(mongo, collections)
         if len(coll_names) == 0:
-            logger.info('%s No collections to transfer.' %
-                        CURR_FILE
-                        )
+            logger.info('%s No collections to transfer.' % CURR_FILE)
             return
 
         relation_names = []
         for coll in coll_names:
             relation_names.append(tc.snake_case(coll))
 
-        if self.drop:
-            table.drop(self.pg, self.schema, relation_names)
-        elif self.truncate:
-            table.truncate(self.pg, self.schema, coll_names)
+        a_pool = Pool(4)
+        result = a_pool.map(self.transfer_collections_parallel, coll_names)
 
-        schema.create(self.pg, self.schema)
-
-        for coll in coll_names:
-            self.transfer_coll(coll)
-
-    def transfer_coll(self, coll):
+    def transfer_collections_parallel(self, coll, new_columns=[]):
         '''
         Transfers documents or whole collections if the number of fields
         is less than 30 000 (batch_size).
@@ -274,62 +275,66 @@ class Extractor():
              : name of collection which is going to be transferred
         '''
 
-        r = self.adjust_columns(coll)
+        pg = postgres.PgConnection(self.pg)
+        mongo = mongodb.MongoConnection(self.mdb).conn
 
         if self.tailing_from is not None or self.tailing_from_db is True:
             return
+        attr_details = eh.get_attr_details(
+            self.coll_def, coll, self.has_extra_props)
 
-        if self.include_extra_props is True:
-            docs = collection.get_by_name(self.mdb, coll)
-        else:
-            attr_source = [k for k, v in self.attr_details.items()]
-            docs = collection.get_by_name_reduced(self.mdb, coll, attr_source)
+        docs = eh.get_docs(
+            mongo,
+            self.has_extra_props,
+            coll,
+            attr_details,
+            new_columns
+        )
 
-        # Start transferring docs
         nr_of_docs = docs.count()
-        nr_of_transferred = 1000
-        i = 0
-        transferring = []
-        actions = []
+        MAX_N_ROWS = self.settings_pg["n_rows"]
 
+        if nr_of_docs > 30000:
+            MAX_N_ROWS = 10000
+        else:
+            MAX_N_ROWS = nr_of_docs
+
+        chunks = []
+
+        i = 0
         transfer_start = time.time()
-        # transfer_info.log_stats(self.pg, self.schema, log_entry)
+
         for doc in docs:
-            transferring.append(doc)
+            is_last_doc = (i + 1 == nr_of_docs)
+            chunks.append(doc)
+
             try:
-                if (i+1) % nr_of_transferred == 0 and i+1 >= nr_of_transferred:
-                    if self.include_extra_props is True:
-                        r.insert_bulk(
-                            transferring,
-                            self.attr_details,
-                            self.include_extra_props)
-                    else:
-                        r.insert_bulk_no_extra_props(
-                            transferring,
-                            self.attr_details,
-                            self.include_extra_props)
-                    transferring = []
-                if i + 1 == nr_of_docs and (i + 1) % nr_of_transferred != 0:
-                    if self.include_extra_props is True:
-                        r.insert_bulk(
-                            transferring,
-                            self.attr_details,
-                            self.include_extra_props)
-                    else:
-                        r.insert_bulk_no_extra_props(
-                            transferring,
-                            self.attr_details,
-                            self.include_extra_props)
-                        logger.info(
-                            "%s Finished collection %s: %d docs"
-                            % (CURR_FILE,
-                               coll, i + 1))
-                        transferring = []
+                # we reached the maximum number of docs we can transfer at once OR
+                # we reached the last document therefore we start pumping
+                if (i+1) % MAX_N_ROWS == 0 or is_last_doc:
+
+                    eh.work_parallel(chunks,
+                                self.has_extra_props,
+                                pg,
+                                coll,
+                                self.coll_def,
+                                self.schema
+                            )
+
+                    chunks = []
+
+                if is_last_doc is True:
+                    logger.info(
+                        "%s Finished collection %s: %d docs"
+                        % (CURR_FILE,
+                            coll, i + 1))
+
             except Exception as ex:
                 logger.error("""%s Transfer unsuccessful. %s""" % (
                     CURR_FILE,
                     ex))
-            if (i+1) % (nr_of_transferred * 10) == 0:
+
+            if (i+1) % (MAX_N_ROWS) == 0:
                 logger.info("""%s %d/%d (%s)""" % (
                     CURR_FILE,
                     i+1,
@@ -337,28 +342,35 @@ class Extractor():
                     coll))
             i += 1
 
-        transfer_end = time.time()
-        action = 'UPSERT'
-        if self.drop is True or self.truncate is True:
-            action = 'INSERT'
-        actions.append([action, transfer_start, transfer_end])
+        transfer_details = eh.get_transfer_details(
+            self.tables_empty,
+            transfer_start,
+            time.time()
+        )   
 
-        vacuum_start = time.time()
-        r.vacuum()
-        vacuum_end = time.time()
-        actions.append(['FULL VACUUM', vacuum_start, vacuum_end])
-
-        log_entries = []
-
-        for action in actions:
-            log_entries.append(tuple([action[0], r.relation_name,
-                                      nr_of_docs, action[1], action[2]]))
-        transfer_info.log_stats(self.pg, self.schema, log_entries)
+        r, attr_details = eh.init_relation(coll, pg, self.coll_def, self.has_extra_props, self.schema)
+        vacuum_details = eh.get_vacuum_details(r)
+        eh.log(r,
+               nr_of_docs,
+               [transfer_details, vacuum_details]
+               )
+        del r
+        pg.__del__()
 
     def insert_multiple(self, docs, r, coll):
         '''
-        Transfers multiple documents with different fields
-        (not whole collections).
+        Used by [TAILER]
+        Calls update_multiple when tailing which will UPSERT
+        the documents. 
+        Plans: create a function that will INSERT 
+        because it is faster than UPSERT  
+        Details: update_multiple(self, docs, r, coll)
+        '''
+        self.update_multiple(docs, r, coll)
+
+    def update_multiple(self, docs, r, coll):
+        '''
+        Upserts multiple documents with different fields.
         Used by [TAILER]
         Parameters
         ----------
@@ -377,80 +389,10 @@ class Extractor():
         Example
         -------
         '''
-        (
-            att_new,
-            att_orig,
-            types,
-            name_rel,
-            type_x_props_pg
-        ) = cp.config_fields(self.coll_def, coll)
-
-        # TODO: check if this is necessary:
-        if types == []:
-            return
-
-        # Adding extra properties to inserted/updated row is necessary
-        # because this attribute is not part of the original document
-        # and anything that is not defined in the collection.yml file
-        # will be pushed in this value. This function will also create
-        # a dictionary which will contain all the information about
-        # the attribute before and after the conversion.
-
-        self.attr_details = self.prepare_attr_details(
-            att_new, att_orig, types, type_x_props_pg)
-        # TODO remove this stuff with the extra props
-        try:
-            if self.include_extra_props is True:
-                r.insert_bulk(
-                    docs, self.attr_details, self.include_extra_props)
-            else:
-                r.insert_bulk_no_extra_props_tailed(
-                    docs, self.attr_details, self.include_extra_props)
-        except Exception as ex:
-            logger.error("""
-            %s Transferring to %s was unsuccessful.
-            Exception: %s
-            """ % (
-                CURR_FILE,
-
-                r.relation_name, ex))
-            logger.error("%s\n" % docs)
-
-    def update_multiple(self, docs, r, coll):
-        '''
-        Upserts multiple documents with different fields.
-        Parameters
-        ----------
-        doc : dict
-            : document
-        r : Relation
-            relation in PG
-        coll : string
-             : collection name
-        Returns
-        -------
-        -
-
-        Raises
-        ------
-        Example
-        -------
-        '''
-        (attrs_new, attrs_original, types, relation_name,
-         type_x_props_pg) = cp.config_fields(self.coll_def, coll)
-        if types == []:
-            return
-        # Adding extra properties to inserted/updated row is necessary
-        # because this attribute is not part of the original
-        # document and anything that is not defined in the
-        # collection.yml file will be pushed in this value.
-        # This function will also create a dictionary which will
-        # contain all the information
-        # about the attribute before and after the conversion.
-
-        self.attr_details = self.prepare_attr_details(
-            attrs_new, attrs_original, types, type_x_props_pg)
-        # TODO remove this stuff with the extra props.
+        attr_details = eh.get_attr_details(
+            self.coll_def, coll, self.has_extra_props
+        )
+        tailing = True
         try:
             if self.include_extra_props is True:
                 r.insert_bulk(
@@ -466,62 +408,9 @@ class Extractor():
                 r.relation_name, ex))
             logger.error('%s\n' % docs)
 
-    def prepare_attr_details(self,
-                             attrs_cm,
-                             attrs_mdb,
-                             types_cm,
-                             type_x_props_pg=None):
-        '''
-        Adds extra properties field to the attribute details:
-        (attr_details).
-        Extra properties are not part of the original document
-        and they need to be added in this separate step.
-        Returns
-        -------
-        attr_details : list
-                      : details for mapping each field
-                      - name of the field (in mongodb)
-                      - name in the collection map (for pg)
-                      - type in the collection map (for pg)
-                      - default value
-
-        Parameters
-        ----------
-        attrs_cm : list
-                    : attribute names from config file
-        attrs_mdb : list
-                    : field names of MongoDB document
-        types_cm : list
-                    : types from config files
-        extra_props_type : string
-                    : type of the extra property
-        Example
-        -------
-        attrs_new = [kit_cat, birdy_bird]
-        attrs_original = [kitCat, birdyBird]
-        types = ['text', 'text']
-        extra_props_type = 'jsonb'
-        res = append_extra_props(
-            attrs_new, attrs_original, types, extra_props_type
-        )
-        '''
-        if self.include_extra_props is True:
-
-            attrs_cm.append(name_extra_props_pg)
-            attrs_mdb.append(name_extra_props_mdb)
-            types_cm.append(type_x_props_pg)
-
-        self.attr_details = {}
-        for i in range(0, len(attrs_mdb)):
-            details = {}
-            details["name_cm"] = attrs_cm[i]
-            details["type_cm"] = types_cm[i]
-            details["value"] = None
-            self.attr_details[attrs_mdb[i]] = details
-        return self.attr_details
-
-    def adjust_columns(self, coll):
+    def init_relation(self, coll, pg):
         """
+        Initializes relation object
         Adds or removes extra properties if necessary and updates column types
         for a collection.
         Changes the attribute details (attr_details)
@@ -537,61 +426,23 @@ class Extractor():
         r : object
           : the relation object
 
-
-
         """
         # get data from the collection map
         (attrs_new,
          attrs_original,
          types,
-         relation_name,
          type_x_props
          ) = cp.config_fields(self.coll_def, coll)
+
         if types == []:
             return
 
-        r = relation.Relation(self.pg, self.schema, relation_name)
+        relation_name = cp.get_relation_name(self.coll_def, coll)
+        r = relation.Relation(pg, self.schema, relation_name)
+        # add extra properties if necessary
+        attr_details = eh.add_extra_props(
+            attrs_original, attrs_new, types, self.has_extra_props)
 
-        self.add_extra_props(attrs_original, attrs_new, types)
-        # Check if changing type was unsuccessful.
-        failed = r.update_schema(self.attr_details)
-        self.handle_failed_type_update(failed)
-
-        return r
-
-    def handle_failed_type_update(self, failed):
-        if failed is not None:
-            for tuf in failed:
-                name_pg = tuf[0]
-                name_mdb = [
-                    attr for attr in self.attr_details if self.attr_details[attr]["name_cm"] == name_pg][0]
-                type_orig = tuf[1].lower()
-                type_new = self.attr_details[name_mdb]["type_cm"].lower()
-                self.attr_details[name_mdb]["type_cm"] = type_orig
-                logger.warn("""
-                    %s Type conversion is not possible for column '%s'.
-                    Skipping conversion %s -> %s.""" %
-                            (
-                                CURR_FILE,
-                                name_pg, type_orig, type_new))
-
-    def add_extra_props(self, attrs_original, attrs_new, types):
-
-        # This dict contains all the necessary information about the
-        # Mongo fields, Postgres columns and their types
-        self.attr_details = {}
-        attrs_mdb = attrs_original
-        attrs_cm = attrs_new
-        types_cm = types
-
-        if self.include_extra_props is True:
-            attrs_cm.append(name_extra_props_pg)
-            types_cm.append(types)
-            attrs_mdb.append(name_extra_props_mdb)
-
-        for i in range(len(attrs_mdb)):
-            details = {}
-            details["name_cm"] = attrs_cm[i]
-            details["type_cm"] = types[i]
-            details["value"] = None
-            self.attr_details[attrs_mdb[i]] = details
+        # Check if changing type was unsuccessful. TODO
+        attr_details = eh.handle_failed_type_update(r, attr_details)
+        return (r, attr_details)
