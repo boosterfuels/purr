@@ -10,6 +10,8 @@ from etl.transform import relation, type_checker as tc, config_parser as cp
 CURR_FILE = "[EXTRACTOR]"
 
 from multiprocessing import Process, Pool
+import etl.load.init_pg as postgres
+import etl.extract.init_mongo as mongodb
 
 
 class Extractor():
@@ -250,7 +252,7 @@ class Extractor():
         """
         # check if collections exist
         mongo = mongodb.MongoConnection(self.mdb).conn
-        coll_names = extract.collection.check(mongo, collections)
+        coll_names = collection.check(mongo, collections)
         if len(coll_names) == 0:
             logger.info('%s No collections to transfer.' % CURR_FILE)
             return
