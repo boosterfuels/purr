@@ -7,6 +7,7 @@ from etl.extract import transfer_info
 from etl.extract import collection
 import time
 from etl.transform import config_parser as cp
+import etl.transform.relation as relation
 
 
 name_extra_props_pg = "_extra_props"
