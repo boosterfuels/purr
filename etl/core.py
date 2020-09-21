@@ -51,7 +51,7 @@ def start(settings, coll_map):
     setup_pg = settings["postgres"]
     setup_mdb = settings["mongo"]
 
-    ex = extract.extractor.Extractor(
+    ex = extractor.Extractor(
         None, None, setup_pg, settings, coll_map)
 
     start_date_time = datetime.utcnow()
