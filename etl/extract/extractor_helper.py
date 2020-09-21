@@ -109,8 +109,8 @@ def finish_processes(processes):
     for p in processes:
         p.join()
 
-
-def work(transferring, attr_details, has_extra_props, r):
+def work_parallel(transferring, has_extra_props, pg, coll, coll_def, schema):
+    r, attr_details = init_relation(coll, pg, coll_def, has_extra_props, schema)
     try:
         r.insert(
             transferring,
@@ -122,6 +122,44 @@ def work(transferring, attr_details, has_extra_props, r):
             CURR_FILE, os.getpid(), ex)
         )
 
+def init_relation(coll, pg, coll_def, has_extra_props, schema):
+    """
+    Initializes relation object
+    Adds or removes extra properties if necessary and updates column types
+    for a collection.
+    Changes the attribute details (attr_details)
+
+    Parameters
+    ----------
+    coll : string
+         : name of the collection
+
+
+    Returns
+    ----------
+    r : object
+      : the relation object
+
+    """
+    # get data from the collection map
+    (attrs_new,
+     attrs_original,
+     types,
+     type_x_props
+     ) = cp.config_fields(coll_def, coll)
+
+    if types == []:
+        return
+
+    relation_name = cp.get_relation_name(coll_def, coll)
+    r = relation.Relation(pg, schema, relation_name)
+    # add extra properties if necessary
+    attr_details = add_extra_props(
+        attrs_original, attrs_new, types, has_extra_props)
+
+    # Check if changing type was unsuccessful. TODO
+    attr_details = handle_failed_type_update(r, attr_details)
+    return (r, attr_details)
 
 def init_connections(n_process, db_dest):
     connections_pg = []

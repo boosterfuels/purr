@@ -9,6 +9,8 @@ from etl.transform import relation, type_checker as tc, config_parser as cp
 
 CURR_FILE = "[EXTRACTOR]"
 
+from multiprocessing import Process, Pool
+
 
 class Extractor():
     """
@@ -18,8 +20,8 @@ class Extractor():
     def __init__(self, pg, mdb, settings_pg, settings_general, coll_def):
         """Constructor for Extractor"""
 
-        self.pg = pg
-        self.mdb = mdb
+        self.pg = settings_pg["connection"]
+        self.mdb = settings_general["mongo"]
         self.has_extra_props = settings_general['include_extra_props']
         try:
             self.has_extra_props = settings_general['include_extra_props']
@@ -60,7 +62,7 @@ class Extractor():
                                     type_new
                                 ))
                             table.column_change_type(
-                                self.pg,
+                                pg,
                                 self.schema,
                                 name_table,
                                 column,
@@ -108,7 +110,7 @@ class Extractor():
                         # update collection settings
                         self.coll_def[name_coll][":columns"] = fields_new
                         table.remove_column(
-                            self.pg,
+                            pg,
                             self.schema,
                             name_table,
                             attribute)
@@ -247,7 +249,8 @@ class Extractor():
                    : list of collection names
         """
         # check if collections exist
-        coll_names = collection.check(self.mdb, collections)
+        mongo = mongodb.MongoConnection(self.mdb).conn
+        coll_names = extract.collection.check(mongo, collections)
         if len(coll_names) == 0:
             logger.info('%s No collections to transfer.' % CURR_FILE)
             return
@@ -256,13 +259,10 @@ class Extractor():
         for coll in coll_names:
             relation_names.append(tc.snake_case(coll))
 
-        self.cleanup(relation_names)
-        schema.create(self.pg, self.schema)
+        a_pool = Pool(4)
+        result = a_pool.map(self.transfer_collections_parallel, coll_names)
 
-        for coll in coll_names:
-            self.transfer_collections(coll)
-
-    def transfer_collections(self, coll, new_columns=[]):
+    def transfer_collections_parallel(self, coll, new_columns=[]):
         '''
         Transfers documents or whole collections if the number of fields
         is less than 30 000 (batch_size).
@@ -275,13 +275,16 @@ class Extractor():
              : name of collection which is going to be transferred
         '''
 
+        pg = postgres.PgConnection(self.pg)
+        mongo = mongodb.MongoConnection(self.mdb).conn
+
         if self.tailing_from is not None or self.tailing_from_db is True:
             return
         attr_details = eh.get_attr_details(
             self.coll_def, coll, self.has_extra_props)
 
         docs = eh.get_docs(
-            self.mdb,
+            mongo,
             self.has_extra_props,
             coll,
             attr_details,
@@ -289,56 +292,37 @@ class Extractor():
         )
 
         nr_of_docs = docs.count()
-
         MAX_N_ROWS = self.settings_pg["n_rows"]
 
-        (n_process, size_chunk) = eh.get_n_process(
-            nr_of_docs, MAX_N_ROWS)
+        if nr_of_docs > 30000:
+            MAX_N_ROWS = 10000
+        else:
+            MAX_N_ROWS = nr_of_docs
 
-        pg_conns = eh.init_connections(
-            n_process,
-            self.settings_pg["connection"]
-        )
-
-        # the documents will be divided into n chunks
-        # one chunk will be transferred by one process
-        chunks = eh.init_chunks(n_process)
-
-        # init relations object for each connection
+        chunks = []
         relations = []
 
-        for conn in pg_conns:
-            r, attr_details = self.init_relation(coll, conn)
-            relations.append(r)
-
-        # Start transferring docs
         i = 0
-        j = 0
         transfer_start = time.time()
+
         for doc in docs:
             is_last_doc = (i + 1 == nr_of_docs)
-            chunks[j].append(doc)
-
-            # if the current chunk is full, move to the next one
-            if len(chunks[j]) == size_chunk:
-                j = j+1
+            chunks.append(doc)
 
             try:
                 # we reached the maximum number of docs we can transfer at once OR
                 # we reached the last document therefore we start pumping
                 if (i+1) % MAX_N_ROWS == 0 or is_last_doc:
-                    processes = eh.init_processes(
-                        pg_conns,
-                        chunks,
-                        attr_details,
-                        self.has_extra_props,
-                        relations
-                    )
 
-                    eh.start_processes(processes)
-                    eh.finish_processes(processes)
-                    j = 0
-                    chunks = eh.init_chunks(n_process)
+                    eh.work_parallel(chunks,
+                                self.has_extra_props,
+                                pg,
+                                coll,
+                                self.coll_def,
+                                self.schema
+                            )
+
+                    chunks = []
 
                 if is_last_doc is True:
                     logger.info(
@@ -359,23 +343,20 @@ class Extractor():
                     coll))
             i += 1
 
-        # log and full vacuum
         transfer_details = eh.get_transfer_details(
             self.tables_empty,
             transfer_start,
             time.time()
-        )
-        vacuum_details = eh.get_vacuum_details(relations[0])
+        )   
 
-        eh.log(relations[0],
+        r, attr_details = eh.init_relation(coll, pg, self.coll_def, self.has_extra_props, self.schema)
+        vacuum_details = eh.get_vacuum_details(r)
+        eh.log(r,
                nr_of_docs,
                [transfer_details, vacuum_details]
                )
-        eh.close_connections(pg_conns)
-
-        # remove unused objects
-        for r in relations:
-            del r
+        del r
+        pg.__del__()
 
     def insert_multiple(self, docs, r, coll):
         '''

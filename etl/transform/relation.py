@@ -136,7 +136,12 @@ class Relation():
         """
         # This is needed because
         # sometimes there is no value for attributes (null)
+        
+        if len(docs) == 0:
+            return
+
         result = []
+
         if type(docs) is not list:
             docs = [docs]
         for doc in docs:
