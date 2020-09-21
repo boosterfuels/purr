@@ -105,6 +105,8 @@ class TestCollections(unittest.TestCase):
         reset_dataset_mdb()
         mocked = mock.coll_names
         result = collection.get_all(mongo)
+        result.sort()
+        mocked.sort()
         assert mocked == result
 
     def test_get_doc_by_id(self):
@@ -116,6 +118,4 @@ class TestCollections(unittest.TestCase):
         oid = str(doc.inserted_id)
         obj["_id"] = doc.inserted_id
         result = collection.get_doc_by_id(mongo, coll_name, oid)
-        print(obj)
-        print(result)
         assert result == obj

@@ -3,155 +3,99 @@ import pymongo
 import time
 from datetime import datetime
 from bson import Timestamp
+from threading import Thread
+from multiprocessing import Queue
 
 from etl.transform import relation
 from etl.monitor import logger
 from etl.extract import extractor, transfer_info
 
-INSERT = "i"
-UPDATE = "u"
-DELETE = "d"
+INSERT = "insert"
+UPDATE = "update"
+DELETE = "delete"
 
 CURR_FILE = "[TAILER]"
 
+COLLECTION_THREADS = []
+DATA_QUEUE = Queue()
+stop_threads = False
 
-def fuse(docs_useful, doc_useful, merge_similar):
-    """ 
-    Merging values with the same ID because there cannot be
-    multiple updates of the same row in one statement"""
-
-    if merge_similar is True:
-        for i in range(0, len(docs_useful)):
-            if docs_useful[i]["_id"] == doc_useful["_id"]:
-                docs_useful[i] = dict(docs_useful[i], **doc_useful)
-                break
-    # otherwise just append the document
-    else:
-        docs_useful.append(doc_useful)
-
-    return docs_useful
-
-
-def unset_values(doc, unset, action):
-    """
-    Unset values of a document.
-    doc: the document
-    unset: a dictionary that contains which 
-    keys of the document need to be to unset 
-    action: the action that affects the values
-    """
-    if action == '$set':
-        if "$set" in doc.keys():
-            for k, v in doc["$set"].items():
-                if v is None:
-                    unset[k] = "$unset"
-    elif action == '$unset':
-        if "$unset" in doc.keys():
-            for k, v in doc["$unset"].items():
-                unset[k] = '$unset'
-    elif action == 'direct_update':
-        for k, v in doc.items():
-            if v is None:
-                unset[k] = '$unset'
-    return unset
-
-
-def handleQueryUpdate(doc, doc_useful, temp, unset, docs_id, merge_similar):
-    # This function handles oplog entries when updating a document
-    # happened using a query.
-    if "o2" in doc.keys():
-        # check if the same document is updated multiple times
-        if "_id" in doc["o2"].keys():
-            doc_useful["_id"] = str(doc["o2"]["_id"])
-            if (doc_useful["_id"] in docs_id):
-                merge_similar = True
-            else:
-                docs_id.append(str(doc_useful["_id"]))
-
-        # updated element by setting variables
-        if "$set" in temp.keys():
-            doc_useful.update(temp["$set"])
-
-        # look for values to unset
-        unset = unset_values(temp, unset, '$set')
-        unset = unset_values(temp, unset, '$unset')
-
-    return (doc_useful, unset, merge_similar)
-
-
-def handleDirectUpdate(doc, doc_useful, temp, unset, coll_settings):
-    # This function handles oplog entries when updating a document
-    # happened using an IDE e.g. Studio3T:
-    if "$set" not in temp.keys() and "$unset" not in temp.keys():
-        logger.info("Direct update:")
-        doc_useful.update(temp)
-        fields = [x[":source"]
-                  for x in coll_settings[":columns"]]
-        for k in fields:
-            if k == '_id':
-                temp[k] = str(temp[k])
-                doc_useful.update(temp)
-            if k not in temp.keys():
-                unset[k] = '$unset'
-        unset = unset_values(temp, unset, 'direct_update')
-    return (doc_useful, unset)
-
-
-def modify_docs_before_update(coll_settings, docs):
-    """
-    Modifies documents based on the keys found in the oplog entry.
-    An entry may (not necessarily) contain keys like $o2, $set and $unset.
-    There are multiple situations when we need to unset a value:
-    - if it has no value: null (None)
-    - if the key appeared in $unset
-    - if the key was left out and there was no $set/$unset
-    """
-    result = []
+def prepare_docs_for_update(coll_settings, docs):
+    docs_useful = []
     docs_id = []
     for doc in docs:
         # It is possible that multiple versions of one document
         # exist among these documents. they must be merged so they
         # can be sent Postgres together as one entry.
-        ids_equal = False
+        merge_similar = False
         unset = {}
-        doc_to_append = {}
+        doc_useful = {}
         temp = doc["o"]
 
-        # updated using a query
-        doc_to_append, unset, ids_equal = handleQueryUpdate(
-            doc, doc_to_append, temp, unset, docs_id, ids_equal)
+        if "o2" in doc.keys():
+            if "_id" in doc["o2"].keys():
+                doc_useful["_id"] = str(doc["o2"]["_id"])
+                if (doc_useful["_id"] in docs_id):
+                    merge_similar = True
+                else:
+                    docs_id.append(str(doc_useful["_id"]))
 
-        # updated without a query (possibly using a client app like Studio3T)
-        handleDirectUpdate(doc, doc_to_append, temp, unset, coll_settings)
+        if "$set" in temp.keys():
+            doc_useful.update(temp["$set"])
+            for k, v in temp["$set"].items():
+                if v is None:
+                    unset[k] = "$unset"
+        if "$unset" in temp.keys():
+            for k, v in temp["$unset"].items():
+                unset[k] = '$unset'
+        if "$set" not in temp.keys() and "$unset" not in temp.keys():
+            # case when the document was not updated
+            # using a query, but the IDE e.g. Studio3T:
+            logger.info("Direct update:")
+            doc_useful.update(temp)
+            fields = [x[":source"]
+                      for x in coll_settings[":columns"]]
+            for k in fields:
+                if k == '_id':
+                    temp[k] = str(temp[k])
+                    doc_useful.update(temp)
+                if k not in temp.keys():
+                    unset[k] = '$unset'
+            for k, v in temp.items():
+                if v is None:
+                    unset[k] = '$unset'
+        doc_useful.update(unset)
 
-        doc_to_append.update(unset)
-
-        # whatever needs to be appended to result, just append it
-        result = fuse(result, doc_to_append, ids_equal)
-
-    return result, ids_equal
+        # merging values with the same ID because there cannot be
+        # multiple updates of the same row in one statement
+        if merge_similar is True:
+            for i in range(0, len(docs_useful)):
+                if docs_useful[i]["_id"] == doc_useful["_id"]:
+                    docs_useful[i] = dict(docs_useful[i], **doc_useful)
+                    break
+        else:
+            docs_useful.append(doc_useful)
+    return docs_useful, merge_similar
 
 
 def log_tailed_docs(pg, schema, docs_useful, ids_log, table_name, oper, merged):
     log_entries = []
     ts = time.time()
     logger.info("IDs: %s" % ids_log)
-    if len(ids_log) != len(docs_useful) and oper != 'd':
+    if len(ids_log) != len(docs_useful) and oper != DELETE:
         logger.error("n(ids)=%s; n(docs_useful)=%s" %
                      (len(ids_log), len(docs_useful)))
     for i in range(len(docs_useful)):
         id = ids_log[i]
         doc = "no entry"
         try:
-            if docs_useful[i] is not None and oper != 'd':
+            if docs_useful[i] is not None and oper != DELETE:
                 doc = str(docs_useful[i])
             else:
                 doc = "Doc is NULL"
         except Exception as ex:
-            logger.error(
-                """Converting log entry failed. Details: %s
-                Document: """ %
-                ex, CURR_FILE)
+            logger.error("%s Converting log entry failed. Details: %s\n Document: " %
+                         (CURR_FILE, ex))
             logger.error(docs_useful[i])
         row = [oper, table_name, id, ts,
                merged, doc]
@@ -160,8 +104,26 @@ def log_tailed_docs(pg, schema, docs_useful, ids_log, table_name, oper, merged):
     try:
         transfer_info.log_rows(pg, schema, log_entries)
     except Exception as ex:
-        logger.error("Logging failed. Details: %s" % ex, CURR_FILE)
+        logger.error("%s Logging failed. Details: %s" % (CURR_FILE, ex))
+   
+def run_collection(conn, coll, stop):
+    cursor = conn["booster"][coll].watch([
+        {'$match': {
+            'operationType': { '$in': [UPDATE, INSERT, DELETE]}
+            }}])
 
+    for doc in cursor:
+        col = doc["ns"]["db"] + "." + doc["ns"]["coll"]
+        op = doc["operationType"]
+
+        if op in [INSERT, UPDATE, DELETE]:
+            DATA_QUEUE.put(doc)
+
+        if stop(): 
+            break
+
+    logger.info("%s Thread %s stopped." % (CURR_FILE, coll))
+    cursor.close()
 
 class Tailer(extractor.Extractor):
     """
@@ -199,10 +161,10 @@ class Tailer(extractor.Extractor):
             else:
                 return False
         except Exception as ex:
-            logger.error("Details %s" % ex, CURR_FILE)
+            logger.error("%s Details %s" % (CURR_FILE, ex))
             return False
 
-    def send_group(self, docs, oper, r):
+    def flush(self, docs, oper, r):
         """
         sends all the data which was collected for one
         collection during tailing to Postgres
@@ -212,8 +174,8 @@ class Tailer(extractor.Extractor):
         merged = False
 
         if oper == INSERT:
-            logger.info("Inserting %s documents into '%s'" %
-                        (len(docs), r.relation_name), CURR_FILE)
+            logger.info("%s Inserting %s documents into '%s'" %
+                        (CURR_FILE, len(docs), r.relation_name))
 
             # TODO: check extra props
             for doc in docs:
@@ -224,18 +186,18 @@ class Tailer(extractor.Extractor):
             except Exception as ex:
                 logger.info(
                     """
-                    Inserting multiple documents failed: %s.
+                    %s Inserting multiple documents failed: %s.
                     Details: %s
-                    """ % (docs, ex), CURR_FILE)
+                    """ % (CURR_FILE, docs, ex))
 
         elif oper == UPDATE:
-            logger.info("Updating %s documents in '%s'" %
-                        (len(docs), r.relation_name), CURR_FILE)
+            logger.info("%s Updating %s documents in '%s'" %
+                        (CURR_FILE, len(docs), r.relation_name))
             r.created = True
 
             coll_name = docs[0]["coll_name"]
             coll_settings = self.coll_settings[coll_name]
-            (docs_useful, merged) = modify_docs_before_update(
+            (docs_useful, merged) = prepare_docs_for_update(
                 coll_settings,
                 docs
             )
@@ -245,12 +207,12 @@ class Tailer(extractor.Extractor):
                 super().update_multiple(docs_useful, r, docs[0]["coll_name"])
             except Exception as ex:
                 logger.info(
-                    """Updating multiple documents failed: %s.
-                    Details: %s""" % (docs, ex), CURR_FILE)
+                    """%s Updating multiple documents failed: %s.
+                    Details: %s""" % (CURR_FILE, docs, ex))
 
         elif oper == DELETE:
-            logger.info("Deleting %s documents from '%s'" %
-                        (len(docs), r.relation_name), CURR_FILE)
+            logger.info("%s Deleting %s documents from '%s'" %
+                        (CURR_FILE, len(docs), r.relation_name))
             ids = []
             for doc in docs:
                 ids.append(doc["o"])
@@ -259,9 +221,9 @@ class Tailer(extractor.Extractor):
                 r.delete(ids)
             except Exception as ex:
                 logger.info(
-                    """Deleting multiple documents failed: %s.
-                    Details: %s""" % (docs, ex), CURR_FILE)
-
+                    """%s Deleting multiple documents failed: %s.
+                    Details: %s""" % (CURR_FILE, docs, ex))
+                
         log_tailed_docs(
             self.pg, self.schema,
             docs_useful, ids_log,
@@ -295,29 +257,46 @@ class Tailer(extractor.Extractor):
             if oper == doc_details["op"]:
                 docs_with_equal_oper.append(doc_details)
             else:
-                self.send_group(docs_with_equal_oper, oper, r)
+                self.flush(docs_with_equal_oper, oper, r)
                 oper = doc_details["op"]
                 docs_with_equal_oper = [doc_details]
-        self.send_group(docs_with_equal_oper, oper, r)
+        self.flush(docs_with_equal_oper, oper, r)
 
     def handle_multiple(self, docs, updated_at):
         # group by name
         docs_grouped = {}
         for doc in docs:
-            if doc["ns"] not in docs_grouped.keys():
-                docs_grouped[doc["ns"]] = []
+            collection = doc["ns"]["db"] + "." + doc["ns"]["coll"]
+            if collection not in docs_grouped.keys():
+                docs_grouped[collection] = []
 
             useful_info_update = {}
-            if "o2" in doc.keys():
-                useful_info_update = doc["o2"]
+            if doc["operationType"] == UPDATE:
+                if "updateDescription" in doc.keys():
+                    useful_info_update = doc["updateDescription"]
+            elif doc["operationType"] == INSERT:
+                if "fullDocument" in doc.keys():
+                    useful_info_update = doc["fullDocument"]
+                else:
+                    useful_info_update = doc["o2"]
 
-            docs_grouped[doc["ns"]].append({
-                "op": doc["op"],
-                "db_name": doc["ns"].split(".")[0],
-                "coll_name": doc["ns"].split(".")[1],
-                "o": doc["o"],
+            set_dict = {}
+            d = {
+                "op": doc["operationType"],
+                "db_name": doc["ns"]["db"],
+                "coll_name": doc["ns"]["coll"],
+                "o": doc["documentKey"],
+                "_id": doc["documentKey"]["_id"],
                 "o2": useful_info_update
-            })
+            }
+            if doc["operationType"] == UPDATE:
+                d["o"]["$set"] = useful_info_update['updatedFields']
+            d["o"]["_id"] = doc["documentKey"]["_id"]
+            if doc["operationType"] == INSERT:
+                d["o"] = useful_info_update
+            d["o2"]["_id"] = doc["documentKey"]["_id"]
+            
+            docs_grouped[collection].append(d)
 
         for coll, docs_details in docs_grouped.items():
             self.transform_and_load_many(docs_details)
@@ -327,12 +306,12 @@ class Tailer(extractor.Extractor):
             minutes_between_update = (
                 diff.seconds//60) % 60
             if minutes_between_update > 5:
-                t = int(time.time())
+                t = int(datetime.utcnow().timestamp())
                 transfer_info.update_latest_successful_ts(
                     self.pg, self.schema, t
                 )
                 logger.info(
-                    "Updated latest_successful_ts: %d" % t, CURR_FILE)
+                    "%s Updated latest_successful_ts: %d" % (CURR_FILE, t))
 
     def start(self, dt=None):
         """
@@ -349,75 +328,56 @@ class Tailer(extractor.Extractor):
         (2)
         start(dt)
         """
-        client = self.mdb.client
-        oplog = client.local.oplog.rs
 
-        # Start reading the oplog
         SECONDS_BETWEEN_FLUSHES = 30
+
+        client = self.mdb.client
+        updated_at = datetime.utcnow()
+        stop_threads = False
+
         try:
-            updated_at = datetime.utcnow()
-            loop = False
+            logger.info("%s Started tailing from %s.\nCurrent utctimestamp: %s" %
+                        (CURR_FILE, str(dt), datetime.utcnow()))
+
+            for coll in self.coll_settings.keys():    
+                found = False
+                x = Thread(target=run_collection, args=(client, coll, lambda: stop_threads))
+                x.daemon = True
+                COLLECTION_THREADS.append(x)
+                x.start()
+
             while True and self.stop_tailing is False:
-                if loop is True:
-                    res = transfer_info.get_latest_successful_ts(
-                        self.pg, self.schema)
-                    latest_ts = int((list(res)[0])[0])
-                    dt = latest_ts
-                    logger.error(
-                        """Stopping. Next time, bring more cookies.""",
-                        CURR_FILE)
-                    raise SystemExit
-                else:
-                    loop = True
 
-                # if there was a reconnect attempt then start tailing from
-                # specific timestamp from the db
-                if self.pg.attempt_to_reconnect is True:
-                    res = transfer_info.get_latest_successful_ts(
-                        self.pg, self.schema)
-                    dt = int((list(res)[0])[0])
-                    self.pg.attempt_to_reconnect = False
+                if self.stop_tailing is True:
+                    logger.info("%s Meow" % (CURR_FILE))
+                    break
+                try:
+                    time.sleep(1)
+                    seconds = datetime.utcnow().second
+                    if ((seconds > SECONDS_BETWEEN_FLUSHES and DATA_QUEUE.qsize()) or (DATA_QUEUE.qsize() > 100)):
+                        logger.info("""
+                        %s Flushing after %s seconds.
+                        Number of documents: %s
+                        """ % (CURR_FILE, seconds, DATA_QUEUE.qsize()))
+                        docs = []
+                        while not DATA_QUEUE.empty():
+                            docs.append(DATA_QUEUE.get())
+                        self.handle_multiple(docs, updated_at)
+                except Exception as ex:
+                    logger.error("%s Cursor error: %s" % (CURR_FILE, ex))
 
-                cursor = oplog.find(
-                    {"ts": {"$gt": Timestamp(dt, 1)}},
-                    cursor_type=pymongo.CursorType.TAILABLE_AWAIT,
-                    oplog_replay=True,
-                )
-                if type(dt) is int:
-                    dt = datetime.utcfromtimestamp(
-                        dt).strftime('%Y-%m-%d %H:%M:%S')
-                logger.info("Started tailing from %s.\nCurrent timestamp: %s" %
-                            (str(dt), datetime.utcnow()), CURR_FILE)
+            logger.error("%s Tailing was stopped." % (CURR_FILE))
+            stop_threads = True
+            for t in COLLECTION_THREADS:
+                t.join()
+            logger.info("%s Exiting..." % (CURR_FILE))
 
-                docs = []
-                while cursor.alive and self.pg.attempt_to_reconnect is False:
-                    if self.stop_tailing is True:
-                        logger.info(
-                            "Tailing is stopped. Meow", CURR_FILE)
-                        break
-                    try:
-                        for doc in cursor:
-                            col = doc["ns"]
-                            op = doc["op"]
-                            if op != "n" and self.coll_in_map(col) is True:
-                                docs.append(doc)
-                        time.sleep(1)
-                        seconds = datetime.utcnow().second
-                        if ((seconds > SECONDS_BETWEEN_FLUSHES and len(docs)) or (len(docs) > 100)):
-                            logger.info("""
-                            Sending group after %s seconds.
-                            Number of documents: %s
-                            """ % (seconds, len(docs)), CURR_FILE)
-                            self.handle_multiple(docs, updated_at)
-                            docs = []
-                    except Exception as ex:
-                        logger.error("Cursor error: %s" % ex, CURR_FILE)
-                cursor.close()
-                continue
-        except StopIteration as e:
-            logger.error("Tailing was stopped unexpectedly: %s" %
-                         e, CURR_FILE)
+        except StopIteration as e: 
+            logger.error("%s Tailing was stopped unexpectedly: %s" % (CURR_FILE, e))
+            stop_threads = True
+            for t in COLLECTION_THREADS:
+                t.join()
 
     def stop(self):
-        logger.info("Tailing is stopped due to schema change.", CURR_FILE)
+        logger.info("%s Tailing is stopped due to schema change." % (CURR_FILE))
         self.stop_tailing = True

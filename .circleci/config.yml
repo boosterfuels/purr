@@ -76,12 +76,9 @@ workflows:
             branches:
               only: 
                 - master
-                - test
       - publish-github-release:
           requires:
             - test
           filters:
             branches:
-              only: 
-                - master
-                - test
+              only: master 

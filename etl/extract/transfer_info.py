@@ -5,10 +5,8 @@ from etl.monitor import logger
 
 table_desc = {
     "purr_oplog": {
-        "attrs": ["id", "operation", "relation", "obj_id",
-                  "ts", "merged", "document"],
-        "types": ["SERIAL", "TEXT", "TEXT", "TEXT",
-                  "INTEGER", "BOOLEAN", "TEXT"],
+        "attrs": ["id", "operation", "relation", "obj_id", "ts", "merged", "document"],
+        "types": ["SERIAL", "TEXT", "TEXT", "TEXT", "INTEGER", "BOOLEAN", "TEXT"],
         "pks": ["id", "ts"]
     },
     "purr_info": {
@@ -16,10 +14,8 @@ table_desc = {
         "types": ["INTEGER", "TEXT", "TEXT"]
     },
     "purr_transfer_stats": {
-        "attrs": ["id", "action", "relation", "number_of_rows",
-                  "ts_start", "ts_end"],
-        "types": ["SERIAL", "TEXT", "TEXT", "INTEGER",
-                  "INTEGER", "INTEGER"]
+        "attrs": ["id", "action", "relation", "number_of_rows", "ts_start", "ts_end"],
+        "types": ["SERIAL", "TEXT", "TEXT", "INTEGER", "INTEGER", "INTEGER"]
     },
     "purr_error": {
         "attrs": ["id", "location", "message", "ts"],
@@ -27,13 +23,11 @@ table_desc = {
     }
 }
 
-
 def save_logs_to_db(db, schema='public'):
     create_stat_table(db, schema)
     create_oplog_table(db, schema)
     create_transfer_stats_table(db, schema)
     create_log_error_table(db, schema)
-
 
 def create_stat_table(db, schema='public'):
     """
@@ -132,6 +126,7 @@ def create_oplog_table(db, schema='public'):
     types = table_desc[table_name]["types"]
     pks = table_desc[table_name]["pks"]
 
+    values = [int(time.time())]
     try:
         table.drop(db, schema, [table_name])
         table.create(db, schema, table_name, attrs, types, pks)
@@ -171,7 +166,7 @@ def log_rows(db, schema, values):
 
 def create_transfer_stats_table(db, schema='public'):
     """
-    Logs the number, relation name, timestamp
+    Logs the number, relation name, timestamp 
     for each collection transfer.
 
     Parameters
@@ -191,6 +186,7 @@ def create_transfer_stats_table(db, schema='public'):
     attrs = table_desc[table_name]["attrs"]
     types = table_desc[table_name]["types"]
 
+    values = [int(time.time())]
     try:
         table.create(db, schema, table_name, attrs, types)
         logger.info("[TRANSFER INFO] Created table %s." % (table_name))
@@ -201,7 +197,7 @@ def create_transfer_stats_table(db, schema='public'):
 
 def log_stats(db, schema, values):
     """
-    Insert the number, relation name, timestamp
+    Insert the number, relation name, timestamp 
     for each collection transfer.
 
     Parameters
@@ -229,7 +225,7 @@ def log_stats(db, schema, values):
 
 def create_log_error_table(db, schema='public'):
     """
-    Logs the error's location, message and timestamp
+    Logs the error's location, message and timestamp 
     when an it occurs.
 
     Parameters
@@ -249,6 +245,7 @@ def create_log_error_table(db, schema='public'):
     attrs = table_desc[table_name]["attrs"]
     types = table_desc[table_name]["types"]
 
+    values = [int(time.time())]
     try:
         table.create(db, schema, table_name, attrs, types)
         logger.info("[TRANSFER INFO] Created table %s." % (table_name))
@@ -259,7 +256,7 @@ def create_log_error_table(db, schema='public'):
 
 def log_error(db, values, schema='public'):
     """
-    Insert the number, relation name, timestamp
+    Insert the number, relation name, timestamp 
     for each collection transfer.
 
     Parameters
@@ -273,13 +270,12 @@ def log_error(db, values, schema='public'):
     -------
     log_stats(pg, 'purr', [])
     """
-
+    
     table_name = "purr_error"
     # id is SERIAL type, we can skip it when inserting rows:
     attrs = table_desc[table_name]["attrs"][1:]
     try:
         row.insert(db, schema, table_name, attrs, values)
     except Exception as ex:
-        logger.error("""
-        [TRANSFER_INFO] Failed to insert logs into table %s: %s"""
+        logger.error("""[TRANSFER_INFO] Failed to insert logs into table %s: %s"""
                      % (table_name, ex))

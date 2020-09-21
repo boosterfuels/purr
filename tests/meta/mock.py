@@ -6,7 +6,7 @@ import os
 
 
 # ------ CONNECTION STRINGS ------
-conn_str_pg = 'postgres://localhost:5432/'
+conn_str_pg = 'postgres://postgres:postgres@localhost:5432/'
 conn_str_mongo = 'mongodb://localhost:27017'
 NAME_DB = 'purr_test'
 db_name_mongo = db_name_pg = NAME_DB
@@ -370,8 +370,12 @@ oplog_entries_update = [
         'h': -4473962510602026742,
         'v': 2,
         'op': 'u',
-        'ns': 'test_purrito.Employee',
+        'operationType': 'update',
+        'ns': {'db': 'test_purrito', 'coll': 'Employee'},
         'o2': {'_id': '1'},
+        'updateDescription' : {'updatedFields': {'firstName': 'Janos',
+                'lastName': None, 'hair': None}},
+        'documentKey': {'_id': '1'},
         'o': {
             '$set': {
                 'firstName': 'Janos',
@@ -388,10 +392,13 @@ oplog_entries_update = [
         'h': -6116078169406119246,
         'v': 2,
         'op': 'u',
-        'ns': 'test_purrito.Company',
+        'operationType': 'update',
+        'ns': {'db': 'test_purrito', 'coll': 'Company'},
+        'documentKey': {'_id': '2'},
         'o2': {
-            '_id': 2
+            '_id': '2'
         },
+        'updateDescription' : {'updatedFields': {'domains': ['dragonglass.org']}},
         'o': {
             '$set': {
                 'domains': ['dragonglass.org']
@@ -404,8 +411,13 @@ oplog_entries_update = [
         'h': -4473962510602026742,
         'v': 2,
         'op': 'u',
-        'ns': 'test_purrito.Employee',
+        'operationType': 'update',
+        'ns': {'db': 'test_purrito', 'coll': 'Employee'},
+        'documentKey': {'_id': '2'},
         'o2': {'_id': '2'},
+        'updateDescription' : {'updatedFields': {'firstName': 'Arja',
+                "lastName": "Stark",
+                'hair': 'blonde'}},
         'o': {
             '$set': {
                 'firstName': 'Arja',

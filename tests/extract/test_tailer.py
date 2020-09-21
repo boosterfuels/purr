@@ -83,7 +83,7 @@ def reset_dataset():
 
 
 class TestTailer(unittest.TestCase):
-    def test_modify_docs_before_update_one(self):
+    def test_prepare_docs_for_update_one(self):
         docs = [{'coll_name': 'Company',
                  'db_name': 'test_purrito',
                  'o': {'$set': {'active': True, 'name': True}},
@@ -92,11 +92,11 @@ class TestTailer(unittest.TestCase):
         mocked = [{'_id': '5caf5998a54d758375bd9928',
                    'active': True, 'name': True}]
 
-        (docs_useful, merged) = tailer.modify_docs_before_update(
+        (docs_useful, merged) = tailer.prepare_docs_for_update(
             settings_company, docs)
         assert mocked == docs_useful and merged is False
 
-    def test_modify_docs_before_update_one_no_set_no_unset(self):
+    def test_prepare_docs_for_update_one_no_set_no_unset(self):
         docs = [{'coll_name': 'Company',
                  'db_name': 'test_purrito',
                  'o': {
@@ -109,12 +109,12 @@ class TestTailer(unittest.TestCase):
         mocked = [{'_id': '5caf5998a54d758375bd9928',
                    'active': True, 'name': True, 'domains': '$unset', 'signupCode': '$unset'}]
 
-        (docs_useful, merged) = tailer.modify_docs_before_update(
+        (docs_useful, merged) = tailer.prepare_docs_for_update(
             settings_company, docs)
 
         assert mocked == docs_useful and merged is False
 
-    def test_modify_docs_before_update_one_no_set_no_unset_all_nulls(self):
+    def test_prepare_docs_for_update_one_no_set_no_unset_all_nulls(self):
         docs = [{'coll_name': "Company",
                  'db_name': 'test_purrito',
                  'o': {
@@ -129,11 +129,11 @@ class TestTailer(unittest.TestCase):
             'domains': '$unset',
             'signupCode': '$unset'
         }]
-        (docs_useful, merged) = tailer.modify_docs_before_update(
+        (docs_useful, merged) = tailer.prepare_docs_for_update(
             settings_company, docs)
         assert mocked == docs_useful and merged is False
 
-    def test_modify_docs_before_update_multiple_merged_mixed(self):
+    def test_prepare_docs_for_update_multiple_merged_mixed(self):
         """
         This test covers the case when one document of a collection
         is updated directly through the IDE (e.g. Studio3T) and
@@ -161,12 +161,12 @@ class TestTailer(unittest.TestCase):
                   {'_id': '5caf5998a54d758375bd9929',
                    'active': '$unset', 'name': 'stuffy'}]
 
-        (docs_useful, merged) = tailer.modify_docs_before_update(
+        (docs_useful, merged) = tailer.prepare_docs_for_update(
             settings_company, docs)
 
         assert mocked == docs_useful and merged is False
 
-    def test_modify_docs_before_update_multiple_merged(self):
+    def test_prepare_docs_for_update_multiple_merged(self):
         docs = [{'coll_name': 'Company',
                  'db_name': 'test_purrito',
                  'o': {'$set': {'active': True, 'name': True}},
@@ -183,13 +183,12 @@ class TestTailer(unittest.TestCase):
         collection_settings = mock.coll_config
         collection_name = "Company"
 
-        (docs_useful, merged) = tailer.modify_docs_before_update(
+        (docs_useful, merged) = tailer.prepare_docs_for_update(
             collection_settings[collection_name], docs)
 
         assert mocked == docs_useful and merged is True
 
     def test_handle_multiple(self):
-        transfer_info.create_oplog_table(pg, 'public')
         reset_dataset()
         oplog_entries = mock.oplog_entries_update
         create_and_populate_company_pg()
@@ -248,73 +247,3 @@ class TestTailer(unittest.TestCase):
 
         assert True
 
-    def test_log_tailed_docs_one(self):
-        transfer_info.create_oplog_table(pg)
-
-        ids_log = ['58a32cfda51183070034909b']
-        docs = [{
-            '_id': '58a32cfda51183070034909b',
-            'updatedAt': datetime.datetime(2019, 4, 29, 11, 26, 50, 703000)
-        }]
-        table_name = 'some_relation'
-        oper = 'u'
-        merged = True
-        cursor = pg.conn.cursor()
-        schema = 'public'
-        tailer.log_tailed_docs(pg, schema, docs,
-                               ids_log, table_name, oper,
-                               merged)
-        cursor.execute(
-            """SELECT operation,
-            relation, obj_id, merged, document FROM purr_oplog;""")
-        res = cursor.fetchone()
-        cursor.close()
-        mock = tuple(
-            ['u',
-             'some_relation',
-             '58a32cfda51183070034909b',
-             True,
-             "{'_id': '58a32cfda51183070034909b', 'updatedAt': datetime.datetime(2019, 4, 29, 11, 26, 50, 703000)}"
-             ])
-        assert mock == res
-
-    def test_log_tailed_docs_multiple(self):
-        transfer_info.create_oplog_table(pg)
-
-        ids_log = ['58a32cfda51183070034909b', '58a32cfda51183070034909c']
-        docs = [{
-            '_id': '58a32cfda51183070034909b',
-            'updatedAt': datetime.datetime(2019, 4, 29, 11, 26, 50, 703000)
-        }, {
-            '_id': '58a32cfda51183070034909c',
-            'updatedAt': datetime.datetime(2019, 5, 21, 2, 24, 24, 5)
-        }]
-        table_name = 'some_relation'
-        oper = 'u'
-        merged = False
-        cursor = pg.conn.cursor()
-        schema = 'public'
-        tailer.log_tailed_docs(pg, schema, docs,
-                               ids_log, table_name, oper,
-                               merged)
-        cursor.execute(
-            """SELECT operation,
-            relation, obj_id, merged, document FROM purr_oplog order by id;""")
-        res = cursor.fetchall()
-        mock = [
-            tuple(
-                ['u',
-                 'some_relation',
-                 '58a32cfda51183070034909b',
-                 False,
-                 "{'_id': '58a32cfda51183070034909b', 'updatedAt': datetime.datetime(2019, 4, 29, 11, 26, 50, 703000)}"
-                 ]),
-            tuple(
-                ['u',
-                 'some_relation',
-                 '58a32cfda51183070034909c',
-                 False,
-                 "{'_id': '58a32cfda51183070034909c', 'updatedAt': datetime.datetime(2019, 5, 21, 2, 24, 24, 5)}"
-                 ])]
-        cursor.close()
-        assert mock == res
