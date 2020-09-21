@@ -37,7 +37,7 @@ class Extractor():
         self.coll_def = coll_def
         self.tailing_from = settings_general['tailing_from']
         self.tailing_from_db = settings_general['tailing_from_db']
-        self.coll_map_cur = cm.get_coll_map_from_db(self.pg)
+        #self.coll_map_cur = cm.get_coll_map_from_db(self.pg)
 
     def column_convert(self, name_table, source, fields_cur, fields_new):
         """
