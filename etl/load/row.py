@@ -137,7 +137,7 @@ def upsert_bulk(db, schema, table, attrs, rows):
 
     cmd = """
     INSERT INTO %s.%s (%s) VALUES (%s) ON CONFLICT ON CONSTRAINT %s
-    DO UPDATE SET (%s) = (%s);
+    DO UPDATE SET (%s) = ROW(%s);
     """ % (
         schema, table.lower(), attrs, temp,
         constraint, attrs_reduced, excluded)
@@ -216,7 +216,7 @@ def upsert_transfer_info(db, schema, table, attrs, row):
 
     # upsert
     cmd = """INSERT INTO %s.%s (%s) VALUES (%s) ON CONFLICT ON CONSTRAINT %s
-    DO UPDATE SET (%s) = (%s);""" % (
+    DO UPDATE SET (%s) = ROW(%s);""" % (
         schema, table.lower(), attrs, placeholder,
         constraint, attrs_reduced, excluded)
 
