@@ -107,7 +107,7 @@ def log_tailed_docs(pg, schema, docs_useful, ids_log, table_name, oper, merged):
         logger.error("%s Logging failed. Details: %s" % (CURR_FILE, ex))
    
 def run_collection(conn, coll, stop):
-    cursor = conn["booster"][coll].watch([
+    cursor = conn[coll].watch([
         {'$match': {
             'operationType': { '$in': [UPDATE, INSERT, DELETE]}
             }}])
@@ -331,7 +331,7 @@ class Tailer(extractor.Extractor):
 
         SECONDS_BETWEEN_FLUSHES = 30
 
-        client = self.mdb.client
+        conn = self.mdb.conn
         updated_at = datetime.utcnow()
         stop_threads = False
 
@@ -341,7 +341,7 @@ class Tailer(extractor.Extractor):
 
             for coll in self.coll_settings.keys():    
                 found = False
-                x = Thread(target=run_collection, args=(client, coll, lambda: stop_threads))
+                x = Thread(target=run_collection, args=(conn, coll, lambda: stop_threads))
                 x.daemon = True
                 COLLECTION_THREADS.append(x)
                 x.start()
